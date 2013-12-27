@@ -28,6 +28,22 @@ public class MapBuilder {
     return all_rooms;
   }
   
+  public int getMinX() {
+    return min_x;
+  }
+  
+  public int getMaxX() {
+    return max_x;
+  }
+  
+  public int getMinY() {
+    return min_y;
+  }
+  
+  public int getMaxY() {
+    return max_y;
+  }
+  
   public void addFirstRoom() {
     int width = (int) (Math.random() * max_room_size) + 1;
     int height = (int) (Math.random() * max_room_size) + 1;
@@ -58,7 +74,8 @@ public class MapBuilder {
     int room_index = (int) (Math.random() * available_rooms.size());
     Room base_room = available_rooms.get(room_index);
     Dimension new_room_dims =
-            new Dimension((int) (Math.random() * max_room_size) + 1, (int) (Math.random() * max_room_size) + 1);
+            new Dimension((int) (Math.random() * max_room_size) + 1,
+                    (int) (Math.random() * max_room_size) + 1);
     ArrayList<RoomSide> possible_directions = base_room.findUnconnectedSides();
     int direction_index = (int) (Math.random() * possible_directions.size());
     RoomConnection connection = null;
@@ -67,7 +84,7 @@ public class MapBuilder {
     for (int num_tries = 0; num_tries < possible_directions.size(); ++num_tries) {
       direction = possible_directions.get((direction_index + num_tries) % possible_directions.size());
       connection = positionRoom(base_room, new_room_dims, direction);
-      if (roomFits(connection.getNeighbor())) {
+      if (roomFits(connection.getNeighbor(), base_room)) {
         new_room_found = true;
         break;
       }
@@ -100,7 +117,8 @@ public class MapBuilder {
       else {
         new_nw_corner = new Point(base_corner.x - new_room_dims.width, base_corner.y - new_corner_offset);
       }
-      Point new_se_corner = new Point(new_nw_corner.x + new_room_dims.width, new_nw_corner.y + new_room_dims.height);
+      Point new_se_corner =
+              new Point(new_nw_corner.x + new_room_dims.width, new_nw_corner.y + new_room_dims.height);
       Room new_room = new Room(new_nw_corner, new_se_corner);
       return new RoomConnection(Math.max(new_nw_corner.y, base_corner.y), Math.min(new_se_corner.y,
               base_room.getSECorner().y), new_room);
@@ -117,21 +135,25 @@ public class MapBuilder {
       else {
         new_nw_corner = new Point(base_corner.x - new_corner_offset, base_corner.y + base_room.getHeight());
       }
-      Point new_se_corner = new Point(new_nw_corner.x + new_room_dims.width, new_nw_corner.y + new_room_dims.height);
+      Point new_se_corner =
+              new Point(new_nw_corner.x + new_room_dims.width, new_nw_corner.y + new_room_dims.height);
       Room new_room = new Room(new_nw_corner, new_se_corner);
       return new RoomConnection(Math.max(new_nw_corner.x, base_corner.x), Math.min(new_se_corner.x,
               base_room.getSECorner().x), new_room);
     }
   }
   
-  public boolean roomFits(Room room) {
-    Point new_nw_corner = room.getNWCorner();
-    Point new_se_corner = room.getSECorner();
+  public boolean roomFits(Room new_room, Room base_room) {
+    Point new_nw_corner = new_room.getNWCorner();
+    Point new_se_corner = new_room.getSECorner();
     for (Room old_room : all_rooms) {
+      if (old_room.equals(base_room)) {
+        continue;
+      }
       Point old_nw_corner = old_room.getNWCorner();
       Point old_se_corner = old_room.getSECorner();
-      if (old_se_corner.x > new_nw_corner.x && old_nw_corner.x < new_se_corner.x && old_se_corner.y > new_nw_corner.y
-              && old_nw_corner.y < new_se_corner.y) {
+      if (old_se_corner.x >= new_nw_corner.x && old_nw_corner.x <= new_se_corner.x &&
+              old_se_corner.y >= new_nw_corner.y && old_nw_corner.y <= new_se_corner.y) {
         return false;
       }
     }

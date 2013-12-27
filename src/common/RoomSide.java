@@ -70,7 +70,8 @@ public enum RoomSide {
     return North;
   }
   
-  public static RoomSide bestDirection(double curx, double cury, double tarx, double tary, RoomSide default_dir) {
+  public static RoomSide bestDirection(double curx, double cury, double tarx, double tary,
+          RoomSide default_dir) {
     if ((Math.abs(curx - tarx) < 0.1) && (Math.abs(cury - tary) < 0.1)) {
       return default_dir;
     }

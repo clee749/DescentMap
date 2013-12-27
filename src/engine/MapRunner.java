@@ -13,15 +13,11 @@ public class MapRunner {
   private final DescentMap map;
   
   public MapRunner() {
-    map = new DescentMap(Constants.DEFAULT_MAX_ROOM_SIZE);
+    map = new DescentMap(Constants.BUILDER_MAX_ROOM_SIZE);
   }
   
   public DescentMap getMap() {
     return map;
-  }
-  
-  public void drawMap() {
-    
   }
   
   public void stepMapBuilder() {
@@ -40,11 +36,11 @@ public class MapRunner {
     frame.setMinimumSize(new Dimension(100, 100));
     frame.setVisible(true);
     
-    for (int i = 0; i < Constants.DEFAULT_MAX_NUM_ROOMS; ++i) {
+    for (int i = 0; i < Constants.BUILDER_MAX_NUM_ROOMS; ++i) {
       runner.stepMapBuilder();
       panel.repaint();
       try {
-        Thread.sleep(Constants.SLEEP);
+        Thread.sleep(Constants.RUNNER_SLEEP);
       }
       catch (InterruptedException e) {
         e.printStackTrace();

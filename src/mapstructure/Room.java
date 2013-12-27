@@ -45,12 +45,12 @@ public class Room {
     return neighbors;
   }
   
-  public void paint(Graphics2D g, Point center_cell, Point center_cell_corner_pixel, int pixels_per_cell) {
+  public void paint(Graphics2D g, Point ref_cell, Point ref_cell_corner_pixel, int pixels_per_cell) {
     g.setColor(Color.gray);
-    g.setStroke(new BasicStroke(Constants.DEFAULT_WALL_THICKNESS));
+    g.setStroke(new BasicStroke(Constants.ROOM_WALL_THICKNESS));
     Point nw_pixel =
-            new Point(center_cell_corner_pixel.x - ((center_cell.x - nw_corner.x) * pixels_per_cell),
-                    center_cell_corner_pixel.y - ((center_cell.y - nw_corner.y) * pixels_per_cell));
+            new Point(ref_cell_corner_pixel.x - ((ref_cell.x - nw_corner.x) * pixels_per_cell),
+                    ref_cell_corner_pixel.y - ((ref_cell.y - nw_corner.y) * pixels_per_cell));
     Point se_pixel = new Point(nw_pixel.x + width * pixels_per_cell, nw_pixel.y + height * pixels_per_cell);
     
     // north wall
@@ -59,8 +59,10 @@ public class Room {
       g.drawLine(nw_pixel.x, nw_pixel.y, se_pixel.x, nw_pixel.y);
     }
     else {
-      g.drawLine(nw_pixel.x, nw_pixel.y, nw_pixel.x + (connection.getMin() - nw_corner.x) * pixels_per_cell, nw_pixel.y);
-      g.drawLine(nw_pixel.x + (connection.getMax() - nw_corner.x) * pixels_per_cell, nw_pixel.y, se_pixel.x, nw_pixel.y);
+      g.drawLine(nw_pixel.x, nw_pixel.y, nw_pixel.x + (connection.getMin() - nw_corner.x) * pixels_per_cell,
+              nw_pixel.y);
+      g.drawLine(nw_pixel.x + (connection.getMax() - nw_corner.x) * pixels_per_cell, nw_pixel.y, se_pixel.x,
+              nw_pixel.y);
     }
     
     // south wall
@@ -69,8 +71,10 @@ public class Room {
       g.drawLine(nw_pixel.x, se_pixel.y, se_pixel.x, se_pixel.y);
     }
     else {
-      g.drawLine(nw_pixel.x, se_pixel.y, nw_pixel.x + (connection.getMin() - nw_corner.x) * pixels_per_cell, se_pixel.y);
-      g.drawLine(nw_pixel.x + (connection.getMax() - nw_corner.x) * pixels_per_cell, se_pixel.y, se_pixel.x, se_pixel.y);
+      g.drawLine(nw_pixel.x, se_pixel.y, nw_pixel.x + (connection.getMin() - nw_corner.x) * pixels_per_cell,
+              se_pixel.y);
+      g.drawLine(nw_pixel.x + (connection.getMax() - nw_corner.x) * pixels_per_cell, se_pixel.y, se_pixel.x,
+              se_pixel.y);
     }
     
     // west wall
@@ -79,8 +83,10 @@ public class Room {
       g.drawLine(nw_pixel.x, nw_pixel.y, nw_pixel.x, se_pixel.y);
     }
     else {
-      g.drawLine(nw_pixel.x, nw_pixel.y, nw_pixel.x, nw_pixel.y + (connection.getMin() - nw_corner.y) * pixels_per_cell);
-      g.drawLine(nw_pixel.x, nw_pixel.y + (connection.getMax() - nw_corner.y) * pixels_per_cell, nw_pixel.x, se_pixel.y);
+      g.drawLine(nw_pixel.x, nw_pixel.y, nw_pixel.x, nw_pixel.y + (connection.getMin() - nw_corner.y) *
+              pixels_per_cell);
+      g.drawLine(nw_pixel.x, nw_pixel.y + (connection.getMax() - nw_corner.y) * pixels_per_cell, nw_pixel.x,
+              se_pixel.y);
     }
     
     // east wall
@@ -89,8 +95,10 @@ public class Room {
       g.drawLine(se_pixel.x, nw_pixel.y, se_pixel.x, se_pixel.y);
     }
     else {
-      g.drawLine(se_pixel.x, nw_pixel.y, se_pixel.x, nw_pixel.y + (connection.getMin() - nw_corner.y) * pixels_per_cell);
-      g.drawLine(se_pixel.x, nw_pixel.y + (connection.getMax() - nw_corner.y) * pixels_per_cell, se_pixel.x, se_pixel.y);
+      g.drawLine(se_pixel.x, nw_pixel.y, se_pixel.x, nw_pixel.y + (connection.getMin() - nw_corner.y) *
+              pixels_per_cell);
+      g.drawLine(se_pixel.x, nw_pixel.y + (connection.getMax() - nw_corner.y) * pixels_per_cell, se_pixel.x,
+              se_pixel.y);
     }
   }
   
