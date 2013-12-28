@@ -11,19 +11,23 @@ import common.Constants;
 
 public class MapRunner {
   private final DescentMap map;
-  
+
   public MapRunner() {
     map = new DescentMap(Constants.BUILDER_MAX_ROOM_SIZE);
   }
-  
+
   public DescentMap getMap() {
     return map;
   }
-  
+
   public void stepMapBuilder() {
     map.addRoom();
   }
-  
+
+  public void finishBuildingMap() {
+    map.finishBuildingMap();
+  }
+
   public static void main(String[] args) {
     MapRunner runner = new MapRunner();
     JFrame frame = new JFrame();
@@ -35,7 +39,7 @@ public class MapRunner {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setMinimumSize(new Dimension(100, 100));
     frame.setVisible(true);
-    
+
     for (int i = 0; i < Constants.BUILDER_MAX_NUM_ROOMS; ++i) {
       runner.stepMapBuilder();
       panel.repaint();
@@ -46,6 +50,8 @@ public class MapRunner {
         e.printStackTrace();
       }
     }
+    runner.finishBuildingMap();
+    panel.repaint();
     System.out.println("DONE");
   }
 }

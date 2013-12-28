@@ -4,58 +4,82 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import mapstructure.MineExteriorRoom;
 import mapstructure.Room;
 import mapstructure.RoomConnection;
 
+import common.Constants;
 import common.RoomSide;
+
+class EdgeRoom {
+  public final RoomSide direction;
+  public final Room room;
+
+  public EdgeRoom(RoomSide direction, Room room) {
+    this.direction = direction;
+    this.room = room;
+  }
+}
+
 
 public class MapBuilder {
   private final int max_room_size;
   private final ArrayList<Room> all_rooms;
   private final ArrayList<Room> available_rooms;
-  private int min_x;
-  private int max_x;
-  private int min_y;
-  private int max_y;
-  
+  private Room westmost_room;
+  private Room eastmost_room;
+  private Room northmost_room;
+  private Room southmost_room;
+  private Room entrance_room;
+  private Room exit_room;
+
   public MapBuilder(int max_room_size) {
     this.max_room_size = max_room_size;
     all_rooms = new ArrayList<Room>();
     available_rooms = new ArrayList<Room>();
   }
-  
+
   public ArrayList<Room> getRooms() {
     return all_rooms;
   }
-  
+
   public int getMinX() {
-    return min_x;
+    return westmost_room.getNWCorner().x;
   }
-  
+
   public int getMaxX() {
-    return max_x;
+    return eastmost_room.getSECorner().x;
   }
-  
+
   public int getMinY() {
-    return min_y;
+    return northmost_room.getNWCorner().y;
   }
-  
+
   public int getMaxY() {
-    return max_y;
+    return southmost_room.getSECorner().y;
   }
-  
+
+  public Room getEntranceRoom() {
+    return entrance_room;
+  }
+
+  public Room getExitRoom() {
+    return exit_room;
+  }
+
   public void addFirstRoom() {
     int width = (int) (Math.random() * max_room_size) + 1;
     int height = (int) (Math.random() * max_room_size) + 1;
     Room room = new Room(new Point(0, 0), new Point(width, height));
     all_rooms.add(room);
     available_rooms.add(room);
-    min_x = 0;
-    max_x = width;
-    min_y = 0;
-    max_y = height;
+    westmost_room = room;
+    eastmost_room = room;
+    northmost_room = room;
+    southmost_room = room;
+    entrance_room = room;
   }
-  
+
   /**
    * Choose a random room to build off from the list of available rooms. Choose a random direction,
    * size, and connection location for the new room. If the room fits, use it. TODO: allow the new
@@ -84,7 +108,7 @@ public class MapBuilder {
     for (int num_tries = 0; num_tries < possible_directions.size(); ++num_tries) {
       direction = possible_directions.get((direction_index + num_tries) % possible_directions.size());
       connection = positionRoom(base_room, new_room_dims, direction);
-      if (roomFits(connection.getNeighbor(), base_room)) {
+      if (roomFits(connection.neighbor, base_room)) {
         new_room_found = true;
         break;
       }
@@ -94,7 +118,7 @@ public class MapBuilder {
       available_rooms.remove(room_index);
       return;
     }
-    Room new_room = connection.getNeighbor();
+    Room new_room = connection.neighbor;
     base_room.addNeighbor(direction, connection);
     all_rooms.add(new_room);
     available_rooms.add(new_room);
@@ -102,7 +126,61 @@ public class MapBuilder {
     new_room.addNeighbor(opposite_direction, new RoomConnection(new_room, base_room, opposite_direction));
     updateMapRanges(new_room);
   }
-  
+
+  public void placeEntranceAndExitRooms() {
+    ArrayList<EdgeRoom> edge_rooms = new ArrayList<EdgeRoom>();
+    edge_rooms.add(new EdgeRoom(RoomSide.East, eastmost_room));
+    edge_rooms.add(new EdgeRoom(RoomSide.North, northmost_room));
+    edge_rooms.add(new EdgeRoom(RoomSide.West, westmost_room));
+    edge_rooms.add(new EdgeRoom(RoomSide.South, southmost_room));
+
+    EdgeRoom entrance_edge_room = edge_rooms.remove((int) (Math.random() * edge_rooms.size()));
+    entrance_room = entrance_edge_room.room;
+    MineExteriorRoom entrance_exterior_room =
+            new MineExteriorRoom(entrance_room.getNWCorner(), entrance_room.getSECorner());
+    all_rooms.add(entrance_exterior_room);
+
+    EdgeRoom exit_edge_room = edge_rooms.remove((int) (Math.random() * edge_rooms.size()));
+    RoomSide direction = exit_edge_room.direction;
+    Dimension exit_room_dims;
+    if (direction.equals(RoomSide.East) || direction.equals(RoomSide.West)) {
+      exit_room_dims = new Dimension(Constants.BUILDER_EXIT_ROOM_LENGTH, 1);
+    }
+    else {
+      exit_room_dims = new Dimension(1, Constants.BUILDER_EXIT_ROOM_LENGTH);
+    }
+    RoomConnection connection = positionRoom(exit_edge_room.room, exit_room_dims, direction);
+    exit_edge_room.room.addNeighbor(direction, connection);
+    RoomSide opposite_direction = RoomSide.opposite(direction);
+    exit_room = connection.neighbor;
+    exit_room.addNeighbor(opposite_direction, new RoomConnection(exit_room, exit_edge_room.room,
+            opposite_direction));
+    all_rooms.add(exit_room);
+    // updateMapRanges(exit_room);
+
+    Point exterior_nw_corner;
+    if (direction.equals(RoomSide.East)) {
+      exterior_nw_corner = exit_room.getNECorner();
+    }
+    else if (direction.equals(RoomSide.North)) {
+      Point base_corner = exit_room.getNWCorner();
+      exterior_nw_corner = new Point(base_corner.x, base_corner.y - 1);
+    }
+    else if (direction.equals(RoomSide.West)) {
+      Point base_corner = exit_room.getNWCorner();
+      exterior_nw_corner = new Point(base_corner.x - 1, base_corner.y);
+    }
+    else {
+      exterior_nw_corner = exit_room.getSWCorner();
+    }
+    MineExteriorRoom exterior =
+            new MineExteriorRoom(exterior_nw_corner, new Point(exterior_nw_corner.x + 1,
+                    exterior_nw_corner.y + 1));
+    exit_room.addNeighbor(direction, new RoomConnection(exit_room, exterior, direction));
+    all_rooms.add(exterior);
+    updateMapRanges(exterior);
+  }
+
   public RoomConnection positionRoom(Room base_room, Dimension new_room_dims, RoomSide direction) {
     Point base_corner = base_room.getNWCorner();
     if (direction.equals(RoomSide.East) || direction.equals(RoomSide.West)) {
@@ -142,7 +220,7 @@ public class MapBuilder {
               base_room.getSECorner().x), new_room);
     }
   }
-  
+
   public boolean roomFits(Room new_room, Room base_room) {
     Point new_nw_corner = new_room.getNWCorner();
     Point new_se_corner = new_room.getSECorner();
@@ -159,21 +237,21 @@ public class MapBuilder {
     }
     return true;
   }
-  
+
   public void updateMapRanges(Room new_room) {
     Point new_nw_corner = new_room.getNWCorner();
     Point new_se_corner = new_room.getSECorner();
-    if (new_nw_corner.x < min_x) {
-      min_x = new_nw_corner.x;
+    if (new_nw_corner.x < westmost_room.getNWCorner().x) {
+      westmost_room = new_room;
     }
-    if (new_se_corner.x > max_x) {
-      max_x = new_se_corner.x;
+    if (new_se_corner.x > eastmost_room.getSECorner().x) {
+      eastmost_room = new_room;
     }
-    if (new_nw_corner.y < min_y) {
-      min_y = new_nw_corner.y;
+    if (new_nw_corner.y < northmost_room.getNWCorner().y) {
+      northmost_room = new_room;
     }
-    if (new_se_corner.y > max_y) {
-      max_y = new_se_corner.y;
+    if (new_se_corner.y > southmost_room.getSECorner().y) {
+      southmost_room = new_room;
     }
   }
 }

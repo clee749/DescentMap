@@ -11,12 +11,12 @@ import mapstructure.DescentMap;
 public class MapPanel extends JPanel {
   private final DescentMap map;
   private final MapConstructionDisplayer construction_displayer;
-  
+
   public MapPanel(MapRunner runner) {
     map = runner.getMap();
     construction_displayer = map.getConstructionDisplayer();
   }
-  
+
   @Override
   public void paint(Graphics g) {
     g.setColor(Color.black);
