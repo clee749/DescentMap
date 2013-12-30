@@ -16,7 +16,11 @@ public class Constants {
   public static final Color ROOM_WALL_COLOR = Color.gray;
 
   // runner
-  public static final int RUNNER_SLEEP = 100;
+  public static final long RUNNER_BUILD_SLEEP = 100;
+  public static final long RUNNER_PAUSE_AFTER_BUILD_SLEEP = 1000;
+  public static final long RUNNER_PLAY_MIN_SLEEP = 1000;
+  public static final long RUNNER_PLAY_MAX_SLEEP = 11000;
+  public static final long RUNNER_PAUSE_AFTER_PLAY_SLEEP = 1000;
 
   protected Constants() {
 

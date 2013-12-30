@@ -3,36 +3,36 @@ package common;
 import java.awt.Point;
 
 public enum RoomSide {
-  East, North, West, South;
+  EAST, NORTH, WEST, SOUTH;
 
   public static RoomSide opposite(RoomSide direction) {
     if (direction == null) {
       return null;
     }
-    if (direction.equals(North)) {
-      return South;
+    if (direction.equals(NORTH)) {
+      return SOUTH;
     }
-    if (direction.equals(South)) {
-      return North;
+    if (direction.equals(SOUTH)) {
+      return NORTH;
     }
-    if (direction.equals(West)) {
-      return East;
+    if (direction.equals(WEST)) {
+      return EAST;
     }
-    return West;
+    return WEST;
   }
 
   public static Point dxdy(RoomSide direction) {
     if (direction != null) {
-      if (direction.equals(North)) {
+      if (direction.equals(NORTH)) {
         return new Point(0, -1);
       }
-      if (direction.equals(South)) {
+      if (direction.equals(SOUTH)) {
         return new Point(0, 1);
       }
-      if (direction.equals(West)) {
+      if (direction.equals(WEST)) {
         return new Point(-1, 0);
       }
-      if (direction.equals(East)) {
+      if (direction.equals(EAST)) {
         return new Point(1, 0);
       }
     }
@@ -45,11 +45,11 @@ public enum RoomSide {
 
   public static RoomSide[] adjacents(RoomSide direction) {
     RoomSide[] dirs;
-    if (direction.equals(North) || direction.equals(South)) {
-      dirs = new RoomSide[] {West, East};
+    if (direction.equals(NORTH) || direction.equals(SOUTH)) {
+      dirs = new RoomSide[] {WEST, EAST};
     }
     else {
-      dirs = new RoomSide[] {North, South};
+      dirs = new RoomSide[] {NORTH, SOUTH};
     }
     return dirs;
   }
@@ -60,14 +60,14 @@ public enum RoomSide {
     }
     if (Math.abs(dxdy.x) > Math.abs(dxdy.y)) {
       if (dxdy.x > 0) {
-        return East;
+        return EAST;
       }
-      return West;
+      return WEST;
     }
     if (dxdy.y > 0) {
-      return South;
+      return SOUTH;
     }
-    return North;
+    return NORTH;
   }
 
   public static RoomSide bestDirection(double curx, double cury, double tarx, double tary,
@@ -77,13 +77,13 @@ public enum RoomSide {
     }
     if (Math.abs(tarx - curx) > Math.abs(tary - cury)) {
       if (tarx - curx > 0) {
-        return East;
+        return EAST;
       }
-      return West;
+      return WEST;
     }
     if (tary - cury > 0) {
-      return South;
+      return SOUTH;
     }
-    return North;
+    return NORTH;
   }
 }

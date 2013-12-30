@@ -15,7 +15,7 @@ public class RoomConnection {
 
   public RoomConnection(Room base_room, Room neighbor, RoomSide direction) {
     this.neighbor = neighbor;
-    if (direction.equals(RoomSide.East) || direction.equals(RoomSide.West)) {
+    if (direction.equals(RoomSide.EAST) || direction.equals(RoomSide.WEST)) {
       min = Math.max(neighbor.getNWCorner().y, base_room.getNWCorner().y);
       max = Math.min(neighbor.getSECorner().y, base_room.getSECorner().y);
     }

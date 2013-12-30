@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
+import mapobject.unit.pyro.Pyro;
 import mapstructure.Room;
 
 import common.Constants;
@@ -40,5 +41,9 @@ public class MapConstructionDisplayer {
     for (Room room : builder.getRooms()) {
       room.paint(g, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     }
+  }
+
+  public void displayShip(Graphics2D g, Pyro ship) {
+    ship.paint(g, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
   }
 }

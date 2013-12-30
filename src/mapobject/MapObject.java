@@ -16,6 +16,21 @@ public abstract class MapObject {
     this.y_loc = y_loc;
   }
 
-  public abstract void paint(Graphics2D g, Point center_location, Point center_location_corner_pixel,
-          int pixels_per_location);
+  public Room getRoom() {
+    return room;
+  }
+
+  public double getX() {
+    return x_loc;
+  }
+
+  public double getY() {
+    return y_loc;
+  }
+
+  public abstract void paint(Graphics2D g, Point ref_cell, Point ref_cell_corner_pixel, int pixels_per_cell);
+
+  public abstract void computeNextStep();
+
+  public abstract void doNextStep(long ms_elapsed);
 }

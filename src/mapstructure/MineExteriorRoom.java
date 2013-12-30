@@ -24,4 +24,9 @@ public class MineExteriorRoom extends Room {
     g.setColor(Constants.ROOM_WALL_COLOR);
     g.setStroke(new BasicStroke(Constants.ROOM_WALL_THICKNESS));
   }
+
+  @Override
+  public String toString() {
+    return super.toString() + " (Exterior)";
+  }
 }

@@ -129,10 +129,10 @@ public class MapBuilder {
 
   public void placeEntranceAndExitRooms() {
     ArrayList<EdgeRoom> edge_rooms = new ArrayList<EdgeRoom>();
-    edge_rooms.add(new EdgeRoom(RoomSide.East, eastmost_room));
-    edge_rooms.add(new EdgeRoom(RoomSide.North, northmost_room));
-    edge_rooms.add(new EdgeRoom(RoomSide.West, westmost_room));
-    edge_rooms.add(new EdgeRoom(RoomSide.South, southmost_room));
+    edge_rooms.add(new EdgeRoom(RoomSide.EAST, eastmost_room));
+    edge_rooms.add(new EdgeRoom(RoomSide.NORTH, northmost_room));
+    edge_rooms.add(new EdgeRoom(RoomSide.WEST, westmost_room));
+    edge_rooms.add(new EdgeRoom(RoomSide.SOUTH, southmost_room));
 
     EdgeRoom entrance_edge_room = edge_rooms.remove((int) (Math.random() * edge_rooms.size()));
     entrance_room = entrance_edge_room.room;
@@ -143,7 +143,7 @@ public class MapBuilder {
     EdgeRoom exit_edge_room = edge_rooms.remove((int) (Math.random() * edge_rooms.size()));
     RoomSide direction = exit_edge_room.direction;
     Dimension exit_room_dims;
-    if (direction.equals(RoomSide.East) || direction.equals(RoomSide.West)) {
+    if (direction.equals(RoomSide.EAST) || direction.equals(RoomSide.WEST)) {
       exit_room_dims = new Dimension(Constants.BUILDER_EXIT_ROOM_LENGTH, 1);
     }
     else {
@@ -156,17 +156,18 @@ public class MapBuilder {
     exit_room.addNeighbor(opposite_direction, new RoomConnection(exit_room, exit_edge_room.room,
             opposite_direction));
     all_rooms.add(exit_room);
-    // updateMapRanges(exit_room);
+    // no need to call updateMapRanges here because the MineExteriorRoom will be in the same
+    // direction
 
     Point exterior_nw_corner;
-    if (direction.equals(RoomSide.East)) {
+    if (direction.equals(RoomSide.EAST)) {
       exterior_nw_corner = exit_room.getNECorner();
     }
-    else if (direction.equals(RoomSide.North)) {
+    else if (direction.equals(RoomSide.NORTH)) {
       Point base_corner = exit_room.getNWCorner();
       exterior_nw_corner = new Point(base_corner.x, base_corner.y - 1);
     }
-    else if (direction.equals(RoomSide.West)) {
+    else if (direction.equals(RoomSide.WEST)) {
       Point base_corner = exit_room.getNWCorner();
       exterior_nw_corner = new Point(base_corner.x - 1, base_corner.y);
     }
@@ -183,13 +184,13 @@ public class MapBuilder {
 
   public RoomConnection positionRoom(Room base_room, Dimension new_room_dims, RoomSide direction) {
     Point base_corner = base_room.getNWCorner();
-    if (direction.equals(RoomSide.East) || direction.equals(RoomSide.West)) {
+    if (direction.equals(RoomSide.EAST) || direction.equals(RoomSide.WEST)) {
       int base_dim = base_room.getHeight();
       int new_dim = new_room_dims.height;
       int new_corner_range = base_dim + new_dim - 1;
       int new_corner_offset = (int) (Math.random() * new_corner_range) - base_dim + 1;
       Point new_nw_corner;
-      if (direction.equals(RoomSide.East)) {
+      if (direction.equals(RoomSide.EAST)) {
         new_nw_corner = new Point(base_corner.x + base_room.getWidth(), base_corner.y - new_corner_offset);
       }
       else {
@@ -207,7 +208,7 @@ public class MapBuilder {
       int new_corner_range = base_dim + new_dim - 1;
       int new_corner_offset = (int) (Math.random() * new_corner_range) - base_dim + 1;
       Point new_nw_corner;
-      if (direction.equals(RoomSide.North)) {
+      if (direction.equals(RoomSide.NORTH)) {
         new_nw_corner = new Point(base_corner.x - new_corner_offset, base_corner.y - new_room_dims.height);
       }
       else {

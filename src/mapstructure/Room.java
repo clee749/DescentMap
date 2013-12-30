@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import common.MazeUtils;
 import common.RoomSide;
 
 public class Room {
@@ -51,13 +52,11 @@ public class Room {
   }
 
   public void paint(Graphics2D g, Point ref_cell, Point ref_cell_corner_pixel, int pixels_per_cell) {
-    Point nw_pixel =
-            new Point(ref_cell_corner_pixel.x - ((ref_cell.x - nw_corner.x) * pixels_per_cell),
-                    ref_cell_corner_pixel.y - ((ref_cell.y - nw_corner.y) * pixels_per_cell));
+    Point nw_pixel = MazeUtils.coordsToPixel(nw_corner, ref_cell, ref_cell_corner_pixel, pixels_per_cell);
     Point se_pixel = new Point(nw_pixel.x + width * pixels_per_cell, nw_pixel.y + height * pixels_per_cell);
 
     // north wall
-    RoomConnection connection = neighbors.get(RoomSide.North);
+    RoomConnection connection = neighbors.get(RoomSide.NORTH);
     if (connection == null) {
       g.drawLine(nw_pixel.x, nw_pixel.y, se_pixel.x, nw_pixel.y);
     }
@@ -69,7 +68,7 @@ public class Room {
     }
 
     // south wall
-    connection = neighbors.get(RoomSide.South);
+    connection = neighbors.get(RoomSide.SOUTH);
     if (connection == null) {
       g.drawLine(nw_pixel.x, se_pixel.y, se_pixel.x, se_pixel.y);
     }
@@ -81,7 +80,7 @@ public class Room {
     }
 
     // west wall
-    connection = neighbors.get(RoomSide.West);
+    connection = neighbors.get(RoomSide.WEST);
     if (connection == null) {
       g.drawLine(nw_pixel.x, nw_pixel.y, nw_pixel.x, se_pixel.y);
     }
@@ -93,7 +92,7 @@ public class Room {
     }
 
     // east wall
-    connection = neighbors.get(RoomSide.East);
+    connection = neighbors.get(RoomSide.EAST);
     if (connection == null) {
       g.drawLine(se_pixel.x, nw_pixel.y, se_pixel.x, se_pixel.y);
     }
