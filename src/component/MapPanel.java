@@ -1,4 +1,4 @@
-package engine;
+package component;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
-import mapstructure.DescentMap;
+import structure.DescentMap;
 
 public class MapPanel extends JPanel {
   private DescentMap map;

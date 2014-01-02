@@ -3,17 +3,23 @@ package mapobject;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
-import mapstructure.Room;
+import structure.Room;
 
 public abstract class MapObject {
+  protected final double radius;
   protected Room room;
   protected double x_loc;
   protected double y_loc;
 
-  public MapObject(Room room, double x_loc, double y_loc) {
+  public MapObject(double radius, Room room, double x_loc, double y_loc) {
+    this.radius = radius;
     this.room = room;
     this.x_loc = x_loc;
     this.y_loc = y_loc;
+  }
+
+  public double getRadius() {
+    return radius;
   }
 
   public Room getRoom() {

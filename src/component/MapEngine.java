@@ -1,7 +1,7 @@
-package engine;
+package component;
 
+import structure.DescentMap;
 import mapobject.unit.pyro.Pyro;
-import mapstructure.DescentMap;
 
 public class MapEngine {
   private final DescentMap map;

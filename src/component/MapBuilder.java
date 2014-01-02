@@ -1,12 +1,12 @@
-package engine;
+package component;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
 
-import mapstructure.MineExteriorRoom;
-import mapstructure.Room;
-import mapstructure.RoomConnection;
+import structure.MineExteriorRoom;
+import structure.Room;
+import structure.RoomConnection;
 
 import common.Constants;
 import common.RoomSide;

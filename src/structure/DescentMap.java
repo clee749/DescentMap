@@ -1,4 +1,4 @@
-package mapstructure;
+package structure;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -10,10 +10,10 @@ import java.util.Iterator;
 import mapobject.unit.pyro.Pyro;
 
 import common.Constants;
-
-import engine.MapBuilder;
-import engine.MapConstructionDisplayer;
-import engine.MapDisplayer;
+import common.DescentMapException;
+import component.MapBuilder;
+import component.MapConstructionDisplayer;
+import component.MapDisplayer;
 
 enum DisplayMode {
   CONSTRUCTION, PLAYTHROUGH;
@@ -76,6 +76,8 @@ public class DescentMap {
         construction_displayer.displayMap(g, dims);
         construction_displayer.displayShip(g, center_ship);
         break;
+      default:
+        throw new DescentMapException("Unexpected DisplayMode: " + display_mode);
     }
   }
 }

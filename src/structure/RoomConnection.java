@@ -1,4 +1,4 @@
-package mapstructure;
+package structure;
 
 import common.RoomSide;
 

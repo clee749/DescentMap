@@ -1,4 +1,4 @@
-package engine;
+package component;
 
 import java.awt.BasicStroke;
 import java.awt.Dimension;
@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 
 import mapobject.unit.pyro.Pyro;
-import mapstructure.Room;
+import structure.Room;
 
 import common.Constants;
 

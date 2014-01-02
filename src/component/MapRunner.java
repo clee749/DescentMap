@@ -1,4 +1,4 @@
-package engine;
+package component;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -7,10 +7,11 @@ import java.awt.Toolkit;
 import javax.swing.JFrame;
 
 import mapobject.unit.pyro.Pyro;
-import mapstructure.DescentMap;
-import mapstructure.Room;
+import structure.DescentMap;
+import structure.Room;
 
 import common.Constants;
+import common.DescentMapException;
 
 enum RunnerState {
   BUILD_MAP, PAUSE_AFTER_BUILD, PLAY_MAP, PAUSE_AFTER_PLAY, COMPLETE;
@@ -59,6 +60,8 @@ public class MapRunner {
       case PAUSE_AFTER_PLAY:
         doPauseAfterPlayStep();
         break;
+      default:
+        throw new DescentMapException("Unexpected RunnerState: " + state);
     }
     last_update_time = System.currentTimeMillis();
     return true;
@@ -113,7 +116,7 @@ public class MapRunner {
     frame.setMinimumSize(new Dimension(100, 100));
     frame.setVisible(true);
 
-    for (int level = 1; level <= 1; ++level) {
+    for (int level = 1; level <= Constants.RUNNER_NUM_LEVELS; ++level) {
       System.out.println("Level " + level);
       MapRunner runner = new MapRunner();
       panel.setMap(runner.getMap());

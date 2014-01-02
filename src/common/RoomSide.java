@@ -86,4 +86,19 @@ public enum RoomSide {
     }
     return NORTH;
   }
+
+  public static double directionToRadians(RoomSide direction) {
+    switch (direction) {
+      case EAST:
+        return 0.0;
+      case NORTH:
+        return Math.PI / 2;
+      case WEST:
+        return Math.PI;
+      case SOUTH:
+        return 3 * Math.PI / 2;
+      default:
+        throw new DescentMapException("Unexpected RoomSide: " + direction);
+    }
+  }
 }

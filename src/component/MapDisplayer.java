@@ -1,9 +1,9 @@
-package engine;
+package component;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 
-import mapstructure.DescentMap;
+import structure.DescentMap;
 
 public class MapDisplayer {
   private final DescentMap map;

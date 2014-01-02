@@ -1,11 +1,11 @@
-package mapstructure;
+package structure;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import common.MazeUtils;
+import common.MapUtils;
 import common.RoomSide;
 
 public class Room {
@@ -51,8 +51,17 @@ public class Room {
     return neighbors;
   }
 
+  public RoomConnection getConnectionInDirection(RoomSide direction) {
+    return neighbors.get(direction);
+  }
+
+  @Override
+  public String toString() {
+    return "(" + nw_corner + ", " + se_corner + ")";
+  }
+
   public void paint(Graphics2D g, Point ref_cell, Point ref_cell_corner_pixel, int pixels_per_cell) {
-    Point nw_pixel = MazeUtils.coordsToPixel(nw_corner, ref_cell, ref_cell_corner_pixel, pixels_per_cell);
+    Point nw_pixel = MapUtils.coordsToPixel(nw_corner, ref_cell, ref_cell_corner_pixel, pixels_per_cell);
     Point se_pixel = new Point(nw_pixel.x + width * pixels_per_cell, nw_pixel.y + height * pixels_per_cell);
 
     // north wall
@@ -118,8 +127,28 @@ public class Room {
     neighbors.put(side, connection);
   }
 
-  @Override
-  public String toString() {
-    return "(" + nw_corner + ", " + se_corner + ")";
+  public boolean containsPoint(double x, double y) {
+    return nw_corner.x <= x && x <= se_corner.x && nw_corner.y <= y && y <= se_corner.y;
+  }
+
+  public boolean containsRange(double x, double y, double range) {
+    return nw_corner.x <= x - range && x + range <= se_corner.x && nw_corner.y <= y - range &&
+            y + range <= se_corner.y;
+  }
+
+  public RoomSide directionOfLeaving(double x, double y) {
+    if (x < nw_corner.x) {
+      return RoomSide.WEST;
+    }
+    if (x > se_corner.x) {
+      return RoomSide.EAST;
+    }
+    if (y < nw_corner.y) {
+      return RoomSide.NORTH;
+    }
+    if (y > se_corner.y) {
+      return RoomSide.SOUTH;
+    }
+    return null;
   }
 }

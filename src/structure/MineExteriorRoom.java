@@ -1,4 +1,4 @@
-package mapstructure;
+package structure;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
