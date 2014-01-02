@@ -1,18 +1,13 @@
 package component;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 
 import structure.DescentMap;
 
-public class MapDisplayer {
-  private final DescentMap map;
+public interface MapDisplayer {
+  public void setMap(DescentMap map);
 
-  public MapDisplayer(DescentMap map) {
-    this.map = map;
-  }
+  public void finishBuildingMap();
 
-  public void displayMap(Graphics2D g, Dimension dims) {
-
-  }
+  public void paint(Graphics g);
 }

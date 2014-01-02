@@ -9,6 +9,7 @@ import structure.Room;
 import structure.RoomConnection;
 
 import common.Constants;
+import common.MapUtils;
 import common.RoomSide;
 
 class EdgeRoom {
@@ -231,8 +232,7 @@ public class MapBuilder {
       }
       Point old_nw_corner = old_room.getNWCorner();
       Point old_se_corner = old_room.getSECorner();
-      if (old_se_corner.x >= new_nw_corner.x && old_nw_corner.x <= new_se_corner.x &&
-              old_se_corner.y >= new_nw_corner.y && old_nw_corner.y <= new_se_corner.y) {
+      if (MapUtils.rectanglesIntersect(old_nw_corner, old_se_corner, new_nw_corner, new_se_corner)) {
         return false;
       }
     }

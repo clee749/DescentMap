@@ -46,4 +46,10 @@ public class MapUtils {
     }
     return angle;
   }
+
+  public static boolean rectanglesIntersect(Point nw_corner1, Point se_corner1, Point nw_corner2,
+          Point se_corner2) {
+    return se_corner1.x >= nw_corner2.x && nw_corner1.x <= se_corner2.x && se_corner1.y >= nw_corner2.y &&
+            nw_corner1.y <= se_corner2.y;
+  }
 }

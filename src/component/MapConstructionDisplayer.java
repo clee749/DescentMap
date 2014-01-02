@@ -1,30 +1,29 @@
 package component;
 
-import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
-import mapobject.unit.pyro.Pyro;
+import structure.DescentMap;
 import structure.Room;
 
 import common.Constants;
 
 public class MapConstructionDisplayer {
-  private final MapBuilder builder;
+  private final DescentMap map;
   private int pixels_per_cell;
   private Point ref_cell;
   private Point ref_cell_nw_pixel;
 
-  public MapConstructionDisplayer(MapBuilder builder) {
-    this.builder = builder;
+  public MapConstructionDisplayer(DescentMap map) {
+    this.map = map;
   }
 
   public void centerMap(Dimension dims) {
-    int min_x = builder.getMinX();
-    int max_x = builder.getMaxX();
-    int min_y = builder.getMinY();
-    int max_y = builder.getMaxY();
+    int min_x = map.getMinX();
+    int max_x = map.getMaxX();
+    int min_y = map.getMinY();
+    int max_y = map.getMaxY();
     int x_range = max_x - min_x + 1;
     int y_range = max_y - min_y + 1;
     int sight_diameter = Math.max(Math.max(x_range, y_range), Constants.CONSTRUCTION_MIN_SIGHT_DIAMETER);
@@ -36,14 +35,8 @@ public class MapConstructionDisplayer {
 
   public void displayMap(Graphics2D g, Dimension dims) {
     centerMap(dims);
-    g.setColor(Constants.ROOM_WALL_COLOR);
-    g.setStroke(new BasicStroke(Constants.ROOM_WALL_THICKNESS));
-    for (Room room : builder.getRooms()) {
+    for (Room room : map.getRooms()) {
       room.paint(g, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     }
-  }
-
-  public void displayShip(Graphics2D g, Pyro ship) {
-    ship.paint(g, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
   }
 }

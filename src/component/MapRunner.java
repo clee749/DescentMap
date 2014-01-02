@@ -14,11 +14,12 @@ import common.Constants;
 import common.DescentMapException;
 
 enum RunnerState {
-  BUILD_MAP, PAUSE_AFTER_BUILD, PLAY_MAP, PAUSE_AFTER_PLAY, COMPLETE;
+  BUILD_MAP, PAUSE_AFTER_BUILD, PAUSE_BEFORE_PLAY, PLAY_MAP, PAUSE_AFTER_PLAY, COMPLETE;
 }
 
 
 public class MapRunner {
+  private final MapDisplayer displayer;
   private final DescentMap map;
   private MapEngine engine;
   private RunnerState state;
@@ -26,7 +27,8 @@ public class MapRunner {
   private long last_update_time;
   private int num_build_steps;
 
-  public MapRunner() {
+  public MapRunner(MapDisplayer displayer) {
+    this.displayer = displayer;
     map = new DescentMap(Constants.BUILDER_MAX_ROOM_SIZE);
     state = RunnerState.BUILD_MAP;
     target_sleep_ms = Constants.RUNNER_BUILD_SLEEP;
@@ -53,6 +55,9 @@ public class MapRunner {
         break;
       case PAUSE_AFTER_BUILD:
         doPauseAfterBuildStep();
+        break;
+      case PAUSE_BEFORE_PLAY:
+        doPauseBeforePlayStep();
         break;
       case PLAY_MAP:
         doPlayStep(Math.min(elapsed_time, Constants.RUNNER_PLAY_MAX_SLEEP));
@@ -88,6 +93,12 @@ public class MapRunner {
   }
 
   public void doPauseAfterBuildStep() {
+    displayer.finishBuildingMap();
+    state = RunnerState.PAUSE_BEFORE_PLAY;
+    target_sleep_ms = Constants.RUNNER_PAUSE_BEFORE_PLAY_SLEEP;
+  }
+
+  public void doPauseBeforePlayStep() {
     state = RunnerState.PLAY_MAP;
     target_sleep_ms = Constants.RUNNER_PLAY_MIN_SLEEP;
   }
@@ -118,7 +129,7 @@ public class MapRunner {
 
     for (int level = 1; level <= Constants.RUNNER_NUM_LEVELS; ++level) {
       System.out.println("Level " + level);
-      MapRunner runner = new MapRunner();
+      MapRunner runner = new MapRunner(panel);
       panel.setMap(runner.getMap());
       do {
         if (runner.doNextStep()) {

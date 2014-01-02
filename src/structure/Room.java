@@ -1,10 +1,13 @@
 package structure;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import common.Constants;
 import common.MapUtils;
 import common.RoomSide;
 
@@ -61,8 +64,16 @@ public class Room {
   }
 
   public void paint(Graphics2D g, Point ref_cell, Point ref_cell_corner_pixel, int pixels_per_cell) {
+    paint(g, Constants.ROOM_WALL_COLOR, Constants.ROOM_WALL_STROKE, ref_cell, ref_cell_corner_pixel,
+            pixels_per_cell);
+  }
+
+  public void paint(Graphics2D g, Color wall_color, Stroke wall_stroke, Point ref_cell,
+          Point ref_cell_corner_pixel, int pixels_per_cell) {
     Point nw_pixel = MapUtils.coordsToPixel(nw_corner, ref_cell, ref_cell_corner_pixel, pixels_per_cell);
     Point se_pixel = new Point(nw_pixel.x + width * pixels_per_cell, nw_pixel.y + height * pixels_per_cell);
+    g.setColor(wall_color);
+    g.setStroke(wall_stroke);
 
     // north wall
     RoomConnection connection = neighbors.get(RoomSide.NORTH);
@@ -125,30 +136,5 @@ public class Room {
 
   public void addNeighbor(RoomSide side, RoomConnection connection) {
     neighbors.put(side, connection);
-  }
-
-  public boolean containsPoint(double x, double y) {
-    return nw_corner.x <= x && x <= se_corner.x && nw_corner.y <= y && y <= se_corner.y;
-  }
-
-  public boolean containsRange(double x, double y, double range) {
-    return nw_corner.x <= x - range && x + range <= se_corner.x && nw_corner.y <= y - range &&
-            y + range <= se_corner.y;
-  }
-
-  public RoomSide directionOfLeaving(double x, double y) {
-    if (x < nw_corner.x) {
-      return RoomSide.WEST;
-    }
-    if (x > se_corner.x) {
-      return RoomSide.EAST;
-    }
-    if (y < nw_corner.y) {
-      return RoomSide.NORTH;
-    }
-    if (y > se_corner.y) {
-      return RoomSide.SOUTH;
-    }
-    return null;
   }
 }
