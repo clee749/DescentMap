@@ -33,10 +33,10 @@ public class PyroPilot extends Pilot {
 
   @Override
   public void updateCurrentRoom(Room room) {
-    visitRoom(room);
     if (current_room == null ||
             (target_room_info != null && room.equals(target_room_info.getValue().neighbor))) {
       current_room = room;
+      visitRoom(room);
       initMoveToRoomState();
     }
   }
@@ -166,13 +166,13 @@ public class PyroPilot extends Pilot {
         target_direction = 0.0;
         break;
       case NORTH:
-        target_direction = 3 * Math.PI / 2;
+        target_direction = Constants.THREE_PI_OVER_TWO;
         break;
       case WEST:
         target_direction = Math.PI;
         break;
       case SOUTH:
-        target_direction = Math.PI / 2;
+        target_direction = Constants.PI_OVER_TWO;
         break;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + direction);

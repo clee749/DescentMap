@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Stroke;
 
+import util.ImageHandler;
+
 /*
  * Mock Room to connect with the exit Room.
  */
@@ -18,8 +20,9 @@ public class MineExteriorRoom extends Room {
   }
 
   @Override
-  public void paint(Graphics2D g, Point ref_cell, Point ref_cell_corner_pixel, int pixels_per_cell) {
-    super.paint(g, MineExteriorRoom.WALL_COLOR, MineExteriorRoom.WALL_STROKE, ref_cell,
+  public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_corner_pixel,
+          int pixels_per_cell) {
+    super.paint(g, images, MineExteriorRoom.WALL_COLOR, MineExteriorRoom.WALL_STROKE, ref_cell,
             ref_cell_corner_pixel, pixels_per_cell);
   }
 

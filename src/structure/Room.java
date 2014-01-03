@@ -6,6 +6,10 @@ import java.awt.Point;
 import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+
+import mapobject.MapObject;
+import util.ImageHandler;
 
 import common.Constants;
 import common.MapUtils;
@@ -17,6 +21,7 @@ public class Room {
   private final int width;
   private final int height;
   private final HashMap<RoomSide, RoomConnection> neighbors;
+  private final HashSet<MapObject> children;
 
   public Room(Point nw_corner, Point se_corner) {
     this.nw_corner = nw_corner;
@@ -24,6 +29,7 @@ public class Room {
     width = se_corner.x - nw_corner.x;
     height = se_corner.y - nw_corner.y;
     neighbors = new HashMap<RoomSide, RoomConnection>();
+    children = new HashSet<MapObject>();
   }
 
   public Point getNWCorner() {
@@ -63,14 +69,15 @@ public class Room {
     return "(" + nw_corner + ", " + se_corner + ")";
   }
 
-  public void paint(Graphics2D g, Point ref_cell, Point ref_cell_corner_pixel, int pixels_per_cell) {
-    paint(g, Constants.ROOM_WALL_COLOR, Constants.ROOM_WALL_STROKE, ref_cell, ref_cell_corner_pixel,
+  public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
+          int pixels_per_cell) {
+    paint(g, images, Constants.ROOM_WALL_COLOR, Constants.ROOM_WALL_STROKE, ref_cell, ref_cell_nw_pixel,
             pixels_per_cell);
   }
 
-  public void paint(Graphics2D g, Color wall_color, Stroke wall_stroke, Point ref_cell,
-          Point ref_cell_corner_pixel, int pixels_per_cell) {
-    Point nw_pixel = MapUtils.coordsToPixel(nw_corner, ref_cell, ref_cell_corner_pixel, pixels_per_cell);
+  public void paint(Graphics2D g, ImageHandler images, Color wall_color, Stroke wall_stroke, Point ref_cell,
+          Point ref_cell_nw_pixel, int pixels_per_cell) {
+    Point nw_pixel = MapUtils.coordsToPixel(nw_corner, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     Point se_pixel = new Point(nw_pixel.x + width * pixels_per_cell, nw_pixel.y + height * pixels_per_cell);
     g.setColor(wall_color);
     g.setStroke(wall_stroke);
@@ -122,6 +129,13 @@ public class Room {
       g.drawLine(se_pixel.x, nw_pixel.y + (connection.max - nw_corner.y) * pixels_per_cell, se_pixel.x,
               se_pixel.y);
     }
+
+    // children
+    if (images != null) {
+      for (MapObject child : children) {
+        child.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      }
+    }
   }
 
   public ArrayList<RoomSide> findUnconnectedSides() {
@@ -136,5 +150,13 @@ public class Room {
 
   public void addNeighbor(RoomSide side, RoomConnection connection) {
     neighbors.put(side, connection);
+  }
+
+  public boolean addChild(MapObject object) {
+    return children.add(object);
+  }
+
+  public boolean removeChild(MapObject child) {
+    return children.remove(child);
   }
 }

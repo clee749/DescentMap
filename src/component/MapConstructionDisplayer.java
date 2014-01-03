@@ -36,7 +36,7 @@ public class MapConstructionDisplayer {
   public void displayMap(Graphics2D g, Dimension dims) {
     centerMap(dims);
     for (Room room : map.getRooms()) {
-      room.paint(g, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      room.paint(g, null, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     }
   }
 }

@@ -92,11 +92,11 @@ public enum RoomSide {
       case EAST:
         return 0.0;
       case NORTH:
-        return Math.PI / 2;
+        return Constants.PI_OVER_TWO;
       case WEST:
         return Math.PI;
       case SOUTH:
-        return 3 * Math.PI / 2;
+        return Constants.THREE_PI_OVER_TWO;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + direction);
     }

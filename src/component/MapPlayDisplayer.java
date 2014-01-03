@@ -7,7 +7,9 @@ import java.awt.Point;
 import mapobject.MapObject;
 import structure.DescentMap;
 import structure.Room;
+import util.ImageHandler;
 
+import common.Constants;
 import common.MapUtils;
 
 public class MapPlayDisplayer {
@@ -17,6 +19,7 @@ public class MapPlayDisplayer {
   private Point center_pixel;
   private int num_cols;
   private int num_rows;
+  private ImageHandler images;
 
   public MapPlayDisplayer(DescentMap map, int sight_radius) {
     this.map = map;
@@ -29,6 +32,9 @@ public class MapPlayDisplayer {
     center_pixel = new Point(dims.width / 2, dims.height / 2);
     num_cols = (int) ((double) dims.width / pixels_per_cell) + 2;
     num_rows = (int) ((double) dims.height / pixels_per_cell) + 2;
+
+    images = new ImageHandler();
+    images.loadImages(Constants.IMAGES_PATH, pixels_per_cell);
   }
 
   public void displayMap(Graphics2D g) {
@@ -45,9 +51,8 @@ public class MapPlayDisplayer {
     Point se_corner = new Point(min_x + num_cols, min_y + num_rows);
     for (Room room : map.getRooms()) {
       if (MapUtils.rectanglesIntersect(nw_corner, se_corner, room.getNWCorner(), room.getSECorner())) {
-        room.paint(g, center_cell, center_cell_nw_pixel, pixels_per_cell);
+        room.paint(g, images, center_cell, center_cell_nw_pixel, pixels_per_cell);
       }
     }
-    center_object.paint(g, center_cell, center_cell_nw_pixel, pixels_per_cell);
   }
 }

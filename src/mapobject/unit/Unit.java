@@ -10,6 +10,7 @@ import pilot.PilotMove;
 import pilot.TurnDirection;
 import structure.Room;
 import structure.RoomConnection;
+import util.ImageHandler;
 
 import common.DescentMapException;
 import common.MapUtils;
@@ -37,13 +38,16 @@ public abstract class Unit extends MapObject {
     return direction;
   }
 
-  public void setRoom(Room room) {
-    this.room = room;
-    pilot.updateCurrentRoom(room);
+  public void updateRoom(Room previous_room, Room next_room) {
+    room = next_room;
+    pilot.updateCurrentRoom(next_room);
+    previous_room.removeChild(this);
+    next_room.addChild(this);
   }
 
   @Override
-  public void paint(Graphics2D g, Point ref_cell, Point ref_cell_corner_pixel, int pixels_per_cell) {
+  public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_corner_pixel,
+          int pixels_per_cell) {
 
   }
 
@@ -109,10 +113,8 @@ public abstract class Unit extends MapObject {
               previous_x_loc + radius <= connection.max) {
         // Is our center in the neighbor Room?
         if (y_loc < nw_corner.y) {
-          // we are no longer in the same Room
-          room = connection.neighbor;
-          // make sure the Pilot knows about the new Room
-          pilot.updateCurrentRoom(room);
+          // update our current Room
+          updateRoom(room, connection.neighbor);
         }
       }
       else {
@@ -127,8 +129,7 @@ public abstract class Unit extends MapObject {
       if (connection != null && connection.min <= previous_x_loc - radius &&
               previous_x_loc + radius <= connection.max) {
         if (y_loc > se_corner.y) {
-          room = connection.neighbor;
-          pilot.updateCurrentRoom(room);
+          updateRoom(room, connection.neighbor);
         }
       }
       else {
@@ -142,8 +143,7 @@ public abstract class Unit extends MapObject {
       if (connection != null && connection.min <= previous_y_loc - radius &&
               previous_y_loc + radius <= connection.max) {
         if (x_loc < nw_corner.x) {
-          room = connection.neighbor;
-          pilot.updateCurrentRoom(room);
+          updateRoom(room, connection.neighbor);
         }
       }
       else {
@@ -157,8 +157,7 @@ public abstract class Unit extends MapObject {
       if (connection != null && connection.min <= previous_y_loc - radius &&
               previous_y_loc + radius <= connection.max) {
         if (x_loc > se_corner.x) {
-          room = connection.neighbor;
-          pilot.updateCurrentRoom(room);
+          updateRoom(room, connection.neighbor);
         }
       }
       else {
