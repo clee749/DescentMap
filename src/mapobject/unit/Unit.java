@@ -1,18 +1,20 @@
 package mapobject.unit;
 
 import gunner.Gunner;
+
+import java.awt.geom.Point2D;
+
 import mapobject.MapObject;
 import mapobject.TurnableMapObject;
-import mapobject.shot.LaserShot;
-import mapobject.shot.Shot;
 import pilot.Pilot;
 import structure.Room;
 
 import common.Constants;
-import common.ObjectType;
+import common.MapUtils;
 import component.MapEngine;
 
 public abstract class Unit extends TurnableMapObject {
+  protected final double cannon_offset;
   protected Gunner gunner;
   protected double reload_time;
   protected int shots_per_volley;
@@ -24,6 +26,7 @@ public abstract class Unit extends TurnableMapObject {
 
   public Unit(Pilot pilot, Gunner gunner, Room room, double x_loc, double y_loc, double direction) {
     super(pilot, room, x_loc, y_loc, direction);
+    cannon_offset = Constants.getCannonOffset(type) * radius;
     this.gunner = gunner;
     reload_time = Constants.getReloadTime(type);
     shots_per_volley = Constants.getShotsPerVolley(type);
@@ -77,7 +80,10 @@ public abstract class Unit extends TurnableMapObject {
     volley_reload_time_left = -1.0;
   }
 
-  public Shot fireCannon() {
-    return new LaserShot(this, Constants.getRadius(ObjectType.LaserShot), room, x_loc, y_loc, direction, 1);
+  public Point2D.Double findRightShotAbsOffset(double offset) {
+    double axis = direction + MapUtils.PI_OVER_TWO;
+    return new Point2D.Double(Math.cos(axis) * offset, Math.sin(axis) * offset);
   }
+
+  public abstract MapObject fireCannon();
 }

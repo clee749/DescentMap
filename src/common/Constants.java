@@ -25,6 +25,11 @@ public class Constants {
   // play displayer
   public static final int PLAY_SIGHT_RADIUS = 3;
 
+  // additional Pyro constants
+  public static final double PYRO_OUTER_CANNON_OFFSET = 0.8;
+  public static final double PYRO_CANNON_FORWARD_OFFSET = 0.2;
+  public static final double PYRO_MISSILE_OFFSET = 0.2;
+
   // room
   public static final Color ROOM_WALL_COLOR = Color.gray;
   public static final Stroke ROOM_WALL_STROKE = new BasicStroke(2);
@@ -40,15 +45,15 @@ public class Constants {
 
   // objects
   public static double getRadius(ObjectType type) {
-    return Constants.OBJECT_RADII.get(type);
+    return Constants.RADII.get(type);
   }
 
   public static double getMoveSpeed(ObjectType type) {
-    return Constants.OBJECT_MOVE_SPEEDS.get(type);
+    return Constants.MOVE_SPEEDS.get(type);
   }
 
   public static double getTurnSpeed(ObjectType type) {
-    return Constants.OBJECT_TURN_SPEEDS.get(type);
+    return Constants.TURN_SPEEDS.get(type);
   }
 
   public static double getReloadTime(ObjectType type) {
@@ -63,28 +68,33 @@ public class Constants {
     return Constants.VOLLEY_RELOAD_TIMES.get(type);
   }
 
-  private static final HashMap<ObjectType, Double> OBJECT_RADII = Constants.getObjectRadii();
-  private static final HashMap<ObjectType, Double> OBJECT_MOVE_SPEEDS = Constants.getObjectMoveSpeeds();
-  private static final HashMap<ObjectType, Double> OBJECT_TURN_SPEEDS = Constants.getObjectTurnSpeeds();
+  public static double getCannonOffset(ObjectType type) {
+    return Constants.CANNON_OFFSETS.get(type);
+  }
+
+  private static final HashMap<ObjectType, Double> RADII = Constants.getRadii();
+  private static final HashMap<ObjectType, Double> MOVE_SPEEDS = Constants.getMoveSpeeds();
+  private static final HashMap<ObjectType, Double> TURN_SPEEDS = Constants.getTurnSpeeds();
   private static final HashMap<ObjectType, Double> RELOAD_TIMES = Constants.getReloadTimes();
   private static final HashMap<ObjectType, Integer> SHOTS_PER_VOLLEYS = Constants.getShotsPerVolleys();
   private static final HashMap<ObjectType, Double> VOLLEY_RELOAD_TIMES = Constants.getVolleyReloadTimes();
+  private static final HashMap<ObjectType, Double> CANNON_OFFSETS = Constants.getCannonOffsets();
 
-  private static HashMap<ObjectType, Double> getObjectRadii() {
+  private static HashMap<ObjectType, Double> getRadii() {
     HashMap<ObjectType, Double> radii = new HashMap<ObjectType, Double>();
     radii.put(ObjectType.Pyro, 0.25);
     radii.put(ObjectType.LaserShot, 0.1);
     return radii;
   }
 
-  private static HashMap<ObjectType, Double> getObjectMoveSpeeds() {
+  private static HashMap<ObjectType, Double> getMoveSpeeds() {
     HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
     speeds.put(ObjectType.Pyro, 1.0);
     speeds.put(ObjectType.LaserShot, 3.0);
     return speeds;
   }
 
-  private static HashMap<ObjectType, Double> getObjectTurnSpeeds() {
+  private static HashMap<ObjectType, Double> getTurnSpeeds() {
     HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
     speeds.put(ObjectType.Pyro, 1.0);
     return speeds;
@@ -106,6 +116,12 @@ public class Constants {
     HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
     times.put(ObjectType.Pyro, 0.1);
     return times;
+  }
+
+  private static HashMap<ObjectType, Double> getCannonOffsets() {
+    HashMap<ObjectType, Double> offsets = new HashMap<ObjectType, Double>();
+    offsets.put(ObjectType.Pyro, 0.525);
+    return offsets;
   }
 
   protected Constants() {

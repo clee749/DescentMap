@@ -20,6 +20,11 @@ public abstract class MapObject {
   protected double x_loc;
   protected double y_loc;
 
+  public MapObject(double radius) {
+    type = getType();
+    this.radius = radius;
+  }
+
   public MapObject(Room room, double x_loc, double y_loc) {
     type = getType();
     radius = Constants.getRadius(type);

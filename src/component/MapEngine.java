@@ -4,9 +4,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import mapobject.MapObject;
+import mapobject.MultipleObject;
 import mapobject.unit.pyro.Pyro;
 import structure.DescentMap;
 import structure.Room;
+
+import common.ObjectType;
 
 class RoomChange {
   public final MapObject object;
@@ -36,7 +39,14 @@ public class MapEngine {
   }
 
   public void addObject(MapObject object) {
-    object.getRoom().addChild(object);
+    if (object.getType().equals(ObjectType.MultipleObject)) {
+      for (MapObject inner_object : ((MultipleObject) object).getObjects()) {
+        addObject(inner_object);
+      }
+    }
+    else {
+      object.getRoom().addChild(object);
+    }
   }
 
   public void computeNextStep(double s_elapsed) {
