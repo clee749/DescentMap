@@ -18,52 +18,12 @@ public class Constants {
   public static final String IMAGES_PATH = "/images";
   public static final int IMAGES_NUM_IN_QUADRANT = 10;
 
-  // objects
-  public static double getMoveSpeed(ObjectType type) {
-    return Constants.OBJECT_MOVE_SPEEDS.get(type);
-  }
-
-  public static double getTurnSpeed(ObjectType type) {
-    return Constants.OBJECT_TURN_SPEEDS.get(type);
-  }
-
-  public static double getRadius(ObjectType type) {
-    return Constants.OBJECT_RADII.get(type);
-  }
-
-  private static final HashMap<ObjectType, Double> OBJECT_MOVE_SPEEDS = Constants.getObjectMoveSpeeds();
-  private static final HashMap<ObjectType, Double> OBJECT_TURN_SPEEDS = Constants.getObjectTurnSpeeds();
-  private static final HashMap<ObjectType, Double> OBJECT_RADII = Constants.getObjectRadii();
-
-  private static HashMap<ObjectType, Double> getObjectMoveSpeeds() {
-    HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
-    speeds.put(ObjectType.Pyro, 1.0);
-    return speeds;
-  }
-
-  private static HashMap<ObjectType, Double> getObjectTurnSpeeds() {
-    HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
-    speeds.put(ObjectType.Pyro, 1.0);
-    return speeds;
-  }
-
-  private static HashMap<ObjectType, Double> getObjectRadii() {
-    HashMap<ObjectType, Double> radii = new HashMap<ObjectType, Double>();
-    radii.put(ObjectType.Pyro, 0.25);
-    return radii;
-  }
-
   // pilot
   public static final double PILOT_LOCATION_EPSILON = 0.1;
   public static final double PILOT_DIRECTION_EPSILON = 0.1; // 1 radian ~ 57 degrees
 
   // play displayer
   public static final int PLAY_SIGHT_RADIUS = 3;
-
-  // radians
-  public static final double PI_OVER_TWO = Math.PI / 2;
-  public static final double THREE_PI_OVER_TWO = 3 * Math.PI / 2;
-  public static final double TWO_PI = 2 * Math.PI;
 
   // room
   public static final Color ROOM_WALL_COLOR = Color.gray;
@@ -77,6 +37,76 @@ public class Constants {
   public static final long RUNNER_PLAY_MIN_SLEEP = 100;
   public static final long RUNNER_PLAY_MAX_SLEEP = 110;
   public static final long RUNNER_PAUSE_AFTER_PLAY_SLEEP = 1000;
+
+  // objects
+  public static double getRadius(ObjectType type) {
+    return Constants.OBJECT_RADII.get(type);
+  }
+
+  public static double getMoveSpeed(ObjectType type) {
+    return Constants.OBJECT_MOVE_SPEEDS.get(type);
+  }
+
+  public static double getTurnSpeed(ObjectType type) {
+    return Constants.OBJECT_TURN_SPEEDS.get(type);
+  }
+
+  public static double getReloadTime(ObjectType type) {
+    return Constants.RELOAD_TIMES.get(type);
+  }
+
+  public static int getShotsPerVolley(ObjectType type) {
+    return Constants.SHOTS_PER_VOLLEYS.get(type);
+  }
+
+  public static double getVolleyReloadTime(ObjectType type) {
+    return Constants.VOLLEY_RELOAD_TIMES.get(type);
+  }
+
+  private static final HashMap<ObjectType, Double> OBJECT_RADII = Constants.getObjectRadii();
+  private static final HashMap<ObjectType, Double> OBJECT_MOVE_SPEEDS = Constants.getObjectMoveSpeeds();
+  private static final HashMap<ObjectType, Double> OBJECT_TURN_SPEEDS = Constants.getObjectTurnSpeeds();
+  private static final HashMap<ObjectType, Double> RELOAD_TIMES = Constants.getReloadTimes();
+  private static final HashMap<ObjectType, Integer> SHOTS_PER_VOLLEYS = Constants.getShotsPerVolleys();
+  private static final HashMap<ObjectType, Double> VOLLEY_RELOAD_TIMES = Constants.getVolleyReloadTimes();
+
+  private static HashMap<ObjectType, Double> getObjectRadii() {
+    HashMap<ObjectType, Double> radii = new HashMap<ObjectType, Double>();
+    radii.put(ObjectType.Pyro, 0.25);
+    radii.put(ObjectType.LaserShot, 0.1);
+    return radii;
+  }
+
+  private static HashMap<ObjectType, Double> getObjectMoveSpeeds() {
+    HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
+    speeds.put(ObjectType.Pyro, 1.0);
+    speeds.put(ObjectType.LaserShot, 3.0);
+    return speeds;
+  }
+
+  private static HashMap<ObjectType, Double> getObjectTurnSpeeds() {
+    HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
+    speeds.put(ObjectType.Pyro, 1.0);
+    return speeds;
+  }
+
+  private static HashMap<ObjectType, Double> getReloadTimes() {
+    HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
+    times.put(ObjectType.Pyro, 3.0);
+    return times;
+  }
+
+  private static HashMap<ObjectType, Integer> getShotsPerVolleys() {
+    HashMap<ObjectType, Integer> shots = new HashMap<ObjectType, Integer>();
+    shots.put(ObjectType.Pyro, 4);
+    return shots;
+  }
+
+  private static HashMap<ObjectType, Double> getVolleyReloadTimes() {
+    HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
+    times.put(ObjectType.Pyro, 0.1);
+    return times;
+  }
 
   protected Constants() {
 

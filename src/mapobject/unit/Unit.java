@@ -1,168 +1,83 @@
 package mapobject.unit;
 
-import java.awt.Graphics2D;
-import java.awt.Point;
-
+import gunner.Gunner;
 import mapobject.MapObject;
-import pilot.MoveDirection;
+import mapobject.TurnableMapObject;
+import mapobject.shot.LaserShot;
+import mapobject.shot.Shot;
 import pilot.Pilot;
-import pilot.PilotMove;
-import pilot.TurnDirection;
 import structure.Room;
-import structure.RoomConnection;
-import util.ImageHandler;
 
-import common.DescentMapException;
-import common.MapUtils;
-import common.RoomSide;
+import common.Constants;
+import common.ObjectType;
+import component.MapEngine;
 
-public abstract class Unit extends MapObject {
-  protected final double move_speed;
-  protected final double turn_speed;
-  protected double previous_x_loc;
-  protected double previous_y_loc;
-  protected double direction;
-  protected Pilot pilot;
-  // protected Gunner gunner;
-  protected PilotMove next_move;
-  protected boolean fire_cannon;
+public abstract class Unit extends TurnableMapObject {
+  protected Gunner gunner;
+  protected double reload_time;
+  protected int shots_per_volley;
+  protected double reload_time_left;
+  protected double shots_left_in_volley;
+  protected double volley_reload_time;
+  protected double volley_reload_time_left;
+  protected boolean firing_volley;
 
-  public Unit(double move_speed, double turn_speed, double radius, Room room, double x_loc, double y_loc) {
-    super(radius, room, x_loc, y_loc);
-    this.move_speed = move_speed;
-    this.turn_speed = turn_speed;
-    direction = 0.0;
-  }
-
-  public double getDirection() {
-    return direction;
-  }
-
-  public void updateRoom(Room previous_room, Room next_room) {
-    room = next_room;
-    pilot.updateCurrentRoom(next_room);
-    previous_room.removeChild(this);
-    next_room.addChild(this);
+  public Unit(Pilot pilot, Gunner gunner, Room room, double x_loc, double y_loc, double direction) {
+    super(pilot, room, x_loc, y_loc, direction);
+    this.gunner = gunner;
+    reload_time = Constants.getReloadTime(type);
+    shots_per_volley = Constants.getShotsPerVolley(type);
+    volley_reload_time = Constants.getVolleyReloadTime(type);
   }
 
   @Override
-  public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_corner_pixel,
-          int pixels_per_cell) {
-
+  public void computeNextStep(double s_elapsed) {
+    super.computeNextStep(s_elapsed);
+    if (reload_time_left < 0.0) {
+      planToFireCannonVolley();
+    }
+    else {
+      handleCannonReload(s_elapsed);
+    }
   }
 
   @Override
-  public void computeNextStep() {
-    next_move = pilot.findNextMove();
+  public MapObject doNextStep(MapEngine engine, double s_elapsed) {
+    MapObject movement_object_created = super.doNextStep(engine, s_elapsed);
+    if (firing_volley) {
+      if (volley_reload_time_left < 0.0) {
+        --shots_left_in_volley;
+        if (shots_left_in_volley < 1) {
+          firing_volley = false;
+        }
+        else {
+          volley_reload_time_left = volley_reload_time;
+        }
+        return fireCannon();
+      }
+      else {
+        handleCannonVolleyReload(s_elapsed);
+      }
+    }
+    return movement_object_created;
   }
 
-  @Override
-  public void doNextStep(long ms_elapsed) {
-    previous_x_loc = x_loc;
-    previous_y_loc = y_loc;
-    executePilotMove(ms_elapsed);
-    boundInsideAndUpdateRoom();
+  public void handleCannonReload(double s_elapsed) {
+    reload_time_left -= s_elapsed;
   }
 
-  public void executePilotMove(long ms_elapsed) {
-    if (next_move == null) {
-      return;
-    }
-
-    double s_elapsed = ms_elapsed / 1000.0;
-
-    MoveDirection move = next_move.getMove();
-    if (move != null) {
-      switch (move) {
-        case FORWARD:
-          x_loc += move_speed * Math.cos(direction) * s_elapsed;
-          y_loc += move_speed * Math.sin(direction) * s_elapsed;
-          break;
-        default:
-          throw new DescentMapException("Unexpected MoveDirection: " + move);
-      }
-    }
-
-    TurnDirection turn = next_move.getTurn();
-    if (turn != null) {
-      switch (turn) {
-        case COUNTER_CLOCKWISE:
-          direction = MapUtils.normalizeAngle(direction + turn_speed * s_elapsed);
-          break;
-        case CLOCKWISE:
-          direction = MapUtils.normalizeAngle(direction - turn_speed * s_elapsed);
-          break;
-        default:
-          throw new DescentMapException("Unexpected TurnDirection: " + turn);
-      }
-    }
+  public void handleCannonVolleyReload(double s_elapsed) {
+    volley_reload_time_left -= s_elapsed;
   }
 
-  public void boundInsideAndUpdateRoom() {
-    Point nw_corner = room.getNWCorner();
-    Point se_corner = room.getSECorner();
+  public void planToFireCannonVolley() {
+    firing_volley = true;
+    reload_time_left = reload_time;
+    shots_left_in_volley = shots_per_volley;
+    volley_reload_time_left = -1.0;
+  }
 
-    // north wall
-    // Are we outside the Room bounds?
-    if (y_loc - radius < nw_corner.y) {
-      // Does the Room have a neighbor in this direction?
-      RoomConnection connection = room.getConnectionInDirection(RoomSide.NORTH);
-      // Are we within the connection to the neighbor Room?
-      // we need to use previous_x_loc because we have not yet bounded x_loc
-      if (connection != null && connection.min <= previous_x_loc - radius &&
-              previous_x_loc + radius <= connection.max) {
-        // Is our center in the neighbor Room?
-        if (y_loc < nw_corner.y) {
-          // update our current Room
-          updateRoom(room, connection.neighbor);
-        }
-      }
-      else {
-        // hit the wall
-        y_loc = nw_corner.y + radius;
-      }
-    }
-
-    // south wall
-    else if (y_loc + radius > se_corner.y) {
-      RoomConnection connection = room.getConnectionInDirection(RoomSide.SOUTH);
-      if (connection != null && connection.min <= previous_x_loc - radius &&
-              previous_x_loc + radius <= connection.max) {
-        if (y_loc > se_corner.y) {
-          updateRoom(room, connection.neighbor);
-        }
-      }
-      else {
-        y_loc = se_corner.y - radius;
-      }
-    }
-
-    // west wall
-    if (x_loc - radius < nw_corner.x) {
-      RoomConnection connection = room.getConnectionInDirection(RoomSide.WEST);
-      if (connection != null && connection.min <= previous_y_loc - radius &&
-              previous_y_loc + radius <= connection.max) {
-        if (x_loc < nw_corner.x) {
-          updateRoom(room, connection.neighbor);
-        }
-      }
-      else {
-        x_loc = nw_corner.x + radius;
-      }
-    }
-
-    // east wall
-    else if (x_loc + radius > se_corner.x) {
-      RoomConnection connection = room.getConnectionInDirection(RoomSide.EAST);
-      if (connection != null && connection.min <= previous_y_loc - radius &&
-              previous_y_loc + radius <= connection.max) {
-        if (x_loc > se_corner.x) {
-          updateRoom(room, connection.neighbor);
-        }
-      }
-      else {
-        x_loc = se_corner.x - radius;
-      }
-    }
+  public Shot fireCannon() {
+    return new LaserShot(this, Constants.getRadius(ObjectType.LaserShot), room, x_loc, y_loc, direction, 1);
   }
 }

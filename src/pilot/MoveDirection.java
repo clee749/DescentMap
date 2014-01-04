@@ -1,5 +1,5 @@
 package pilot;
 
 public enum MoveDirection {
-  FORWARD, BACKWARD, LEFT, RIGHT;
+  NONE, FORWARD, BACKWARD, LEFT, RIGHT;
 }

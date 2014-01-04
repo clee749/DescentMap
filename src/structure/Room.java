@@ -64,6 +64,10 @@ public class Room {
     return neighbors.get(direction);
   }
 
+  public HashSet<MapObject> getChildren() {
+    return children;
+  }
+
   @Override
   public String toString() {
     return "(" + nw_corner + ", " + se_corner + ")";

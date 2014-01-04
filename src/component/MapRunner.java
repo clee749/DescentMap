@@ -45,8 +45,8 @@ public class MapRunner {
   }
 
   public boolean doNextStep() {
-    long elapsed_time = System.currentTimeMillis() - last_update_time;
-    if (elapsed_time < target_sleep_ms) {
+    long ms_elapsed = System.currentTimeMillis() - last_update_time;
+    if (ms_elapsed < target_sleep_ms) {
       return false;
     }
     switch (state) {
@@ -60,7 +60,7 @@ public class MapRunner {
         doPauseBeforePlayStep();
         break;
       case PLAY_MAP:
-        doPlayStep(Math.min(elapsed_time, Constants.RUNNER_PLAY_MAX_SLEEP));
+        doPlayStep(Math.min(ms_elapsed / 1000.0, Constants.RUNNER_PLAY_MAX_SLEEP));
         break;
       case PAUSE_AFTER_PLAY:
         doPauseAfterPlayStep();
@@ -83,11 +83,13 @@ public class MapRunner {
       Point nw_corner = entrance_room.getNWCorner();
       Point se_corner = entrance_room.getSECorner();
       Pyro ship =
-              new Pyro(entrance_room, (nw_corner.x + se_corner.x) / 2.0, (nw_corner.y + se_corner.y) / 2.0);
+              new Pyro(entrance_room, (nw_corner.x + se_corner.x) / 2.0, (nw_corner.y + se_corner.y) / 2.0,
+                      0.0);
       map.insertPyro(ship);
       state = RunnerState.PAUSE_AFTER_BUILD;
       target_sleep_ms = Constants.RUNNER_PAUSE_AFTER_BUILD_SLEEP;
       engine = new MapEngine(map);
+      engine.addObject(ship);
       engine.setCenterShip(ship);
     }
   }
@@ -103,9 +105,9 @@ public class MapRunner {
     target_sleep_ms = Constants.RUNNER_PLAY_MIN_SLEEP;
   }
 
-  public void doPlayStep(long ms_elapsed) {
-    engine.computeNextStep();
-    engine.doNextStep(ms_elapsed);
+  public void doPlayStep(double s_elapsed) {
+    engine.computeNextStep(s_elapsed);
+    engine.doNextStep(s_elapsed);
     if (engine.levelComplete()) {
       state = RunnerState.PAUSE_AFTER_PLAY;
       target_sleep_ms = Constants.RUNNER_PAUSE_AFTER_PLAY_SLEEP;

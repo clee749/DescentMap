@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Stack;
 
-import mapobject.unit.pyro.Pyro;
 import structure.Room;
 import structure.RoomConnection;
 
@@ -24,8 +23,8 @@ public class PyroPilot extends Pilot {
   private final HashSet<Room> visited;
   private PyroPilotState state;
 
-  public PyroPilot(Pyro ship) {
-    super(ship);
+  public PyroPilot(double object_radius, Room current_room) {
+    super(object_radius, current_room);
     path = new Stack<RoomSide>();
     visited = new HashSet<Room>();
     state = PyroPilotState.INACTIVE;
@@ -67,11 +66,8 @@ public class PyroPilot extends Pilot {
   }
 
   @Override
-  public PilotMove findNextMove() {
-    double current_x = unit.getX();
-    double current_y = unit.getY();
-    double current_direction = unit.getDirection();
-    updateState();
+  public PilotMove findNextMove(double current_x, double current_y, double current_direction) {
+    updateState(current_x, current_y, current_direction);
     switch (state) {
       case INACTIVE:
         return null;
@@ -111,18 +107,17 @@ public class PyroPilot extends Pilot {
     visited.add(room);
   }
 
-  public void updateState() {
+  public void updateState(double current_x, double current_y, double current_direction) {
     switch (state) {
       case INACTIVE:
         break;
       case MOVE_TO_ROOM:
-        if (Math.abs(target_x - unit.getX()) < unit.getRadius() &&
-                Math.abs(target_y - unit.getY()) < unit.getRadius()) {
+        if (Math.abs(target_x - current_x) < object_radius && Math.abs(target_y - current_y) < object_radius) {
           initTurnIntoRoomState();
         }
         break;
       case TURN_INTO_ROOM:
-        if (Math.abs(target_direction - unit.getDirection()) < Constants.PILOT_DIRECTION_EPSILON) {
+        if (Math.abs(target_direction - current_direction) < Constants.PILOT_DIRECTION_EPSILON) {
           current_room = target_room_info.getValue().neighbor;
           visitRoom(current_room);
           initMoveToRoomState();
@@ -138,20 +133,20 @@ public class PyroPilot extends Pilot {
     double middle = (connection.min + connection.max) / 2.0;
     switch (direction) {
       case EAST:
-        target_x = current_room.getSECorner().x - 0.5;
+        target_x = current_room.getSECorner().x - object_radius;
         target_y = middle;
         break;
       case WEST:
-        target_x = current_room.getNWCorner().x + 0.5;
+        target_x = current_room.getNWCorner().x + object_radius;
         target_y = middle;
         break;
       case NORTH:
         target_x = middle;
-        target_y = current_room.getNWCorner().y + 0.5;
+        target_y = current_room.getNWCorner().y + object_radius;
         break;
       case SOUTH:
         target_x = middle;
-        target_y = current_room.getSECorner().y - 0.5;
+        target_y = current_room.getSECorner().y - object_radius;
         break;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + direction);
@@ -166,13 +161,13 @@ public class PyroPilot extends Pilot {
         target_direction = 0.0;
         break;
       case NORTH:
-        target_direction = Constants.THREE_PI_OVER_TWO;
+        target_direction = MapUtils.THREE_PI_OVER_TWO;
         break;
       case WEST:
         target_direction = Math.PI;
         break;
       case SOUTH:
-        target_direction = Constants.PI_OVER_TWO;
+        target_direction = MapUtils.PI_OVER_TWO;
         break;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + direction);

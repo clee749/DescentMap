@@ -3,6 +3,10 @@ package common;
 import java.awt.Point;
 
 public class MapUtils {
+  public static final double PI_OVER_TWO = Math.PI / 2;
+  public static final double THREE_PI_OVER_TWO = 3 * Math.PI / 2;
+  public static final double TWO_PI = 2 * Math.PI;
+
   protected MapUtils() {
 
   }
@@ -33,10 +37,10 @@ public class MapUtils {
 
   public static double normalizeAngle(double angle) {
     if (angle < 0) {
-      return angle + Constants.TWO_PI;
+      return angle + MapUtils.TWO_PI;
     }
-    if (angle >= Constants.TWO_PI) {
-      return angle - Constants.TWO_PI;
+    if (angle >= MapUtils.TWO_PI) {
+      return angle - MapUtils.TWO_PI;
     }
     return angle;
   }

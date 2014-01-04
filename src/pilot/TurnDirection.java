@@ -1,5 +1,5 @@
 package pilot;
 
 public enum TurnDirection {
-  COUNTER_CLOCKWISE, CLOCKWISE;
+  NONE, COUNTER_CLOCKWISE, CLOCKWISE;
 }

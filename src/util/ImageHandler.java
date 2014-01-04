@@ -23,6 +23,7 @@ import javax.imageio.stream.ImageInputStream;
 import javax.swing.ImageIcon;
 
 import common.Constants;
+import common.MapUtils;
 import common.ObjectType;
 
 // Robots: http://www.descent2.com/goodies/3dmodels/thinman/descent1
@@ -134,17 +135,18 @@ class ImageUtils {
 
 public class ImageHandler {
   public static final int NUM_IMAGES_IN_CIRCLE = Constants.IMAGES_NUM_IN_QUADRANT * 4;
-  public static final double RADIANS_PER_IMAGE = Constants.PI_OVER_TWO / Constants.IMAGES_NUM_IN_QUADRANT;
+  public static final double RADIANS_PER_IMAGE = MapUtils.PI_OVER_TWO / Constants.IMAGES_NUM_IN_QUADRANT;
 
-  private HashMap<ObjectType, ArrayList<Image>> images;
+  private HashMap<String, ArrayList<Image>> images;
 
   public void loadImages(String path, int pixels_per_cell) {
-    images = new HashMap<ObjectType, ArrayList<Image>>();
-    loadRotatedImages(path, ObjectType.Pyro, pixels_per_cell, Constants.getRadius(ObjectType.Pyro));
+    images = new HashMap<String, ArrayList<Image>>();
+    loadRotatedImages(path, "Pyro", pixels_per_cell, Constants.getRadius(ObjectType.Pyro));
+    loadRotatedImages(path, "LaserShot1", pixels_per_cell, Constants.getRadius(ObjectType.LaserShot));
   }
 
-  public boolean loadAnimatedGif(String path, ObjectType type, int pixels_per_cell, double radius) {
-    InputStream is = ImageHandler.class.getResourceAsStream(path + "/" + type.name() + ".gif");
+  public boolean loadAnimatedGif(String path, String name, int pixels_per_cell, double radius) {
+    InputStream is = ImageHandler.class.getResourceAsStream(path + "/" + name + ".gif");
     if (is != null) {
       try {
         ImageInputStream stream = ImageIO.createImageInputStream(is);
@@ -165,7 +167,7 @@ public class ImageHandler {
             list.add(current);
           }
           stream.close();
-          images.put(type, list);
+          images.put(name, list);
           return true;
         }
       }
@@ -176,10 +178,10 @@ public class ImageHandler {
     return false;
   }
 
-  public boolean loadRotatedImages(String path, ObjectType type, int pixels_per_cell, double radius) {
+  public boolean loadRotatedImages(String path, String name, int pixels_per_cell, double radius) {
     Image image = null;
     try {
-      image = ImageIO.read(getClass().getResourceAsStream(path + "/" + type.name() + ".gif"));
+      image = ImageIO.read(getClass().getResourceAsStream(path + "/" + name + ".gif"));
     }
     catch (IOException e) {
       e.printStackTrace();
@@ -191,7 +193,7 @@ public class ImageHandler {
     for (int i = 1; i < ImageHandler.NUM_IMAGES_IN_CIRCLE; ++i) {
       list.add(ImageUtils.rotateImage(image, i * ImageHandler.RADIANS_PER_IMAGE));
     }
-    images.put(type, list);
+    images.put(name, list);
     return true;
   }
 
@@ -205,13 +207,13 @@ public class ImageHandler {
     return image.getScaledInstance(size, -1, Image.SCALE_SMOOTH);
   }
 
-  public Image getImage(ObjectType type, int frame) {
-    ArrayList<Image> list = images.get(type);
+  public Image getImage(String name, int frame) {
+    ArrayList<Image> list = images.get(name);
     return list.get(frame % list.size());
   }
 
-  public Image getImage(ObjectType type, double direction) {
-    return images.get(type).get(
+  public Image getImage(String name, double direction) {
+    return images.get(name).get(
             (int) (Math.round(direction / ImageHandler.RADIANS_PER_IMAGE)) %
                     ImageHandler.NUM_IMAGES_IN_CIRCLE);
   }
