@@ -4,12 +4,14 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import mapobject.MapObject;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
 import common.Constants;
 import common.DescentMapException;
+import common.ObjectType;
 import common.RoomSide;
 
 enum RobotPilotState {
@@ -19,7 +21,8 @@ enum RobotPilotState {
   TURN_INTO_ROOM,
   MOVE_INTO_ROOM,
   TURN_TO_ROOM_INTERIOR,
-  MOVE_TO_ROOM_INTERIOR;
+  MOVE_TO_ROOM_INTERIOR,
+  REACT_TO_PYRO;
 }
 
 
@@ -52,7 +55,7 @@ public class RobotPilot extends Pilot {
         }
         else {
           previous_exploration_room = current_room;
-          planToMoveToNeighborRoom(target_room_info.getKey());
+          planMoveToRoomConnection(target_room_info.getKey());
           planToTurnToTarget();
         }
         break;
@@ -74,6 +77,8 @@ public class RobotPilot extends Pilot {
         break;
       case MOVE_TO_ROOM_INTERIOR:
         break;
+      case REACT_TO_PYRO:
+        break;
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
     }
@@ -87,38 +92,46 @@ public class RobotPilot extends Pilot {
       case INACTIVE:
         return new PilotMove(MoveDirection.NONE, TurnDirection.NONE);
       case TURN_TO_ROOM_EXIT:
-        if (MapUtils.angleTo(object.getDirection(), target_direction) < 0) {
-          return new PilotMove(MoveDirection.NONE, TurnDirection.COUNTER_CLOCKWISE);
-        }
-        return new PilotMove(MoveDirection.NONE, TurnDirection.CLOCKWISE);
+        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_direction)));
       case MOVE_TO_ROOM_EXIT:
-        if (MapUtils.angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY()) < 0) {
-          return new PilotMove(MoveDirection.FORWARD, TurnDirection.COUNTER_CLOCKWISE);
-        }
-        return new PilotMove(MoveDirection.FORWARD, TurnDirection.CLOCKWISE);
+        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
       case TURN_INTO_ROOM:
-        if (MapUtils.angleTo(object.getDirection(), target_direction) < 0) {
-          return new PilotMove(MoveDirection.NONE, TurnDirection.COUNTER_CLOCKWISE);
-        }
-        return new PilotMove(MoveDirection.NONE, TurnDirection.CLOCKWISE);
+        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_direction)));
       case MOVE_INTO_ROOM:
         return new PilotMove(MoveDirection.FORWARD, TurnDirection.NONE);
       case TURN_TO_ROOM_INTERIOR:
-        if (MapUtils.angleTo(object.getDirection(), target_direction) < 0) {
-          return new PilotMove(MoveDirection.NONE, TurnDirection.COUNTER_CLOCKWISE);
-        }
-        return new PilotMove(MoveDirection.NONE, TurnDirection.CLOCKWISE);
+        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_direction)));
       case MOVE_TO_ROOM_INTERIOR:
-        if (MapUtils.angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY()) < 0) {
-          return new PilotMove(MoveDirection.FORWARD, TurnDirection.COUNTER_CLOCKWISE);
+        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
+      case REACT_TO_PYRO:
+        double angle_to_target =
+                MapUtils.angleTo(object.getDirection(), target_object.getX() - object.getX(),
+                        target_object.getY() - object.getY());
+        if (Math.abs(angle_to_target) < Constants.PILOT_ROBOT_TARGET_DIRECTION_EPSILON) {
+          return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(angle_to_target));
         }
-        return new PilotMove(MoveDirection.FORWARD, TurnDirection.CLOCKWISE);
+        return new PilotMove(MoveDirection.NONE, TurnDirection.angleToTurnDirection(angle_to_target));
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
     }
   }
 
   public void updateState(double s_elapsed) {
+    if (!state.equals(RobotPilotState.REACT_TO_PYRO)) {
+      for (MapObject object : current_room.getChildren()) {
+        if (object.getType().equals(ObjectType.Pyro)) {
+          target_object = object;
+          initState(RobotPilotState.REACT_TO_PYRO);
+          return;
+        }
+      }
+    }
+
     switch (state) {
       case INACTIVE:
         if (Math.random() / s_elapsed < Constants.ROBOT_START_EXPLORE_PROB) {
@@ -157,6 +170,11 @@ public class RobotPilot extends Pilot {
           else {
             initState(RobotPilotState.TURN_TO_ROOM_EXIT);
           }
+        }
+        break;
+      case REACT_TO_PYRO:
+        if (!target_object.getRoom().equals(current_room)) {
+          initState(RobotPilotState.INACTIVE);
         }
         break;
       default:

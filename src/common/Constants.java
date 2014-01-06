@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Stroke;
 import java.util.HashMap;
 
+import util.MapUtils;
+
 public class Constants {
   // builder
   public static final int BUILDER_MAX_ROOM_SIZE = 10;
@@ -19,7 +21,8 @@ public class Constants {
   public static final int IMAGES_NUM_IN_QUADRANT = 10;
 
   // pilot
-  public static final double PILOT_DIRECTION_EPSILON = 0.1; // 1 radian ~ 57 degrees
+  public static final double PILOT_DIRECTION_EPSILON = Math.PI / 32;
+  public static final double PILOT_ROBOT_TARGET_DIRECTION_EPSILON = MapUtils.PI_OVER_TWO;
 
   // play displayer
   public static final int PLAY_SIGHT_RADIUS = 3;
@@ -101,8 +104,8 @@ public class Constants {
 
   private static HashMap<ObjectType, Double> getTurnSpeeds() {
     HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
-    speeds.put(ObjectType.Pyro, 1.0);
-    speeds.put(ObjectType.Class2Drone, 1.0);
+    speeds.put(ObjectType.Pyro, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.Class2Drone, MapUtils.PI_OVER_TWO);
     return speeds;
   }
 

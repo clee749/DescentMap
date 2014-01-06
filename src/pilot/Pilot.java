@@ -49,7 +49,7 @@ public abstract class Pilot {
     current_room = room;
   }
 
-  public void planToMoveToNeighborRoom(RoomSide direction) {
+  public void planMoveToRoomConnection(RoomSide direction) {
     RoomConnection connection = current_room.getConnectionInDirection(direction);
     double middle = (connection.min + connection.max) / 2.0;
     switch (direction) {
@@ -64,6 +64,27 @@ public abstract class Pilot {
         break;
       case SOUTH:
         setTargetLocation(middle, current_room.getSECorner().y - object_radius);
+        break;
+      default:
+        throw new DescentMapException("Unexpected RoomSide: " + direction);
+    }
+  }
+
+  public void planMoveToNeighborRoom(RoomSide direction) {
+    RoomConnection connection = current_room.getConnectionInDirection(direction);
+    double middle = (connection.min + connection.max) / 2.0;
+    switch (direction) {
+      case EAST:
+        setTargetLocation(current_room.getSECorner().x + object_radius, middle);
+        break;
+      case WEST:
+        setTargetLocation(current_room.getNWCorner().x - object_radius, middle);
+        break;
+      case NORTH:
+        setTargetLocation(middle, current_room.getNWCorner().y - object_radius);
+        break;
+      case SOUTH:
+        setTargetLocation(middle, current_room.getSECorner().y + object_radius);
         break;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + direction);

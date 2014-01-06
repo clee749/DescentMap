@@ -10,14 +10,13 @@ import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
-import common.Constants;
 import common.DescentMapException;
 import common.RoomSide;
 
 enum PyroPilotState {
   INACTIVE,
-  MOVE_TO_ROOM,
-  TURN_INTO_ROOM;
+  MOVE_TO_ROOM_CONNECTION,
+  MOVE_TO_NEIGHBOR_ROOM;
 }
 
 
@@ -34,7 +33,7 @@ public class PyroPilot extends Pilot {
 
   public void startPilot() {
     visitRoom(current_room);
-    initState(PyroPilotState.MOVE_TO_ROOM);
+    initState(PyroPilotState.MOVE_TO_ROOM_CONNECTION);
   }
 
   public void visitRoom(Room room) {
@@ -46,7 +45,7 @@ public class PyroPilot extends Pilot {
     if (target_room_info == null || room.equals(target_room_info.getValue().neighbor)) {
       super.updateCurrentRoom(room);
       visitRoom(room);
-      initState(PyroPilotState.MOVE_TO_ROOM);
+      initState(PyroPilotState.MOVE_TO_ROOM_CONNECTION);
     }
   }
 
@@ -54,12 +53,12 @@ public class PyroPilot extends Pilot {
     switch (next_state) {
       case INACTIVE:
         break;
-      case MOVE_TO_ROOM:
+      case MOVE_TO_ROOM_CONNECTION:
         findNextRoom();
-        planToMoveToNeighborRoom(target_room_info.getKey());
+        planMoveToRoomConnection(target_room_info.getKey());
         break;
-      case TURN_INTO_ROOM:
-        planToTurnIntoRoom(target_room_info.getKey());
+      case MOVE_TO_NEIGHBOR_ROOM:
+        planMoveToNeighborRoom(target_room_info.getKey());
         break;
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
@@ -73,16 +72,12 @@ public class PyroPilot extends Pilot {
     switch (state) {
       case INACTIVE:
         return null;
-      case MOVE_TO_ROOM:
-        if (MapUtils.angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY()) < 0) {
-          return new PilotMove(MoveDirection.FORWARD, TurnDirection.COUNTER_CLOCKWISE);
-        }
-        return new PilotMove(MoveDirection.FORWARD, TurnDirection.CLOCKWISE);
-      case TURN_INTO_ROOM:
-        if (MapUtils.angleTo(object.getDirection(), target_direction) < 0) {
-          return new PilotMove(MoveDirection.FORWARD, TurnDirection.COUNTER_CLOCKWISE);
-        }
-        return new PilotMove(MoveDirection.FORWARD, TurnDirection.CLOCKWISE);
+      case MOVE_TO_ROOM_CONNECTION:
+        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
+      case MOVE_TO_NEIGHBOR_ROOM:
+        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
     }
@@ -92,17 +87,16 @@ public class PyroPilot extends Pilot {
     switch (state) {
       case INACTIVE:
         break;
-      case MOVE_TO_ROOM:
+      case MOVE_TO_ROOM_CONNECTION:
         if (Math.abs(target_x - object.getX()) < object_radius &&
                 Math.abs(target_y - object.getY()) < object_radius) {
-          initState(PyroPilotState.TURN_INTO_ROOM);
+          initState(PyroPilotState.MOVE_TO_NEIGHBOR_ROOM);
         }
         break;
-      case TURN_INTO_ROOM:
-        if (Math.abs(target_direction - object.getDirection()) < Constants.PILOT_DIRECTION_EPSILON) {
-          current_room = target_room_info.getValue().neighbor;
-          visitRoom(current_room);
-          initState(PyroPilotState.MOVE_TO_ROOM);
+      case MOVE_TO_NEIGHBOR_ROOM:
+        if (Math.abs(target_x - object.getX()) < object_radius &&
+                Math.abs(target_y - object.getY()) < object_radius) {
+          updateCurrentRoom(target_room_info.getValue().neighbor);
         }
         break;
       default:
