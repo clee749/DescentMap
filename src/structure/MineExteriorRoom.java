@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Stroke;
 
-import util.ImageHandler;
+import external.ImageHandler;
 
 /*
  * Mock Room to connect with the exit Room.

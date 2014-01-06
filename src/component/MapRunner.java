@@ -7,14 +7,22 @@ import java.awt.Toolkit;
 import javax.swing.JFrame;
 
 import mapobject.unit.pyro.Pyro;
+import mapobject.unit.robot.Robot;
 import structure.DescentMap;
 import structure.Room;
+import util.RobotFactory;
 
 import common.Constants;
 import common.DescentMapException;
+import common.ObjectType;
 
 enum RunnerState {
-  BUILD_MAP, PAUSE_AFTER_BUILD, PAUSE_BEFORE_PLAY, PLAY_MAP, PAUSE_AFTER_PLAY, COMPLETE;
+  BUILD_MAP,
+  PAUSE_AFTER_BUILD,
+  PAUSE_BEFORE_PLAY,
+  PLAY_MAP,
+  PAUSE_AFTER_PLAY,
+  COMPLETE;
 }
 
 
@@ -85,12 +93,15 @@ public class MapRunner {
       Pyro ship =
               new Pyro(entrance_room, (nw_corner.x + se_corner.x) / 2.0, (nw_corner.y + se_corner.y) / 2.0,
                       0.0);
-      map.insertPyro(ship);
+      Robot robot =
+              RobotFactory.newRobot(ObjectType.Class2Drone, entrance_room, ship.getX(), ship.getY(), 0.0);
+      engine = new MapEngine(map);
+      engine.addObject(robot);
+      engine.addObject(ship);
+      map.setCenterObject(ship);
+      engine.setCenterObject(ship);
       state = RunnerState.PAUSE_AFTER_BUILD;
       target_sleep_ms = Constants.RUNNER_PAUSE_AFTER_BUILD_SLEEP;
-      engine = new MapEngine(map);
-      engine.addObject(ship);
-      engine.setCenterShip(ship);
     }
   }
 

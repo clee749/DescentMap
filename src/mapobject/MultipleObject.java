@@ -5,10 +5,9 @@ import java.awt.Image;
 import java.awt.Point;
 import java.util.LinkedList;
 
-import util.ImageHandler;
-
 import common.ObjectType;
 import component.MapEngine;
+import external.ImageHandler;
 
 public class MultipleObject extends MapObject {
   private final LinkedList<MapObject> objects;

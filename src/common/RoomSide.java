@@ -2,8 +2,13 @@ package common;
 
 import java.awt.Point;
 
+import util.MapUtils;
+
 public enum RoomSide {
-  EAST, NORTH, WEST, SOUTH;
+  EAST,
+  NORTH,
+  WEST,
+  SOUTH;
 
   public static RoomSide opposite(RoomSide direction) {
     if (direction == null) {

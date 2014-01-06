@@ -5,22 +5,68 @@ public enum ObjectType {
   Pyro,
 
   // scenery
-  Barrier, EnergyCenter, RobotGenerator, Entrance, Exit,
+  Barrier,
+  EnergyCenter,
+  RobotGenerator,
+  Entrance,
+  Exit,
 
   // robots
-  GreenRobot, YellowRobot, RedRobot, BabySpider, Class1Drone, Class2Drone, DefenseRobot, LightHulk, MediumHulk, PlatformLaser, SecondaryLifter, Spider, Bomber, HeavyDriller, HeavyHulk, MediumHulkCloaked, PlatformMissile,
+  GreenRobot,
+  YellowRobot,
+  RedRobot,
+  BabySpider,
+  Class1Drone,
+  Class2Drone,
+  DefenseRobot,
+  LightHulk,
+  MediumHulk,
+  PlatformLaser,
+  SecondaryLifter,
+  Spider,
+  Bomber,
+  HeavyDriller,
+  HeavyHulk,
+  MediumHulkCloaked,
+  PlatformMissile,
 
   // weapons
-  LaserShot, PlasmaShot, FusionShot, FireShot, ConcussionMissile, HomingMissile, SmartMissile, SmartPlasma,
+  LaserShot,
+  PlasmaShot,
+  FusionShot,
+  FireShot,
+  ConcussionMissile,
+  HomingMissile,
+  SmartMissile,
+  SmartPlasma,
 
   // power ups
-  Shield, Energy, QuadLasers, Cloak, Invulnerability, ConcussionMissilePowerup, ConcussionPack, HomingMissilePowerup, HomingPack, ProximityPack, SmartMissilePowerup, LaserCannon, PlasmaCannon, FusionCannon, FireCannon, ConcussionCannon, HomingCannon,
+  Shield,
+  Energy,
+  QuadLasers,
+  Cloak,
+  Invulnerability,
+  ConcussionMissilePowerup,
+  ConcussionPack,
+  HomingMissilePowerup,
+  HomingPack,
+  ProximityPack,
+  SmartMissilePowerup,
+  LaserCannon,
+  PlasmaCannon,
+  FusionCannon,
+  FireCannon,
+  ConcussionCannon,
+  HomingCannon,
 
   // transients
-  Explosion, Zunggg, SpawningUnit,
+  Explosion,
+  Zunggg,
+  SpawningUnit,
 
   // miscellaneous
-  ProximityBomb, MultipleObject;
+  ProximityBomb,
+  MultipleObject;
 
   public static ObjectType[] getScenery() {
     ObjectType[] scenery = {Barrier, EnergyCenter, RobotGenerator, Entrance, Exit};

@@ -5,7 +5,6 @@ import java.util.LinkedList;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
-import mapobject.unit.pyro.Pyro;
 import structure.DescentMap;
 import structure.Room;
 
@@ -27,15 +26,15 @@ class RoomChange {
 public class MapEngine {
   private final DescentMap map;
   private final LinkedList<RoomChange> room_changes;
-  private Pyro center_ship;
+  private MapObject center_object;
 
   public MapEngine(DescentMap map) {
     this.map = map;
     room_changes = new LinkedList<RoomChange>();
   }
 
-  public void setCenterShip(Pyro ship) {
-    center_ship = ship;
+  public void setCenterObject(MapObject center_object) {
+    this.center_object = center_object;
   }
 
   public void addObject(MapObject object) {
@@ -86,6 +85,6 @@ public class MapEngine {
   }
 
   public boolean levelComplete() {
-    return center_ship.getRoom().equals(map.getExitRoom());
+    return center_object.getRoom().equals(map.getExitRoom());
   }
 }

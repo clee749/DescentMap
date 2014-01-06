@@ -7,17 +7,20 @@ import java.awt.Point;
 import pilot.MoveDirection;
 import pilot.Pilot;
 import pilot.PilotMove;
+import pilot.TurnDirection;
 import structure.Room;
 import structure.RoomConnection;
-import util.ImageHandler;
+import util.MapUtils;
 
 import common.Constants;
-import common.MapUtils;
 import common.RoomSide;
 import component.MapEngine;
 
+import external.ImageHandler;
+
 public abstract class MovableMapObject extends MapObject {
   protected final double move_speed;
+  protected final double turn_speed;
   protected Pilot pilot;
   protected double direction;
   protected double previous_x_loc;
@@ -27,8 +30,11 @@ public abstract class MovableMapObject extends MapObject {
   public MovableMapObject(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(room, x_loc, y_loc);
     move_speed = Constants.getMoveSpeed(type);
+    Double raw_turn_speed = Constants.getTurnSpeed(type);
+    turn_speed = (raw_turn_speed != null ? raw_turn_speed : 0.0);
     this.pilot = pilot;
     this.direction = direction;
+    pilot.bindToObject(this);
   }
 
   public double getDirection() {
@@ -65,7 +71,7 @@ public abstract class MovableMapObject extends MapObject {
 
   @Override
   public void computeNextStep(double s_elapsed) {
-    next_movement = pilot.findNextMove(x_loc, y_loc, direction);
+    next_movement = pilot.findNextMove(s_elapsed);
   }
 
   @Override
@@ -92,6 +98,18 @@ public abstract class MovableMapObject extends MapObject {
         case FORWARD:
           x_loc += move_speed * Math.cos(direction) * s_elapsed;
           y_loc += move_speed * Math.sin(direction) * s_elapsed;
+          break;
+      }
+    }
+
+    TurnDirection turn = next_movement.turn;
+    if (turn != null) {
+      switch (turn) {
+        case COUNTER_CLOCKWISE:
+          direction = MapUtils.normalizeAngle(direction + turn_speed * s_elapsed);
+          break;
+        case CLOCKWISE:
+          direction = MapUtils.normalizeAngle(direction - turn_speed * s_elapsed);
           break;
       }
     }

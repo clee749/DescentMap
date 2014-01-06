@@ -1,4 +1,4 @@
-package common;
+package util;
 
 import java.awt.Point;
 
@@ -22,17 +22,50 @@ public class MapUtils {
             (int) (ref_cell_nw_pixel.y - (ref_cell.y - y_coord) * pixels_per_cell));
   }
 
+  /**
+   * 
+   * @param src_x x-coordinate of source vector (from origin)
+   * @param src_y y-coordinate of source vector
+   * @param dst_x x-coordinate of destination vector (from origin)
+   * @param dst_y y-coordinate of destination vector
+   * @return smallest angle from source vector to destination vector
+   */
   public static double angleTo(double src_x, double src_y, double dst_x, double dst_y) {
     return -Math.atan2(src_x * dst_y - dst_x * src_y, src_x * dst_x + src_y * dst_y);
   }
 
-  public static double angleTo(double direction, double dst_x, double dst_y) {
-    return MapUtils.angleTo(Math.cos(direction), Math.sin(direction), dst_x, dst_y);
+  /**
+   * 
+   * @param src_direction direction of source vector
+   * @param dst_x x-coordinate of destination vector (from origin)
+   * @param dst_y y-coordinate of destination vector
+   * @return smallest angle from source vector to destination vector
+   */
+  public static double angleTo(double src_direction, double dst_x, double dst_y) {
+    return MapUtils.angleTo(Math.cos(src_direction), Math.sin(src_direction), dst_x, dst_y);
   }
 
+  /**
+   * 
+   * @param src_direction direction of source vector
+   * @param dst_direction direction of destination vector
+   * @return smallest angle from source vector to destination vector
+   */
   public static double angleTo(double src_direction, double dst_direction) {
     return MapUtils.angleTo(Math.cos(src_direction), Math.sin(src_direction), Math.cos(dst_direction),
             Math.sin(dst_direction));
+  }
+
+  /**
+   * 
+   * @param src_x x-coordinate of source point
+   * @param src_y y-coordinate of source point
+   * @param dst_x x-coordinate of destination point
+   * @param dst_y y-coordinate of destination point
+   * @return direction from source point to destination point
+   */
+  public static double absoluteAngleTo(double src_x, double src_y, double dst_x, double dst_y) {
+    return -MapUtils.normalizeAngle(Math.atan2(dst_y - src_y, dst_x - src_x));
   }
 
   public static double normalizeAngle(double angle) {

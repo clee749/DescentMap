@@ -10,7 +10,7 @@ import component.MapEngine;
 public abstract class Shot extends MovableMapObject {
 
   public Shot(MapObject source, double radius, Room room, double x_loc, double y_loc, double direction) {
-    super(new ShotPilot(radius, room), room, x_loc, y_loc, direction);
+    super(new ShotPilot(), room, x_loc, y_loc, direction);
   }
 
   @Override

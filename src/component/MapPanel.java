@@ -14,19 +14,18 @@ import common.Constants;
 import common.DescentMapException;
 
 enum DisplayMode {
-  CONSTRUCTION, PLAYTHROUGH;
+  CONSTRUCTION,
+  PLAYTHROUGH;
 }
 
 
 public class MapPanel extends JPanel implements ComponentListener, MapDisplayer {
-  private DescentMap map;
   private DisplayMode display_mode;
   private MapConstructionDisplayer construction_displayer;
   private MapPlayDisplayer play_displayer;
 
   @Override
   public void setMap(DescentMap map) {
-    this.map = map;
     display_mode = DisplayMode.CONSTRUCTION;
     construction_displayer = new MapConstructionDisplayer(map);
     play_displayer = new MapPlayDisplayer(map, Constants.PLAY_SIGHT_RADIUS);

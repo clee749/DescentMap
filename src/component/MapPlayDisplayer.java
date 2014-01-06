@@ -7,10 +7,10 @@ import java.awt.Point;
 import mapobject.MapObject;
 import structure.DescentMap;
 import structure.Room;
-import util.ImageHandler;
+import util.MapUtils;
 
 import common.Constants;
-import common.MapUtils;
+import external.ImageHandler;
 
 public class MapPlayDisplayer {
   private final DescentMap map;

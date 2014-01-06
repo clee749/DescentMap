@@ -3,7 +3,6 @@ package structure;
 import java.util.ArrayList;
 
 import mapobject.MapObject;
-import mapobject.unit.pyro.Pyro;
 
 import component.MapBuilder;
 
@@ -12,11 +11,15 @@ public class DescentMap {
   private final ArrayList<Room> rooms;
   private Room entrance_room;
   private Room exit_room;
-  private Pyro center_ship;
+  private MapObject center_object;
 
   public DescentMap(int max_room_size) {
     builder = new MapBuilder(max_room_size);
     rooms = builder.getRooms();
+  }
+
+  public boolean hasRooms() {
+    return !rooms.isEmpty();
   }
 
   public ArrayList<Room> getRooms() {
@@ -52,16 +55,16 @@ public class DescentMap {
   }
 
   public MapObject getCenterObject() {
-    return center_ship;
+    return center_object;
+  }
+
+  public void setCenterObject(MapObject center_object) {
+    this.center_object = center_object;
   }
 
   public void finishBuildingMap() {
     builder.placeEntranceAndExitRooms();
     entrance_room = builder.getEntranceRoom();
     exit_room = builder.getExitRoom();
-  }
-
-  public void insertPyro(Pyro ship) {
-    center_ship = ship;
   }
 }

@@ -1,5 +1,6 @@
 package mapobject.unit.pyro;
 
+import external.ImageHandler;
 import gunner.PyroGunner;
 
 import java.awt.Color;
@@ -13,10 +14,9 @@ import mapobject.shot.LaserShot;
 import mapobject.unit.Unit;
 import pilot.PyroPilot;
 import structure.Room;
-import util.ImageHandler;
+import util.MapUtils;
 
 import common.Constants;
-import common.MapUtils;
 import common.ObjectType;
 
 public class Pyro extends Unit {
@@ -25,8 +25,7 @@ public class Pyro extends Unit {
   private final boolean has_quad_lasers;
 
   public Pyro(Room room, double x_loc, double y_loc, double direction) {
-    super(new PyroPilot(Constants.getRadius(ObjectType.Pyro), room), new PyroGunner(), room, x_loc, y_loc,
-            direction);
+    super(new PyroPilot(), new PyroGunner(), room, x_loc, y_loc, direction);
     outer_cannon_offset = Constants.PYRO_OUTER_CANNON_OFFSET * radius;
     cannon_forward_offset = Constants.PYRO_CANNON_FORWARD_OFFSET * radius;
     ((PyroPilot) pilot).startPilot();

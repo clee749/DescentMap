@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import structure.MineExteriorRoom;
 import structure.Room;
 import structure.RoomConnection;
+import util.MapUtils;
 
 import common.Constants;
-import common.MapUtils;
 import common.RoomSide;
 
 class EdgeRoom {

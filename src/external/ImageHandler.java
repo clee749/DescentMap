@@ -1,4 +1,4 @@
-package util;
+package external;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -22,8 +22,9 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.ImageIcon;
 
+import util.MapUtils;
+
 import common.Constants;
-import common.MapUtils;
 import common.ObjectType;
 
 // Robots: http://www.descent2.com/goodies/3dmodels/thinman/descent1
@@ -143,6 +144,8 @@ public class ImageHandler {
     images = new HashMap<String, ArrayList<Image>>();
     loadRotatedImages(path, "Pyro", pixels_per_cell, Constants.getRadius(ObjectType.Pyro));
     loadRotatedImages(path, "LaserShot1", pixels_per_cell, Constants.getRadius(ObjectType.LaserShot));
+    loadRotatedImages(path, "Class2Drone", pixels_per_cell, Constants.getRadius(ObjectType.Class2Drone));
+    loadRotatedImages(path, "LaserShot2", pixels_per_cell, Constants.getRadius(ObjectType.LaserShot));
   }
 
   public boolean loadAnimatedGif(String path, String name, int pixels_per_cell, double radius) {

@@ -5,11 +5,11 @@ import java.awt.Image;
 import java.awt.Point;
 
 import structure.Room;
-import util.ImageHandler;
 
 import common.Constants;
 import common.ObjectType;
 import component.MapEngine;
+import external.ImageHandler;
 
 public abstract class MapObject {
   protected final ObjectType type;

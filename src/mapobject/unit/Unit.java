@@ -5,15 +5,15 @@ import gunner.Gunner;
 import java.awt.geom.Point2D;
 
 import mapobject.MapObject;
-import mapobject.TurnableMapObject;
+import mapobject.MovableMapObject;
 import pilot.Pilot;
 import structure.Room;
+import util.MapUtils;
 
 import common.Constants;
-import common.MapUtils;
 import component.MapEngine;
 
-public abstract class Unit extends TurnableMapObject {
+public abstract class Unit extends MovableMapObject {
   protected final double cannon_offset;
   protected Gunner gunner;
   protected double reload_time;

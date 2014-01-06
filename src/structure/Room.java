@@ -8,12 +8,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import util.MapUtils;
+
 import mapobject.MapObject;
-import util.ImageHandler;
 
 import common.Constants;
-import common.MapUtils;
 import common.RoomSide;
+import external.ImageHandler;
 
 public class Room {
   private final Point nw_corner;
