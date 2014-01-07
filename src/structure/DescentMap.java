@@ -4,26 +4,28 @@ import java.util.ArrayList;
 
 import mapobject.MapObject;
 
+import common.RoomSide;
 import component.MapBuilder;
 
 public class DescentMap {
   private final MapBuilder builder;
-  private final ArrayList<Room> rooms;
+  private final ArrayList<Room> all_rooms;
   private Room entrance_room;
   private Room exit_room;
+  private MineExteriorRoom exterior_room;
   private MapObject center_object;
 
   public DescentMap(int max_room_size) {
     builder = new MapBuilder(max_room_size);
-    rooms = builder.getRooms();
+    all_rooms = builder.getAllRooms();
   }
 
   public boolean hasRooms() {
-    return !rooms.isEmpty();
+    return !all_rooms.isEmpty();
   }
 
-  public ArrayList<Room> getRooms() {
-    return rooms;
+  public ArrayList<Room> getAllRooms() {
+    return all_rooms;
   }
 
   public int getMinX() {
@@ -50,6 +52,18 @@ public class DescentMap {
     return exit_room;
   }
 
+  public RoomSide getEntranceSide() {
+    return builder.getEntranceSide();
+  }
+
+  public RoomSide getExitSide() {
+    return builder.getExitSide();
+  }
+
+  public MineExteriorRoom getExteriorRoom() {
+    return exterior_room;
+  }
+
   public void addRoom() {
     builder.addRoom();
   }
@@ -66,5 +80,6 @@ public class DescentMap {
     builder.placeEntranceAndExitRooms();
     entrance_room = builder.getEntranceRoom();
     exit_room = builder.getExitRoom();
+    exterior_room = builder.getExteriorRoom();
   }
 }

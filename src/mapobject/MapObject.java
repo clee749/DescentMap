@@ -1,14 +1,13 @@
 package mapobject;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Point;
 
 import structure.Room;
 
-import common.Constants;
 import common.ObjectType;
 import component.MapEngine;
+
 import external.ImageHandler;
 
 public abstract class MapObject {
@@ -20,23 +19,18 @@ public abstract class MapObject {
   protected double x_loc;
   protected double y_loc;
 
-  public MapObject(double radius) {
+  public MapObject() {
     type = getType();
-    this.radius = radius;
+    radius = getRadius();
+    is_in_map = true;
   }
 
   public MapObject(Room room, double x_loc, double y_loc) {
-    type = getType();
-    radius = Constants.getRadius(type);
+    this();
     image_name = type.name();
-    is_in_map = true;
     this.room = room;
     this.x_loc = x_loc;
     this.y_loc = y_loc;
-  }
-
-  public double getRadius() {
-    return radius;
   }
 
   public boolean isInMap() {
@@ -57,7 +51,7 @@ public abstract class MapObject {
 
   public abstract ObjectType getType();
 
-  public abstract Image getImage(ImageHandler images);
+  public abstract double getRadius();
 
   public abstract void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell);

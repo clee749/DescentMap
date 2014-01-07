@@ -7,14 +7,11 @@ import java.awt.Toolkit;
 import javax.swing.JFrame;
 
 import mapobject.unit.pyro.Pyro;
-import mapobject.unit.robot.Robot;
 import structure.DescentMap;
 import structure.Room;
-import util.RobotFactory;
 
 import common.Constants;
 import common.DescentMapException;
-import common.ObjectType;
 
 enum RunnerState {
   BUILD_MAP,
@@ -87,16 +84,14 @@ public class MapRunner {
     }
     else {
       map.finishBuildingMap();
+      MapPopulator.populateMap(map);
       Room entrance_room = map.getEntranceRoom();
       Point nw_corner = entrance_room.getNWCorner();
       Point se_corner = entrance_room.getSECorner();
       Pyro ship =
               new Pyro(entrance_room, (nw_corner.x + se_corner.x) / 2.0, (nw_corner.y + se_corner.y) / 2.0,
                       0.0);
-      Robot robot =
-              RobotFactory.newRobot(ObjectType.Class2Drone, entrance_room, ship.getX(), ship.getY(), 0.0);
       engine = new MapEngine(map);
-      engine.addObject(robot);
       engine.addObject(ship);
       map.setCenterObject(ship);
       engine.setCenterObject(ship);

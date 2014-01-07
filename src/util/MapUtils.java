@@ -1,6 +1,7 @@
 package util;
 
 import java.awt.Point;
+import java.awt.geom.Point2D;
 
 public class MapUtils {
   public static final double PI_OVER_TWO = Math.PI / 2;
@@ -11,11 +12,28 @@ public class MapUtils {
 
   }
 
+  /**
+   * 
+   * @param coords coordinates in a DescentMap
+   * @param ref_cell any location
+   * @param ref_cell_nw_pixel the pixel that marks the NW corner of ref_cell
+   * @param pixels_per_cell length of a cell in pixels
+   * @return pixel coordinates where coords should be drawn
+   */
   public static Point coordsToPixel(Point coords, Point ref_cell, Point ref_cell_nw_pixel, int pixels_per_cell) {
     return new Point(ref_cell_nw_pixel.x - (ref_cell.x - coords.x) * pixels_per_cell, ref_cell_nw_pixel.y -
             (ref_cell.y - coords.y) * pixels_per_cell);
   }
 
+  /**
+   * 
+   * @param x_coord x-coordinate of the location in a DescentMap
+   * @param y_coord y-coordinate of the location in a DescentMap
+   * @param ref_cell any location
+   * @param ref_cell_nw_pixel the pixel that marks the NW corner of ref_cell
+   * @param pixels_per_cell length of a cell in pixels
+   * @return pixel coordinates where the point should be drawn
+   */
   public static Point coordsToPixel(double x_coord, double y_coord, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
     return new Point((int) (ref_cell_nw_pixel.x - (ref_cell.x - x_coord) * pixels_per_cell),
@@ -42,7 +60,7 @@ public class MapUtils {
    * @return smallest angle from source vector to destination vector
    */
   public static double angleTo(double src_direction, double dst_x, double dst_y) {
-    return MapUtils.angleTo(Math.cos(src_direction), Math.sin(src_direction), dst_x, dst_y);
+    return angleTo(Math.cos(src_direction), Math.sin(src_direction), dst_x, dst_y);
   }
 
   /**
@@ -52,7 +70,7 @@ public class MapUtils {
    * @return smallest angle from source vector to destination vector
    */
   public static double angleTo(double src_direction, double dst_direction) {
-    return MapUtils.angleTo(Math.cos(src_direction), Math.sin(src_direction), Math.cos(dst_direction),
+    return angleTo(Math.cos(src_direction), Math.sin(src_direction), Math.cos(dst_direction),
             Math.sin(dst_direction));
   }
 
@@ -65,22 +83,49 @@ public class MapUtils {
    * @return direction from source point to destination point
    */
   public static double absoluteAngleTo(double src_x, double src_y, double dst_x, double dst_y) {
-    return -MapUtils.normalizeAngle(Math.atan2(dst_y - src_y, dst_x - src_x));
+    return -normalizeAngle(Math.atan2(dst_y - src_y, dst_x - src_x));
   }
 
+  /**
+   * 
+   * @param angle angle in range [-2 * Math.PI, 4 * Math.PI)
+   * @return congruent angle normalized to range [0, 2 * Math.PI)
+   */
   public static double normalizeAngle(double angle) {
     if (angle < 0) {
-      return angle + MapUtils.TWO_PI;
+      return angle + TWO_PI;
     }
-    if (angle >= MapUtils.TWO_PI) {
-      return angle - MapUtils.TWO_PI;
+    if (angle >= TWO_PI) {
+      return angle - TWO_PI;
     }
     return angle;
   }
 
+  /**
+   * 
+   * @param nw_corner1 NW corner of first rectangle
+   * @param se_corner1 SE corner of first rectangle
+   * @param nw_corner2 NW corner of second rectangle
+   * @param se_corner2 SE corner of second rectangle
+   * @return true if the rectangles intersect, false otherwise
+   */
   public static boolean rectanglesIntersect(Point nw_corner1, Point se_corner1, Point nw_corner2,
           Point se_corner2) {
     return se_corner1.x >= nw_corner2.x && nw_corner1.x <= se_corner2.x && se_corner1.y >= nw_corner2.y &&
             nw_corner1.y <= se_corner2.y;
+  }
+
+  /**
+   * 
+   * @param nw_corner NW corner of Room
+   * @param se_corner SE corner of Room
+   * @param point_radius min distance of random point from a wall of the Room
+   * @return random point inside the Room at least radius distance from a wall
+   */
+  public static Point2D.Double randomInternalPoint(Point nw_corner, Point se_corner, double point_radius) {
+    double x_range = se_corner.x - nw_corner.x - 2 * point_radius;
+    double y_range = se_corner.y - nw_corner.y - 2 * point_radius;
+    return new Point2D.Double(nw_corner.x + point_radius + Math.random() * x_range, nw_corner.y +
+            point_radius + Math.random() * y_range);
   }
 }

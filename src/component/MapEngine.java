@@ -49,7 +49,7 @@ public class MapEngine {
   }
 
   public void computeNextStep(double s_elapsed) {
-    for (Room room : map.getRooms()) {
+    for (Room room : map.getAllRooms()) {
       for (MapObject object : room.getChildren()) {
         object.computeNextStep(s_elapsed);
       }
@@ -59,7 +59,7 @@ public class MapEngine {
   public void doNextStep(double s_elapsed) {
     room_changes.clear();
     LinkedList<MapObject> created_objects = new LinkedList<MapObject>();
-    for (Room room : map.getRooms()) {
+    for (Room room : map.getAllRooms()) {
       for (Iterator<MapObject> it = room.getChildren().iterator(); it.hasNext();) {
         MapObject object = it.next();
         MapObject created = object.doNextStep(this, s_elapsed);

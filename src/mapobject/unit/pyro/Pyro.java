@@ -52,18 +52,16 @@ public class Pyro extends Unit {
   public MapObject fireCannon() {
     MultipleObject shots = new MultipleObject();
     Point2D.Double abs_offset = findRightShotAbsOffset(cannon_offset);
-    shots.addObject(new LaserShot(this, Constants.getRadius(ObjectType.LaserShot), room,
-            x_loc + abs_offset.x, y_loc + abs_offset.y, direction, 1));
-    shots.addObject(new LaserShot(this, Constants.getRadius(ObjectType.LaserShot), room,
-            x_loc - abs_offset.x, y_loc - abs_offset.y, direction, 1));
+    shots.addObject(new LaserShot(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y, direction, 1));
+    shots.addObject(new LaserShot(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y, direction, 1));
     if (has_quad_lasers) {
       abs_offset = findRightShotAbsOffset(outer_cannon_offset);
       double x_forward_abs_offset = Math.cos(direction) * cannon_forward_offset;
       double y_forward_abs_offset = Math.sin(direction) * cannon_forward_offset;
-      shots.addObject(new LaserShot(this, Constants.getRadius(ObjectType.LaserShot), room, x_loc +
-              abs_offset.x + x_forward_abs_offset, y_loc + abs_offset.y + y_forward_abs_offset, direction, 1));
-      shots.addObject(new LaserShot(this, Constants.getRadius(ObjectType.LaserShot), room, x_loc -
-              abs_offset.x + x_forward_abs_offset, y_loc - abs_offset.y + y_forward_abs_offset, direction, 1));
+      shots.addObject(new LaserShot(this, room, x_loc + abs_offset.x + x_forward_abs_offset, y_loc +
+              abs_offset.y + y_forward_abs_offset, direction, 1));
+      shots.addObject(new LaserShot(this, room, x_loc - abs_offset.x + x_forward_abs_offset, y_loc -
+              abs_offset.y + y_forward_abs_offset, direction, 1));
     }
     return shots;
   }

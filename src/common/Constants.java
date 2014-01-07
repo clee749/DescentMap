@@ -51,40 +51,40 @@ public class Constants {
 
   // objects
   public static Double getRadius(ObjectType type) {
-    return Constants.RADII.get(type);
+    return RADII.get(type);
   }
 
   public static Double getMoveSpeed(ObjectType type) {
-    return Constants.MOVE_SPEEDS.get(type);
+    return MOVE_SPEEDS.get(type);
   }
 
   public static Double getTurnSpeed(ObjectType type) {
-    return Constants.TURN_SPEEDS.get(type);
+    return TURN_SPEEDS.get(type);
   }
 
   public static Double getReloadTime(ObjectType type) {
-    return Constants.RELOAD_TIMES.get(type);
+    return RELOAD_TIMES.get(type);
   }
 
   public static Integer getShotsPerVolley(ObjectType type) {
-    return Constants.SHOTS_PER_VOLLEYS.get(type);
+    return SHOTS_PER_VOLLEYS.get(type);
   }
 
   public static Double getVolleyReloadTime(ObjectType type) {
-    return Constants.VOLLEY_RELOAD_TIMES.get(type);
+    return VOLLEY_RELOAD_TIMES.get(type);
   }
 
   public static Double getCannonOffset(ObjectType type) {
-    return Constants.CANNON_OFFSETS.get(type);
+    return CANNON_OFFSETS.get(type);
   }
 
-  private static final HashMap<ObjectType, Double> RADII = Constants.getRadii();
-  private static final HashMap<ObjectType, Double> MOVE_SPEEDS = Constants.getMoveSpeeds();
-  private static final HashMap<ObjectType, Double> TURN_SPEEDS = Constants.getTurnSpeeds();
-  private static final HashMap<ObjectType, Double> RELOAD_TIMES = Constants.getReloadTimes();
-  private static final HashMap<ObjectType, Integer> SHOTS_PER_VOLLEYS = Constants.getShotsPerVolleys();
-  private static final HashMap<ObjectType, Double> VOLLEY_RELOAD_TIMES = Constants.getVolleyReloadTimes();
-  private static final HashMap<ObjectType, Double> CANNON_OFFSETS = Constants.getCannonOffsets();
+  private static final HashMap<ObjectType, Double> RADII = getRadii();
+  private static final HashMap<ObjectType, Double> MOVE_SPEEDS = getMoveSpeeds();
+  private static final HashMap<ObjectType, Double> TURN_SPEEDS = getTurnSpeeds();
+  private static final HashMap<ObjectType, Double> RELOAD_TIMES = getReloadTimes();
+  private static final HashMap<ObjectType, Integer> SHOTS_PER_VOLLEYS = getShotsPerVolleys();
+  private static final HashMap<ObjectType, Double> VOLLEY_RELOAD_TIMES = getVolleyReloadTimes();
+  private static final HashMap<ObjectType, Double> CANNON_OFFSETS = getCannonOffsets();
 
   private static HashMap<ObjectType, Double> getRadii() {
     HashMap<ObjectType, Double> radii = new HashMap<ObjectType, Double>();

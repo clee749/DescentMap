@@ -33,12 +33,18 @@ public class MapConstructionDisplayer {
     ref_cell_nw_pixel = new Point(center_pixel.x - pixels_per_cell / 2, center_pixel.y - pixels_per_cell / 2);
   }
 
-  public void displayMap(Graphics2D g, Dimension dims) {
+  public void paintMap(Graphics2D g, Dimension dims) {
     if (!map.hasRooms()) {
       return;
     }
     centerMap(dims);
-    for (Room room : map.getRooms()) {
+    for (Room room : map.getAllRooms()) {
+      room.paint(g, null, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+    }
+  }
+
+  public void paintRoomIfDefined(Graphics2D g, Room room) {
+    if (room != null) {
       room.paint(g, null, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     }
   }

@@ -5,7 +5,7 @@ import gunner.Gunner;
 import java.awt.geom.Point2D;
 
 import mapobject.MapObject;
-import mapobject.MovableMapObject;
+import mapobject.MovableObject;
 import pilot.Pilot;
 import structure.Room;
 import util.MapUtils;
@@ -13,7 +13,7 @@ import util.MapUtils;
 import common.Constants;
 import component.MapEngine;
 
-public abstract class Unit extends MovableMapObject {
+public abstract class Unit extends MovableObject {
   protected final double cannon_offset;
   protected Gunner gunner;
   protected double reload_time;

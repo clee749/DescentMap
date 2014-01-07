@@ -10,6 +10,7 @@ import structure.Room;
 import util.MapUtils;
 
 import common.Constants;
+
 import external.ImageHandler;
 
 public class MapPlayDisplayer {
@@ -37,7 +38,7 @@ public class MapPlayDisplayer {
     images.loadImages(Constants.IMAGES_PATH, pixels_per_cell);
   }
 
-  public void displayMap(Graphics2D g) {
+  public void paintMap(Graphics2D g) {
     MapObject center_object = map.getCenterObject();
     double center_x = center_object.getX();
     double center_y = center_object.getY();
@@ -49,10 +50,15 @@ public class MapPlayDisplayer {
     int min_y = center_cell.y - num_rows / 2 - 1;
     Point nw_corner = new Point(min_x, min_y);
     Point se_corner = new Point(min_x + num_cols, min_y + num_rows);
-    for (Room room : map.getRooms()) {
-      if (MapUtils.rectanglesIntersect(nw_corner, se_corner, room.getNWCorner(), room.getSECorner())) {
-        room.paint(g, images, center_cell, center_cell_nw_pixel, pixels_per_cell);
-      }
+    for (Room room : map.getAllRooms()) {
+      paintRoomIfOnScreen(g, room, nw_corner, se_corner, center_cell, center_cell_nw_pixel);
+    }
+  }
+
+  public void paintRoomIfOnScreen(Graphics2D g, Room room, Point nw_corner, Point se_corner,
+          Point center_cell, Point center_cell_nw_pixel) {
+    if (MapUtils.rectanglesIntersect(nw_corner, se_corner, room.getNWCorner(), room.getSECorner())) {
+      room.paint(g, images, center_cell, center_cell_nw_pixel, pixels_per_cell);
     }
   }
 }

@@ -1,6 +1,6 @@
 package pilot;
 
-import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
@@ -67,12 +67,10 @@ public class RobotPilot extends Pilot {
       case MOVE_INTO_ROOM:
         break;
       case TURN_TO_ROOM_INTERIOR:
-        Point nw_corner = current_room.getNWCorner();
-        Point se_corner = current_room.getSECorner();
-        double x_range = se_corner.x - nw_corner.x - 2 * object_radius;
-        double y_range = se_corner.y - nw_corner.y - 2 * object_radius;
-        setTargetLocation(nw_corner.x + object_radius + Math.random() * x_range, nw_corner.y + object_radius +
-                Math.random() * y_range);
+        Point2D.Double target_location =
+                MapUtils.randomInternalPoint(current_room.getNWCorner(), current_room.getSECorner(),
+                        object_radius);
+        setTargetLocation(target_location.x, target_location.y);
         planToTurnToTarget();
         break;
       case MOVE_TO_ROOM_INTERIOR:
@@ -92,18 +90,18 @@ public class RobotPilot extends Pilot {
       case INACTIVE:
         return new PilotMove(MoveDirection.NONE, TurnDirection.NONE);
       case TURN_TO_ROOM_EXIT:
-        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+        return new PilotMove(MoveDirection.NONE, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
                 object.getDirection(), target_direction)));
       case MOVE_TO_ROOM_EXIT:
         return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
                 object.getDirection(), target_x - object.getX(), target_y - object.getY())));
       case TURN_INTO_ROOM:
-        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+        return new PilotMove(MoveDirection.NONE, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
                 object.getDirection(), target_direction)));
       case MOVE_INTO_ROOM:
         return new PilotMove(MoveDirection.FORWARD, TurnDirection.NONE);
       case TURN_TO_ROOM_INTERIOR:
-        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+        return new PilotMove(MoveDirection.NONE, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
                 object.getDirection(), target_direction)));
       case MOVE_TO_ROOM_INTERIOR:
         return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(

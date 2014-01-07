@@ -146,6 +146,8 @@ public class ImageHandler {
     loadRotatedImages(path, "LaserShot1", pixels_per_cell, Constants.getRadius(ObjectType.LaserShot));
     loadRotatedImages(path, "Class2Drone", pixels_per_cell, Constants.getRadius(ObjectType.Class2Drone));
     loadRotatedImages(path, "LaserShot2", pixels_per_cell, Constants.getRadius(ObjectType.LaserShot));
+    loadAnimatedGif(path, "Entrance", pixels_per_cell, 0.5);
+    loadAnimatedGif(path, "Exit", pixels_per_cell, 0.5);
   }
 
   public boolean loadAnimatedGif(String path, String name, int pixels_per_cell, double radius) {
@@ -219,5 +221,9 @@ public class ImageHandler {
     return images.get(name).get(
             (int) (Math.round(direction / ImageHandler.RADIANS_PER_IMAGE)) %
                     ImageHandler.NUM_IMAGES_IN_CIRCLE);
+  }
+
+  public Image getImage(String name) {
+    return images.get(name).get(0);
   }
 }

@@ -8,9 +8,8 @@ import common.ObjectType;
 public class LaserShot extends Shot {
   private final int level;
 
-  public LaserShot(MapObject source, double radius, Room room, double x_loc, double y_loc, double direction,
-          int level) {
-    super(source, radius, room, x_loc, y_loc, direction);
+  public LaserShot(MapObject source, Room room, double x_loc, double y_loc, double direction, int level) {
+    super(source, room, x_loc, y_loc, direction);
     image_name += level;
     this.level = level;
   }

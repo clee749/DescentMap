@@ -6,14 +6,13 @@ import java.awt.Point;
 import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-
-import util.MapUtils;
 
 import mapobject.MapObject;
+import util.MapUtils;
 
 import common.Constants;
 import common.RoomSide;
+
 import external.ImageHandler;
 
 public class Room {
@@ -22,7 +21,7 @@ public class Room {
   private final int width;
   private final int height;
   private final HashMap<RoomSide, RoomConnection> neighbors;
-  private final HashSet<MapObject> children;
+  private final ArrayList<MapObject> children;
 
   public Room(Point nw_corner, Point se_corner) {
     this.nw_corner = nw_corner;
@@ -30,7 +29,7 @@ public class Room {
     width = se_corner.x - nw_corner.x;
     height = se_corner.y - nw_corner.y;
     neighbors = new HashMap<RoomSide, RoomConnection>();
-    children = new HashSet<MapObject>();
+    children = new ArrayList<MapObject>();
   }
 
   public Point getNWCorner() {
@@ -65,7 +64,7 @@ public class Room {
     return neighbors.get(direction);
   }
 
-  public HashSet<MapObject> getChildren() {
+  public ArrayList<MapObject> getChildren() {
     return children;
   }
 

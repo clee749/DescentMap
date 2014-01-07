@@ -1,15 +1,15 @@
 package mapobject.shot;
 
 import mapobject.MapObject;
-import mapobject.MovableMapObject;
+import mapobject.MovableObject;
 import pilot.ShotPilot;
 import structure.Room;
 
 import component.MapEngine;
 
-public abstract class Shot extends MovableMapObject {
+public abstract class Shot extends MovableObject {
 
-  public Shot(MapObject source, double radius, Room room, double x_loc, double y_loc, double direction) {
+  public Shot(MapObject source, Room room, double x_loc, double y_loc, double direction) {
     super(new ShotPilot(), room, x_loc, y_loc, direction);
   }
 

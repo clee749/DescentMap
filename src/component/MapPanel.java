@@ -43,10 +43,10 @@ public class MapPanel extends JPanel implements ComponentListener, MapDisplayer 
     g.fillRect(0, 0, getWidth(), getHeight());
     switch (display_mode) {
       case CONSTRUCTION:
-        construction_displayer.displayMap((Graphics2D) g, getSize());
+        construction_displayer.paintMap((Graphics2D) g, getSize());
         break;
       case PLAYTHROUGH:
-        play_displayer.displayMap((Graphics2D) g);
+        play_displayer.paintMap((Graphics2D) g);
         break;
       default:
         throw new DescentMapException("Unexpected DisplayMode: " + display_mode);

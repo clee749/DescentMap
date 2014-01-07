@@ -18,7 +18,7 @@ import component.MapEngine;
 
 import external.ImageHandler;
 
-public abstract class MovableMapObject extends MapObject {
+public abstract class MovableObject extends MapObject {
   protected final double move_speed;
   protected final double turn_speed;
   protected Pilot pilot;
@@ -27,7 +27,7 @@ public abstract class MovableMapObject extends MapObject {
   protected double previous_y_loc;
   protected PilotMove next_movement;
 
-  public MovableMapObject(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
+  public MovableObject(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(room, x_loc, y_loc);
     move_speed = Constants.getMoveSpeed(type);
     Double raw_turn_speed = Constants.getTurnSpeed(type);
@@ -35,6 +35,11 @@ public abstract class MovableMapObject extends MapObject {
     this.pilot = pilot;
     this.direction = direction;
     pilot.bindToObject(this);
+  }
+
+  @Override
+  public double getRadius() {
+    return Constants.getRadius(type);
   }
 
   public double getDirection() {
@@ -53,11 +58,6 @@ public abstract class MovableMapObject extends MapObject {
     room = next_room;
     pilot.updateCurrentRoom(next_room);
     engine.changeRooms(this, previous_room, next_room);
-  }
-
-  @Override
-  public Image getImage(ImageHandler images) {
-    return images.getImage(type.name(), direction);
   }
 
   @Override

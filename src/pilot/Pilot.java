@@ -3,7 +3,7 @@ package pilot;
 import java.util.Map.Entry;
 
 import mapobject.MapObject;
-import mapobject.MovableMapObject;
+import mapobject.MovableObject;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
@@ -12,7 +12,7 @@ import common.DescentMapException;
 import common.RoomSide;
 
 public abstract class Pilot {
-  protected MovableMapObject object;
+  protected MovableObject object;
   protected double object_radius;
   // we cannot just use object.getRoom because we could go into an unintentional Room while turning
   protected Room current_room;
@@ -22,7 +22,7 @@ public abstract class Pilot {
   protected double target_direction;
   protected MapObject target_object;
 
-  public void bindToObject(MovableMapObject object) {
+  public void bindToObject(MovableObject object) {
     this.object = object;
     current_room = object.getRoom();
     object_radius = object.getRadius();
