@@ -1,22 +1,24 @@
 package mapobject.unit.robot;
 
-import external.ImageHandler;
-import gunner.Gunner;
-
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.Point2D;
 
 import mapobject.MapObject;
+import mapobject.shot.LaserShot;
 import mapobject.unit.Unit;
 import pilot.Pilot;
 import structure.Room;
 import util.MapUtils;
+import external.ImageHandler;
 
 public abstract class Robot extends Unit {
+  protected int cannon_side;
 
-  public Robot(Pilot pilot, Gunner gunner, Room room, double x_loc, double y_loc, double direction) {
-    super(pilot, gunner, room, x_loc, y_loc, direction);
+  public Robot(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
+    super(pilot, room, x_loc, y_loc, direction);
+    cannon_side = (int) (Math.random() * 2);
   }
 
   @Override
@@ -32,6 +34,11 @@ public abstract class Robot extends Unit {
 
   @Override
   public MapObject fireCannon() {
-    return null;
+    ++cannon_side;
+    Point2D.Double abs_offset = findRightShotAbsOffset(cannon_offset);
+    if (cannon_side % 2 == 0) {
+      return new LaserShot(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y, direction, 2);
+    }
+    return new LaserShot(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y, direction, 2);
   }
 }

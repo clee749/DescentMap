@@ -116,21 +116,21 @@ public class Constants {
 
   private static HashMap<ObjectType, Double> getReloadTimes() {
     HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
-    times.put(ObjectType.Pyro, 3.0);
+    times.put(ObjectType.Pyro, 0.25);
     times.put(ObjectType.Class2Drone, 2.0);
     return times;
   }
 
   private static HashMap<ObjectType, Integer> getShotsPerVolleys() {
     HashMap<ObjectType, Integer> shots = new HashMap<ObjectType, Integer>();
-    shots.put(ObjectType.Pyro, 4);
+    shots.put(ObjectType.Pyro, 1);
     shots.put(ObjectType.Class2Drone, 2);
     return shots;
   }
 
   private static HashMap<ObjectType, Double> getVolleyReloadTimes() {
     HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
-    times.put(ObjectType.Pyro, 0.1);
+    times.put(ObjectType.Pyro, 0.0);
     times.put(ObjectType.Class2Drone, 0.2);
     return times;
   }

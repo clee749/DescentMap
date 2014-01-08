@@ -6,11 +6,14 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Stack;
 
+import mapobject.unit.Unit;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
+import common.Constants;
 import common.DescentMapException;
+import common.ObjectType;
 import common.RoomSide;
 
 enum PyroPilotState {
@@ -67,17 +70,32 @@ public class PyroPilot extends Pilot {
   }
 
   @Override
-  public PilotMove findNextMove(double s_elapsed) {
+  public PilotAction findNextAction(double s_elapsed) {
     updateState();
+
+    boolean fire_cannon = false;
+    for (Unit unit : current_room.getUnits()) {
+      if (unit.getType().equals(ObjectType.Pyro)) {
+        continue;
+      }
+      double abs_angle_to_unit =
+              Math.abs(MapUtils.angleTo(object.getDirection(), unit.getX() - object.getX(), unit.getY() -
+                      object.getY()));
+      if (abs_angle_to_unit < Constants.PILOT_DIRECTION_EPSILON) {
+        fire_cannon = true;
+        break;
+      }
+    }
+
     switch (state) {
       case INACTIVE:
         return null;
       case MOVE_TO_ROOM_CONNECTION:
-        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
+        return new PilotAction(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon);
       case MOVE_TO_NEIGHBOR_ROOM:
-        return new PilotMove(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
+        return new PilotAction(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon);
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
     }

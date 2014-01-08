@@ -66,7 +66,7 @@ public abstract class MapObject {
   public abstract void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell);
 
-  public abstract void planNextStep(double s_elapsed);
+  public abstract void planNextAction(double s_elapsed);
 
-  public abstract MapObject doNextStep(MapEngine engine, double s_elapsed);
+  public abstract MapObject doNextAction(MapEngine engine, double s_elapsed);
 }

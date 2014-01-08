@@ -18,7 +18,7 @@ public abstract class Shot extends MovableObject {
   }
 
   @Override
-  public MapObject doNextStep(MapEngine engine, double s_elapsed) {
+  public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     // check for collision with a Unit
     for (Unit unit : room.getUnits()) {
       if (unit.equals(source)) {

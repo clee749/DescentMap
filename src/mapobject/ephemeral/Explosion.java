@@ -50,12 +50,12 @@ public class Explosion extends MapObject {
   }
 
   @Override
-  public void planNextStep(double s_elapsed) {
+  public void planNextAction(double s_elapsed) {
 
   }
 
   @Override
-  public MapObject doNextStep(MapEngine engine, double s_elapsed) {
+  public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     time_elapsed += s_elapsed;
     if (time_elapsed > total_time) {
       is_in_map = false;

@@ -6,7 +6,7 @@ import java.awt.Point;
 
 import pilot.MoveDirection;
 import pilot.Pilot;
-import pilot.PilotMove;
+import pilot.PilotAction;
 import pilot.TurnDirection;
 import structure.Room;
 import structure.RoomConnection;
@@ -25,7 +25,7 @@ public abstract class MovableObject extends MapObject {
   protected double direction;
   protected double previous_x_loc;
   protected double previous_y_loc;
-  protected PilotMove next_movement;
+  protected PilotAction next_action;
 
   public MovableObject(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(room, x_loc, y_loc);
@@ -70,12 +70,12 @@ public abstract class MovableObject extends MapObject {
   }
 
   @Override
-  public void planNextStep(double s_elapsed) {
-    next_movement = pilot.findNextMove(s_elapsed);
+  public void planNextAction(double s_elapsed) {
+    next_action = pilot.findNextAction(s_elapsed);
   }
 
   @Override
-  public MapObject doNextStep(MapEngine engine, double s_elapsed) {
+  public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     doNextMovement(engine, s_elapsed);
     return null;
   }
@@ -88,11 +88,11 @@ public abstract class MovableObject extends MapObject {
   }
 
   public void computeNextLocation(double s_elapsed) {
-    if (next_movement == null) {
+    if (next_action == null) {
       return;
     }
 
-    MoveDirection move = next_movement.move;
+    MoveDirection move = next_action.move;
     if (move != null) {
       switch (move) {
         case FORWARD:
@@ -102,7 +102,7 @@ public abstract class MovableObject extends MapObject {
       }
     }
 
-    TurnDirection turn = next_movement.turn;
+    TurnDirection turn = next_action.turn;
     if (turn != null) {
       switch (turn) {
         case COUNTER_CLOCKWISE:

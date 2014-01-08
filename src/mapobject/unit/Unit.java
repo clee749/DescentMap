@@ -1,7 +1,5 @@
 package mapobject.unit;
 
-import gunner.Gunner;
-
 import java.awt.geom.Point2D;
 
 import mapobject.MapObject;
@@ -15,7 +13,6 @@ import component.MapEngine;
 
 public abstract class Unit extends MovableObject {
   protected final double cannon_offset;
-  protected Gunner gunner;
   protected double reload_time;
   protected int shots_per_volley;
   protected double reload_time_left;
@@ -24,19 +21,18 @@ public abstract class Unit extends MovableObject {
   protected double volley_reload_time_left;
   protected boolean firing_volley;
 
-  public Unit(Pilot pilot, Gunner gunner, Room room, double x_loc, double y_loc, double direction) {
+  public Unit(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(pilot, room, x_loc, y_loc, direction);
     cannon_offset = Constants.getCannonOffset(type) * radius;
-    this.gunner = gunner;
     reload_time = Constants.getReloadTime(type);
     shots_per_volley = Constants.getShotsPerVolley(type);
     volley_reload_time = Constants.getVolleyReloadTime(type);
   }
 
   @Override
-  public void planNextStep(double s_elapsed) {
-    super.planNextStep(s_elapsed);
-    if (reload_time_left < 0.0) {
+  public void planNextAction(double s_elapsed) {
+    super.planNextAction(s_elapsed);
+    if (next_action.fire_cannon && !firing_volley && reload_time_left < 0.0) {
       planToFireCannonVolley();
     }
     else {
@@ -45,8 +41,8 @@ public abstract class Unit extends MovableObject {
   }
 
   @Override
-  public MapObject doNextStep(MapEngine engine, double s_elapsed) {
-    MapObject movement_object_created = super.doNextStep(engine, s_elapsed);
+  public MapObject doNextAction(MapEngine engine, double s_elapsed) {
+    MapObject movement_object_created = super.doNextAction(engine, s_elapsed);
     if (firing_volley) {
       if (volley_reload_time_left < 0.0) {
         --shots_left_in_volley;

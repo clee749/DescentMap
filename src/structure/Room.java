@@ -221,16 +221,16 @@ public class Room {
 
   public void computeNextStep(double s_elapsed) {
     for (Scenery scenery : sceneries) {
-      scenery.planNextStep(s_elapsed);
+      scenery.planNextAction(s_elapsed);
     }
     for (Shot shot : shots) {
-      shot.planNextStep(s_elapsed);
+      shot.planNextAction(s_elapsed);
     }
     for (Unit unit : units) {
-      unit.planNextStep(s_elapsed);
+      unit.planNextAction(s_elapsed);
     }
     for (MapObject object : misc_objects) {
-      object.planNextStep(s_elapsed);
+      object.planNextAction(s_elapsed);
     }
   }
 
@@ -247,7 +247,7 @@ public class Room {
     LinkedList<MapObject> created_objects = new LinkedList<MapObject>();
     for (Iterator<MapObject> it = objects.iterator(); it.hasNext();) {
       MapObject object = it.next();
-      MapObject created = object.doNextStep(engine, s_elapsed);
+      MapObject created = object.doNextAction(engine, s_elapsed);
       if (created != null) {
         created_objects.add(created);
       }

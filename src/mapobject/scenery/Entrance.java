@@ -17,12 +17,12 @@ public class Entrance extends Scenery {
   }
 
   @Override
-  public void planNextStep(double s_elapsed) {
+  public void planNextAction(double s_elapsed) {
 
   }
 
   @Override
-  public MapObject doNextStep(MapEngine engine, double s_elapsed) {
+  public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     return null;
   }
 }

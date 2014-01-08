@@ -115,5 +115,5 @@ public abstract class Pilot {
     setTargetDirection(-MapUtils.absoluteAngleTo(object.getX(), object.getY(), target_x, target_y));
   }
 
-  public abstract PilotMove findNextMove(double s_elapsed);
+  public abstract PilotAction findNextAction(double s_elapsed);
 }
