@@ -142,12 +142,13 @@ public class ImageHandler {
 
   public void loadImages(String path, int pixels_per_cell) {
     images = new HashMap<String, ArrayList<Image>>();
+    for (ObjectType type : ObjectType.getSceneries()) {
+      loadAnimatedGif(path, type.name(), pixels_per_cell, 0.5);
+    }
     loadRotatedImages(path, "Pyro", pixels_per_cell, Constants.getRadius(ObjectType.Pyro));
     loadRotatedImages(path, "LaserShot1", pixels_per_cell, Constants.getRadius(ObjectType.LaserShot));
     loadRotatedImages(path, "Class2Drone", pixels_per_cell, Constants.getRadius(ObjectType.Class2Drone));
     loadRotatedImages(path, "LaserShot2", pixels_per_cell, Constants.getRadius(ObjectType.LaserShot));
-    loadAnimatedGif(path, "Entrance", pixels_per_cell, 0.5);
-    loadAnimatedGif(path, "Exit", pixels_per_cell, 0.5);
   }
 
   public boolean loadAnimatedGif(String path, String name, int pixels_per_cell, double radius) {

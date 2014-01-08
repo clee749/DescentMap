@@ -16,6 +16,11 @@ public class Constants {
   // construction displayer
   public static final int CONSTRUCTION_MIN_SIGHT_DIAMETER = 10;
 
+  // explosion
+  public static final Color[] EXPLOSION_COLORS = {Color.magenta, Color.orange, Color.pink, Color.red,
+          Color.yellow, Color.white};
+  public static final double EXPLOSION_DISTANCE_BETWEEN_LAYERS = 0.1;
+
   // images
   public static final String IMAGES_PATH = "/images";
   public static final int IMAGES_NUM_IN_QUADRANT = 10;

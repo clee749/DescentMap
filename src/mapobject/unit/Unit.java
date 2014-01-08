@@ -34,8 +34,8 @@ public abstract class Unit extends MovableObject {
   }
 
   @Override
-  public void computeNextStep(double s_elapsed) {
-    super.computeNextStep(s_elapsed);
+  public void planNextStep(double s_elapsed) {
+    super.planNextStep(s_elapsed);
     if (reload_time_left < 0.0) {
       planToFireCannonVolley();
     }

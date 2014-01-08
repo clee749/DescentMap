@@ -5,13 +5,21 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Stroke;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import mapobject.MapObject;
+import mapobject.scenery.Scenery;
+import mapobject.shot.Shot;
+import mapobject.unit.Unit;
 import util.MapUtils;
 
 import common.Constants;
 import common.RoomSide;
+import component.MapEngine;
 
 import external.ImageHandler;
 
@@ -21,7 +29,10 @@ public class Room {
   private final int width;
   private final int height;
   private final HashMap<RoomSide, RoomConnection> neighbors;
-  private final ArrayList<MapObject> children;
+  private final HashSet<Scenery> sceneries;
+  private final HashSet<Shot> shots;
+  private final HashSet<Unit> units;
+  private final HashSet<MapObject> misc_objects;
 
   public Room(Point nw_corner, Point se_corner) {
     this.nw_corner = nw_corner;
@@ -29,7 +40,10 @@ public class Room {
     width = se_corner.x - nw_corner.x;
     height = se_corner.y - nw_corner.y;
     neighbors = new HashMap<RoomSide, RoomConnection>();
-    children = new ArrayList<MapObject>();
+    sceneries = new HashSet<Scenery>();
+    shots = new HashSet<Shot>();
+    units = new HashSet<Unit>();
+    misc_objects = new HashSet<MapObject>();
   }
 
   public Point getNWCorner() {
@@ -64,8 +78,20 @@ public class Room {
     return neighbors.get(direction);
   }
 
-  public ArrayList<MapObject> getChildren() {
-    return children;
+  public HashSet<Scenery> getSceneries() {
+    return sceneries;
+  }
+
+  public HashSet<Shot> getShots() {
+    return shots;
+  }
+
+  public HashSet<Unit> getUnits() {
+    return units;
+  }
+
+  public HashSet<MapObject> getMiscObjects() {
+    return misc_objects;
   }
 
   @Override
@@ -136,8 +162,17 @@ public class Room {
 
     // children
     if (images != null) {
-      for (MapObject child : children) {
-        child.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      for (Scenery scenery : sceneries) {
+        scenery.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      }
+      for (Shot shot : shots) {
+        shot.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      }
+      for (Unit unit : units) {
+        unit.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      }
+      for (MapObject object : misc_objects) {
+        object.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
     }
   }
@@ -156,11 +191,70 @@ public class Room {
     neighbors.put(side, connection);
   }
 
-  public boolean addChild(MapObject object) {
-    return children.add(object);
+  public void addChild(MapObject object) {
+    if (object instanceof Scenery) {
+      sceneries.add((Scenery) object);
+    }
+    else if (object instanceof Shot) {
+      shots.add((Shot) object);
+    }
+    else if (object instanceof Unit) {
+      units.add((Unit) object);
+    }
+    else {
+      misc_objects.add(object);
+    }
   }
 
   public boolean removeChild(MapObject child) {
-    return children.remove(child);
+    if (child instanceof Scenery) {
+      return sceneries.remove(child);
+    }
+    if (child instanceof Shot) {
+      return shots.remove(child);
+    }
+    if (child instanceof Unit) {
+      return units.remove(child);
+    }
+    return misc_objects.remove(child);
+  }
+
+  public void computeNextStep(double s_elapsed) {
+    for (Scenery scenery : sceneries) {
+      scenery.planNextStep(s_elapsed);
+    }
+    for (Shot shot : shots) {
+      shot.planNextStep(s_elapsed);
+    }
+    for (Unit unit : units) {
+      unit.planNextStep(s_elapsed);
+    }
+    for (MapObject object : misc_objects) {
+      object.planNextStep(s_elapsed);
+    }
+  }
+
+  public LinkedList<MapObject> doNextStep(MapEngine engine, double s_elapsed) {
+    LinkedList<MapObject> created_objects = doNextStep(engine, s_elapsed, sceneries);
+    created_objects.addAll(doNextStep(engine, s_elapsed, shots));
+    created_objects.addAll(doNextStep(engine, s_elapsed, units));
+    created_objects.addAll(doNextStep(engine, s_elapsed, misc_objects));
+    return created_objects;
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public LinkedList<MapObject> doNextStep(MapEngine engine, double s_elapsed, Collection objects) {
+    LinkedList<MapObject> created_objects = new LinkedList<MapObject>();
+    for (Iterator<MapObject> it = objects.iterator(); it.hasNext();) {
+      MapObject object = it.next();
+      MapObject created = object.doNextStep(engine, s_elapsed);
+      if (created != null) {
+        created_objects.add(created);
+      }
+      if (!object.isInMap()) {
+        it.remove();
+      }
+    }
+    return created_objects;
   }
 }

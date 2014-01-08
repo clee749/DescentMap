@@ -41,7 +41,7 @@ public class MultipleObject extends MapObject {
   }
 
   @Override
-  public void computeNextStep(double s_elapsed) {
+  public void planNextStep(double s_elapsed) {
 
   }
 

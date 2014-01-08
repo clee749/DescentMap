@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
-import mapobject.MapObject;
+import mapobject.unit.Unit;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
@@ -121,9 +121,9 @@ public class RobotPilot extends Pilot {
 
   public void updateState(double s_elapsed) {
     if (!state.equals(RobotPilotState.REACT_TO_PYRO)) {
-      for (MapObject object : current_room.getChildren()) {
-        if (object.getType().equals(ObjectType.Pyro)) {
-          target_object = object;
+      for (Unit unit : current_room.getUnits()) {
+        if (unit.getType().equals(ObjectType.Pyro)) {
+          target_object = unit;
           initState(RobotPilotState.REACT_TO_PYRO);
           return;
         }

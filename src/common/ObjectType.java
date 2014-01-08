@@ -4,7 +4,7 @@ public enum ObjectType {
   // Descent ship
   Pyro,
 
-  // scenery
+  // sceneries
   Barrier,
   EnergyCenter,
   RobotGenerator,
@@ -68,7 +68,7 @@ public enum ObjectType {
   ProximityBomb,
   MultipleObject;
 
-  public static ObjectType[] getScenery() {
+  public static ObjectType[] getSceneries() {
     ObjectType[] scenery = {Barrier, EnergyCenter, RobotGenerator, Entrance, Exit};
     return scenery;
   }

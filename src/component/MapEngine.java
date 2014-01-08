@@ -1,6 +1,5 @@
 package component;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import mapobject.MapObject;
@@ -50,9 +49,7 @@ public class MapEngine {
 
   public void computeNextStep(double s_elapsed) {
     for (Room room : map.getAllRooms()) {
-      for (MapObject object : room.getChildren()) {
-        object.computeNextStep(s_elapsed);
-      }
+      room.computeNextStep(s_elapsed);
     }
   }
 
@@ -60,16 +57,7 @@ public class MapEngine {
     room_changes.clear();
     LinkedList<MapObject> created_objects = new LinkedList<MapObject>();
     for (Room room : map.getAllRooms()) {
-      for (Iterator<MapObject> it = room.getChildren().iterator(); it.hasNext();) {
-        MapObject object = it.next();
-        MapObject created = object.doNextStep(this, s_elapsed);
-        if (created != null) {
-          created_objects.add(created);
-        }
-        if (!object.isInMap()) {
-          it.remove();
-        }
-      }
+      created_objects.addAll(room.doNextStep(this, s_elapsed));
     }
     for (RoomChange room_change : room_changes) {
       room_change.src_room.removeChild(room_change.object);

@@ -33,6 +33,16 @@ public abstract class MapObject {
     this.y_loc = y_loc;
   }
 
+  public MapObject(Room room, double x_loc, double y_loc, double radius) {
+    type = getType();
+    this.radius = radius;
+    is_in_map = true;
+    image_name = type.name();
+    this.room = room;
+    this.x_loc = x_loc;
+    this.y_loc = y_loc;
+  }
+
   public boolean isInMap() {
     return is_in_map;
   }
@@ -56,7 +66,7 @@ public abstract class MapObject {
   public abstract void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell);
 
-  public abstract void computeNextStep(double s_elapsed);
+  public abstract void planNextStep(double s_elapsed);
 
   public abstract MapObject doNextStep(MapEngine engine, double s_elapsed);
 }

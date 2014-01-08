@@ -17,7 +17,7 @@ public class Exit extends Scenery {
   }
 
   @Override
-  public void computeNextStep(double s_elapsed) {
+  public void planNextStep(double s_elapsed) {
 
   }
 

@@ -70,7 +70,7 @@ public abstract class MovableObject extends MapObject {
   }
 
   @Override
-  public void computeNextStep(double s_elapsed) {
+  public void planNextStep(double s_elapsed) {
     next_movement = pilot.findNextMove(s_elapsed);
   }
 
