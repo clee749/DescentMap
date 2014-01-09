@@ -58,7 +58,7 @@ public abstract class Powerup extends MovableObject {
 
   @Override
   public void handleHittingWall(RoomSide wall_side) {
-    // TODO: sometimes we get stuck on a wall
+    super.handleHittingWall(wall_side);
     if (wall_side.equals(RoomSide.NORTH) || wall_side.equals(RoomSide.SOUTH)) {
       direction = direction + 2 * (Math.PI - direction);
     }

@@ -48,7 +48,6 @@ public abstract class Unit extends MovableObject {
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     if (shields < 0) {
-      // TODO: sometimes Explosion and Powerups fail to appear
       is_in_map = false;
       MultipleObject objects = new MultipleObject();
       objects.addObject(new Explosion(room, x_loc, y_loc,

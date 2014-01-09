@@ -62,7 +62,7 @@ public abstract class Robot extends Unit {
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     MapObject object_created = super.doNextAction(engine, s_elapsed);
-    if (firing_cannon) {
+    if (firing_cannon && shields >= 0) {
       if (volley_reload_time_left < 0.0) {
         --shots_left_in_volley;
         if (shots_left_in_volley < 1) {
