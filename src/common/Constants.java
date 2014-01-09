@@ -32,10 +32,19 @@ public class Constants {
   // play displayer
   public static final int PLAY_SIGHT_RADIUS = 3;
 
+  // power up
+  public static final double POWERUP_RADIUS = 0.1;
+  public static final double POWERUP_MOVE_SPEED_DECELERATION = 0.5;
+  public static final double POWERUP_MAX_SPEED = 2.0;
+  public static final int POWERUP_SHIELD_AMOUNT = 18;
+
   // Pyro additional constants
   public static final double PYRO_OUTER_CANNON_OFFSET = 0.8;
   public static final double PYRO_CANNON_FORWARD_OFFSET = 0.2;
   public static final double PYRO_MISSILE_OFFSET = 0.2;
+  public static final int PYRO_MAX_SHIELDS = 200;
+  public static final int PYRO_STARTING_ENERGY = 100;
+  public static final int PYRO_MAX_ENERGY = 200;
 
   // robot
   public static final double ROBOT_START_EXPLORE_PROB = 0.1;
@@ -54,17 +63,25 @@ public class Constants {
   public static final long RUNNER_PLAY_MAX_SLEEP = 110;
   public static final long RUNNER_PAUSE_AFTER_PLAY_SLEEP = 1000;
 
+  // shot
+  public static final double SHOT_EXPLOSION_RADIUS_DIVISOR = 30.0;
+  public static final double SHOT_EXPLOSION_TIME_DIVISOR = 3.0;
+
+  // unit
+  public static final double UNIT_EXPLOSION_RADIUS_MULTIPLIER = 1.1;
+  public static final double UNIT_EXPLOSION_MAX_TIME = 1.0;
+
   // objects
   public static Double getRadius(ObjectType type) {
     return RADII.get(type);
   }
 
-  public static Double getMoveSpeed(ObjectType type) {
-    return MOVE_SPEEDS.get(type);
+  public static Double getMaxMoveSpeed(ObjectType type) {
+    return MAX_MOVE_SPEEDS.get(type);
   }
 
-  public static Double getTurnSpeed(ObjectType type) {
-    return TURN_SPEEDS.get(type);
+  public static Double getMaxTurnSpeed(ObjectType type) {
+    return MAX_TURN_SPEEDS.get(type);
   }
 
   public static Double getReloadTime(ObjectType type) {
@@ -83,13 +100,23 @@ public class Constants {
     return CANNON_OFFSETS.get(type);
   }
 
+  public static Integer getStartingShields(ObjectType type) {
+    return STARTING_SHIELDS.get(type);
+  }
+
+  public static Integer getDamage(ObjectType type) {
+    return DAMAGES.get(type);
+  }
+
   private static final HashMap<ObjectType, Double> RADII = getRadii();
-  private static final HashMap<ObjectType, Double> MOVE_SPEEDS = getMoveSpeeds();
-  private static final HashMap<ObjectType, Double> TURN_SPEEDS = getTurnSpeeds();
+  private static final HashMap<ObjectType, Double> MAX_MOVE_SPEEDS = getMaxMoveSpeeds();
+  private static final HashMap<ObjectType, Double> MAX_TURN_SPEEDS = getMaxTurnSpeeds();
   private static final HashMap<ObjectType, Double> RELOAD_TIMES = getReloadTimes();
   private static final HashMap<ObjectType, Integer> SHOTS_PER_VOLLEYS = getShotsPerVolleys();
   private static final HashMap<ObjectType, Double> VOLLEY_RELOAD_TIMES = getVolleyReloadTimes();
   private static final HashMap<ObjectType, Double> CANNON_OFFSETS = getCannonOffsets();
+  private static final HashMap<ObjectType, Integer> STARTING_SHIELDS = getStartingShields();
+  private static final HashMap<ObjectType, Integer> DAMAGES = getDamages();
 
   private static HashMap<ObjectType, Double> getRadii() {
     HashMap<ObjectType, Double> radii = new HashMap<ObjectType, Double>();
@@ -99,7 +126,7 @@ public class Constants {
     return radii;
   }
 
-  private static HashMap<ObjectType, Double> getMoveSpeeds() {
+  private static HashMap<ObjectType, Double> getMaxMoveSpeeds() {
     HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
     speeds.put(ObjectType.Pyro, 1.0);
     speeds.put(ObjectType.LaserShot, 3.0);
@@ -107,7 +134,7 @@ public class Constants {
     return speeds;
   }
 
-  private static HashMap<ObjectType, Double> getTurnSpeeds() {
+  private static HashMap<ObjectType, Double> getMaxTurnSpeeds() {
     HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
     speeds.put(ObjectType.Pyro, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.Class2Drone, MapUtils.PI_OVER_TWO);
@@ -123,14 +150,12 @@ public class Constants {
 
   private static HashMap<ObjectType, Integer> getShotsPerVolleys() {
     HashMap<ObjectType, Integer> shots = new HashMap<ObjectType, Integer>();
-    shots.put(ObjectType.Pyro, 1);
     shots.put(ObjectType.Class2Drone, 2);
     return shots;
   }
 
   private static HashMap<ObjectType, Double> getVolleyReloadTimes() {
     HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
-    times.put(ObjectType.Pyro, 0.0);
     times.put(ObjectType.Class2Drone, 0.2);
     return times;
   }
@@ -140,6 +165,19 @@ public class Constants {
     offsets.put(ObjectType.Pyro, 0.525);
     offsets.put(ObjectType.Class2Drone, 0.0);
     return offsets;
+  }
+
+  private static HashMap<ObjectType, Integer> getStartingShields() {
+    HashMap<ObjectType, Integer> shields = new HashMap<ObjectType, Integer>();
+    shields.put(ObjectType.Pyro, 100);
+    shields.put(ObjectType.Class2Drone, 11);
+    return shields;
+  }
+
+  private static HashMap<ObjectType, Integer> getDamages() {
+    HashMap<ObjectType, Integer> damages = new HashMap<ObjectType, Integer>();
+    damages.put(ObjectType.LaserShot, 3);
+    return damages;
   }
 
   protected Constants() {

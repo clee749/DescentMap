@@ -19,7 +19,7 @@ public class Explosion extends MapObject {
   private double time_elapsed;
 
   public Explosion(Room room, double x_loc, double y_loc, double max_radius, double total_time) {
-    super(room, x_loc, y_loc, max_radius);
+    super(max_radius, room, x_loc, y_loc);
     this.total_time = total_time;
     half_life = total_time / 2;
     time_elapsed = 0.0;

@@ -73,6 +73,6 @@ public class MapEngine {
   }
 
   public boolean levelComplete() {
-    return center_object.getRoom().equals(map.getExitRoom());
+    return center_object.getRoom().equals(map.getExitRoom()) || !center_object.isInMap();
   }
 }

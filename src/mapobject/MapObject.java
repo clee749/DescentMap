@@ -33,7 +33,7 @@ public abstract class MapObject {
     this.y_loc = y_loc;
   }
 
-  public MapObject(Room room, double x_loc, double y_loc, double radius) {
+  public MapObject(double radius, Room room, double x_loc, double y_loc) {
     type = getType();
     this.radius = radius;
     is_in_map = true;

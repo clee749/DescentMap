@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import mapobject.MapObject;
+import mapobject.powerup.Powerup;
 import mapobject.scenery.Scenery;
 import mapobject.shot.Shot;
 import mapobject.unit.Unit;
@@ -30,6 +31,7 @@ public class Room {
   private final int height;
   private final HashMap<RoomSide, RoomConnection> neighbors;
   private final HashSet<Scenery> sceneries;
+  private final HashSet<Powerup> powerups;
   private final HashSet<Shot> shots;
   private final HashSet<Unit> units;
   private final HashSet<MapObject> misc_objects;
@@ -41,6 +43,7 @@ public class Room {
     height = se_corner.y - nw_corner.y;
     neighbors = new HashMap<RoomSide, RoomConnection>();
     sceneries = new HashSet<Scenery>();
+    powerups = new HashSet<Powerup>();
     shots = new HashSet<Shot>();
     units = new HashSet<Unit>();
     misc_objects = new HashSet<MapObject>();
@@ -80,6 +83,10 @@ public class Room {
 
   public HashSet<Scenery> getSceneries() {
     return sceneries;
+  }
+
+  public HashSet<Powerup> getPowerups() {
+    return powerups;
   }
 
   public HashSet<Shot> getShots() {
@@ -165,6 +172,9 @@ public class Room {
       for (Scenery scenery : sceneries) {
         scenery.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
+      for (Powerup powerup : powerups) {
+        powerup.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      }
       for (Shot shot : shots) {
         shot.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
@@ -195,6 +205,9 @@ public class Room {
     if (object instanceof Scenery) {
       sceneries.add((Scenery) object);
     }
+    else if (object instanceof Powerup) {
+      powerups.add((Powerup) object);
+    }
     else if (object instanceof Shot) {
       shots.add((Shot) object);
     }
@@ -210,6 +223,9 @@ public class Room {
     if (child instanceof Scenery) {
       return sceneries.remove(child);
     }
+    if (child instanceof Powerup) {
+      return powerups.remove(child);
+    }
     if (child instanceof Shot) {
       return shots.remove(child);
     }
@@ -222,6 +238,9 @@ public class Room {
   public void computeNextStep(double s_elapsed) {
     for (Scenery scenery : sceneries) {
       scenery.planNextAction(s_elapsed);
+    }
+    for (Powerup powerup : powerups) {
+      powerup.planNextAction(s_elapsed);
     }
     for (Shot shot : shots) {
       shot.planNextAction(s_elapsed);
@@ -236,6 +255,7 @@ public class Room {
 
   public LinkedList<MapObject> doNextStep(MapEngine engine, double s_elapsed) {
     LinkedList<MapObject> created_objects = doNextStep(engine, s_elapsed, sceneries);
+    created_objects.addAll(doNextStep(engine, s_elapsed, powerups));
     created_objects.addAll(doNextStep(engine, s_elapsed, shots));
     created_objects.addAll(doNextStep(engine, s_elapsed, units));
     created_objects.addAll(doNextStep(engine, s_elapsed, misc_objects));

@@ -9,12 +9,14 @@ import mapobject.MapObject;
 import mapobject.MultipleObject;
 import mapobject.shot.LaserShot;
 import mapobject.unit.Unit;
+import pilot.Pilot;
 import pilot.PyroPilot;
 import structure.Room;
 import util.MapUtils;
 
 import common.Constants;
 import common.ObjectType;
+import component.MapEngine;
 
 import external.ImageHandler;
 
@@ -23,12 +25,17 @@ public class Pyro extends Unit {
   private final double cannon_forward_offset;
   private final boolean has_quad_lasers;
 
-  public Pyro(Room room, double x_loc, double y_loc, double direction) {
-    super(new PyroPilot(), room, x_loc, y_loc, direction);
+  public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
+    super(pilot, room, x_loc, y_loc, direction);
     outer_cannon_offset = Constants.PYRO_OUTER_CANNON_OFFSET * radius;
     cannon_forward_offset = Constants.PYRO_CANNON_FORWARD_OFFSET * radius;
     ((PyroPilot) pilot).startPilot();
     has_quad_lasers = true;
+    reload_time = 0.25;
+  }
+
+  public Pyro(Room room, double x_loc, double y_loc, double direction) {
+    this(new PyroPilot(), room, x_loc, y_loc, direction);
   }
 
   @Override
@@ -48,6 +55,27 @@ public class Pyro extends Unit {
   }
 
   @Override
+  public void planNextAction(double s_elapsed) {
+    super.planNextAction(s_elapsed);
+    if (next_action.fire_cannon && reload_time_left < 0.0) {
+      planToFireCannon();
+    }
+    else {
+      handleCannonReload(s_elapsed);
+    }
+  }
+
+  @Override
+  public MapObject doNextAction(MapEngine engine, double s_elapsed) {
+    MapObject object_created = super.doNextAction(engine, s_elapsed);
+    if (firing_cannon) {
+      firing_cannon = false;
+      return fireCannon();
+    }
+    return object_created;
+  }
+
+  @Override
   public MapObject fireCannon() {
     MultipleObject shots = new MultipleObject();
     Point2D.Double abs_offset = findRightShotAbsOffset(cannon_offset);
@@ -63,5 +91,18 @@ public class Pyro extends Unit {
               abs_offset.y + y_forward_abs_offset, direction, 1));
     }
     return shots;
+  }
+
+  @Override
+  public MapObject releasePowerups() {
+    return null;
+  }
+
+  public boolean acquireShield(int amount) {
+    if (shields < Constants.PYRO_MAX_SHIELDS) {
+      shields = Math.min(shields + amount, Constants.PYRO_MAX_SHIELDS);
+      return true;
+    }
+    return false;
   }
 }
