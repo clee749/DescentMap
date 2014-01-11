@@ -4,14 +4,13 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
-import mapobject.unit.Unit;
+import mapobject.unit.pyro.Pyro;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
 import common.Constants;
 import common.DescentMapException;
-import common.ObjectType;
 import common.RoomSide;
 
 enum RobotPilotState {
@@ -37,9 +36,7 @@ public class RobotPilot extends Pilot {
   @Override
   public void updateCurrentRoom(Room room) {
     super.updateCurrentRoom(room);
-    if (state.equals(RobotPilotState.MOVE_INTO_ROOM)) {
-      initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
-    }
+    initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
   }
 
   public void initState(RobotPilotState next_state) {
@@ -55,14 +52,15 @@ public class RobotPilot extends Pilot {
         }
         else {
           previous_exploration_room = current_room;
-          planMoveToRoomConnection(target_room_info.getKey());
-          planToTurnToTarget();
+          planMoveToRoomConnection(target_room_info.getKey(), object_radius);
+          planTurnToTarget();
         }
         break;
       case MOVE_TO_ROOM_EXIT:
         break;
       case TURN_INTO_ROOM:
-        planToTurnIntoRoom(target_room_info.getKey());
+        planMoveToNeighborRoom(target_room_info.getKey(), object_diameter);
+        planTurnToTarget();
         break;
       case MOVE_INTO_ROOM:
         break;
@@ -71,7 +69,7 @@ public class RobotPilot extends Pilot {
                 MapUtils.randomInternalPoint(current_room.getNWCorner(), current_room.getSECorner(),
                         object_radius);
         setTargetLocation(target_location.x, target_location.y);
-        planToTurnToTarget();
+        planTurnToTarget();
         break;
       case MOVE_TO_ROOM_INTERIOR:
         break;
@@ -122,16 +120,32 @@ public class RobotPilot extends Pilot {
   }
 
   public void updateState(double s_elapsed) {
+    // reacting to a Pyro takes precedence over all other states
     if (!state.equals(RobotPilotState.REACT_TO_PYRO)) {
-      for (Unit unit : current_room.getUnits()) {
-        if (unit.getType().equals(ObjectType.Pyro)) {
-          target_object = unit;
-          initState(RobotPilotState.REACT_TO_PYRO);
-          return;
+      // look for a Pyro in the same Room
+      for (Pyro pyro : current_room.getPyros()) {
+        target_object = pyro;
+        target_object_room = pyro.getRoom();
+        initState(RobotPilotState.REACT_TO_PYRO);
+        return;
+      }
+
+      // look for a visible Pyro in a neighbor Room
+      for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
+        RoomConnection connection = entry.getValue();
+        for (Pyro pyro : connection.neighbor.getPyros()) {
+          if (canSeeLocationInNeighborRoom(pyro.getX(), pyro.getY(), entry.getKey(), connection)) {
+            target_object = pyro;
+            target_object_room = connection.neighbor;
+            target_object_room_info = entry;
+            initState(RobotPilotState.REACT_TO_PYRO);
+            return;
+          }
         }
       }
     }
 
+    // handle states if already reacting to Pyro or no Pyro found
     switch (state) {
       case INACTIVE:
         if (Math.random() / s_elapsed < Constants.ROBOT_START_EXPLORE_PROB) {
@@ -173,7 +187,14 @@ public class RobotPilot extends Pilot {
         }
         break;
       case REACT_TO_PYRO:
-        if (!target_object.getRoom().equals(current_room)) {
+        if (target_object_room.equals(current_room)) {
+          if (!target_object.getRoom().equals(target_object_room)) {
+            initState(RobotPilotState.INACTIVE);
+          }
+        }
+        else if (!target_object.getRoom().equals(target_object_room) ||
+                !canSeeLocationInNeighborRoom(target_object.getX(), target_object.getY(),
+                        target_object_room_info.getKey(), target_object_room_info.getValue())) {
           initState(RobotPilotState.INACTIVE);
         }
         break;

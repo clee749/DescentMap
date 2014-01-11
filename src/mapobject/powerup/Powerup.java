@@ -4,14 +4,12 @@ import java.awt.Image;
 
 import mapobject.MapObject;
 import mapobject.MovableObject;
-import mapobject.unit.Unit;
 import mapobject.unit.pyro.Pyro;
 import pilot.PowerupPilot;
 import structure.Room;
 import util.MapUtils;
 
 import common.Constants;
-import common.ObjectType;
 import common.RoomSide;
 import component.MapEngine;
 
@@ -43,14 +41,12 @@ public abstract class Powerup extends MovableObject {
       move_speed = Math.max(move_speed - Constants.POWERUP_MOVE_SPEED_DECELERATION * s_elapsed, 0.0);
     }
 
-    for (Unit unit : room.getUnits()) {
-      if (unit.getType().equals(ObjectType.Pyro)) {
-        double pyro_radius = unit.getRadius();
-        if (Math.abs(x_loc - unit.getX()) < pyro_radius && Math.abs(y_loc - unit.getY()) < pyro_radius &&
-                beAcquired((Pyro) unit)) {
-          is_in_map = false;
-          break;
-        }
+    for (Pyro pyro : room.getPyros()) {
+      double pyro_radius = pyro.getRadius();
+      if (Math.abs(x_loc - pyro.getX()) < pyro_radius && Math.abs(y_loc - pyro.getY()) < pyro_radius &&
+              beAcquired(pyro)) {
+        is_in_map = false;
+        break;
       }
     }
     return created_object;

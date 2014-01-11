@@ -14,6 +14,7 @@ import common.RoomSide;
 public abstract class Pilot {
   protected MovableObject object;
   protected double object_radius;
+  protected double object_diameter;
   // we cannot just use object.getRoom because we could go into an unintentional Room while turning
   protected Room current_room;
   protected Entry<RoomSide, RoomConnection> target_room_info;
@@ -21,11 +22,14 @@ public abstract class Pilot {
   protected double target_y;
   protected double target_direction;
   protected MapObject target_object;
+  protected Room target_object_room;
+  protected Entry<RoomSide, RoomConnection> target_object_room_info;
 
   public void bindToObject(MovableObject object) {
     this.object = object;
     current_room = object.getRoom();
     object_radius = object.getRadius();
+    object_diameter = 2 * object_radius;
   }
 
   public double getTargetX() {
@@ -49,70 +53,90 @@ public abstract class Pilot {
     current_room = room;
   }
 
-  public void planMoveToRoomConnection(RoomSide direction) {
+  public void planMoveToRoomConnection(RoomSide direction, double radius) {
     RoomConnection connection = current_room.getConnectionInDirection(direction);
     double middle = (connection.min + connection.max) / 2.0;
     switch (direction) {
       case EAST:
-        setTargetLocation(current_room.getSECorner().x - object_radius, middle);
+        setTargetLocation(current_room.getSECorner().x - radius, middle);
         break;
       case WEST:
-        setTargetLocation(current_room.getNWCorner().x + object_radius, middle);
+        setTargetLocation(current_room.getNWCorner().x + radius, middle);
         break;
       case NORTH:
-        setTargetLocation(middle, current_room.getNWCorner().y + object_radius);
+        setTargetLocation(middle, current_room.getNWCorner().y + radius);
         break;
       case SOUTH:
-        setTargetLocation(middle, current_room.getSECorner().y - object_radius);
+        setTargetLocation(middle, current_room.getSECorner().y - radius);
         break;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + direction);
     }
   }
 
-  public void planMoveToNeighborRoom(RoomSide direction) {
+  public void planMoveToNeighborRoom(RoomSide direction, double radius) {
     RoomConnection connection = current_room.getConnectionInDirection(direction);
     double middle = (connection.min + connection.max) / 2.0;
     switch (direction) {
       case EAST:
-        setTargetLocation(current_room.getSECorner().x + object_radius, middle);
+        setTargetLocation(current_room.getSECorner().x + radius, middle);
         break;
       case WEST:
-        setTargetLocation(current_room.getNWCorner().x - object_radius, middle);
+        setTargetLocation(current_room.getNWCorner().x - radius, middle);
         break;
       case NORTH:
-        setTargetLocation(middle, current_room.getNWCorner().y - object_radius);
+        setTargetLocation(middle, current_room.getNWCorner().y - radius);
         break;
       case SOUTH:
-        setTargetLocation(middle, current_room.getSECorner().y + object_radius);
+        setTargetLocation(middle, current_room.getSECorner().y + radius);
         break;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + direction);
     }
   }
 
-  public void planToTurnIntoRoom(RoomSide direction) {
-    // target_directions for north and south reversed because y-coordinates increase down screen
-    switch (direction) {
-      case EAST:
-        setTargetDirection(0.0);
-        break;
-      case NORTH:
-        setTargetDirection(MapUtils.THREE_PI_OVER_TWO);
-        break;
-      case WEST:
-        setTargetDirection(Math.PI);
-        break;
-      case SOUTH:
-        setTargetDirection(MapUtils.PI_OVER_TWO);
-        break;
-      default:
-        throw new DescentMapException("Unexpected RoomSide: " + direction);
-    }
+  public void planTurnIntoRoom(RoomSide direction) {
+    setTargetDirection(RoomSide.directionToRadians(direction));
   }
 
-  public void planToTurnToTarget() {
+  public void planTurnToTarget() {
     setTargetDirection(-MapUtils.absoluteAngleTo(object.getX(), object.getY(), target_x, target_y));
+  }
+
+  public boolean canSeeLocationInNeighborRoom(double location_x, double location_y, RoomSide neighbor_side,
+          RoomConnection connection) {
+    double current_x = object.getX();
+    double current_y = object.getY();
+    double neighbor_direction = RoomSide.directionToRadians(neighbor_side);
+    double angle_to_location =
+            MapUtils.angleTo(neighbor_direction, location_x - current_x, location_y - current_y);
+    double angle_to_connection_min;
+    double angle_to_connection_max;
+    switch (neighbor_side) {
+      case NORTH:
+        double dy = current_room.getNWCorner().y - current_y;
+        angle_to_connection_min = MapUtils.angleTo(neighbor_direction, connection.min - current_x, dy);
+        angle_to_connection_max = MapUtils.angleTo(neighbor_direction, connection.max - current_x, dy);
+        break;
+      case SOUTH:
+        dy = current_room.getSECorner().y - current_y;
+        angle_to_connection_min = MapUtils.angleTo(neighbor_direction, connection.min - current_x, dy);
+        angle_to_connection_max = MapUtils.angleTo(neighbor_direction, connection.max - current_x, dy);
+        break;
+      case WEST:
+        double dx = current_room.getNWCorner().x - current_x;
+        angle_to_connection_min = MapUtils.angleTo(neighbor_direction, dx, connection.min - current_y);
+        angle_to_connection_max = MapUtils.angleTo(neighbor_direction, dx, connection.max - current_y);
+        break;
+      case EAST:
+        dx = current_room.getSECorner().x - current_x;
+        angle_to_connection_min = MapUtils.angleTo(neighbor_direction, dx, connection.min - current_y);
+        angle_to_connection_max = MapUtils.angleTo(neighbor_direction, dx, connection.max - current_y);
+        break;
+      default:
+        throw new DescentMapException("Unexpected RoomSide: " + neighbor_side);
+    }
+    return MapUtils.isAngleBetween(angle_to_location, angle_to_connection_min, angle_to_connection_max);
   }
 
   public abstract PilotAction findNextAction(double s_elapsed);

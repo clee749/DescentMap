@@ -128,4 +128,8 @@ public class MapUtils {
     return new Point2D.Double(nw_corner.x + point_radius + Math.random() * x_range, nw_corner.y +
             point_radius + Math.random() * y_range);
   }
+
+  public static boolean isAngleBetween(double test_angle, double angle1, double angle2) {
+    return (angle1 < test_angle && test_angle < angle2) || (angle2 < test_angle && test_angle < angle1);
+  }
 }

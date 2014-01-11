@@ -58,10 +58,10 @@ public class PyroPilot extends Pilot {
         break;
       case MOVE_TO_ROOM_CONNECTION:
         findNextRoom();
-        planMoveToRoomConnection(target_room_info.getKey());
+        planMoveToRoomConnection(target_room_info.getKey(), object_radius);
         break;
       case MOVE_TO_NEIGHBOR_ROOM:
-        planMoveToNeighborRoom(target_room_info.getKey());
+        planMoveToNeighborRoom(target_room_info.getKey(), object_radius);
         break;
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);

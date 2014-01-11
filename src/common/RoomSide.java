@@ -93,15 +93,16 @@ public enum RoomSide {
   }
 
   public static double directionToRadians(RoomSide direction) {
+    // direction for north and south reversed because y-coordinates increase down screen
     switch (direction) {
       case EAST:
         return 0.0;
       case NORTH:
-        return MapUtils.PI_OVER_TWO;
+        return MapUtils.THREE_PI_OVER_TWO;
       case WEST:
         return Math.PI;
       case SOUTH:
-        return MapUtils.THREE_PI_OVER_TWO;
+        return MapUtils.PI_OVER_TWO;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + direction);
     }

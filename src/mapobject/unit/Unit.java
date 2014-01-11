@@ -52,7 +52,10 @@ public abstract class Unit extends MovableObject {
       MultipleObject objects = new MultipleObject();
       objects.addObject(new Explosion(room, x_loc, y_loc,
               radius * Constants.UNIT_EXPLOSION_RADIUS_MULTIPLIER, Constants.UNIT_EXPLOSION_MAX_TIME));
-      objects.addObject(releasePowerups());
+      MapObject powerups = releasePowerups();
+      if (powerups != null) {
+        objects.addObject(powerups);
+      }
       return objects;
     }
     return super.doNextAction(engine, s_elapsed);

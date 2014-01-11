@@ -59,8 +59,8 @@ public class Constants {
   public static final long RUNNER_BUILD_SLEEP = 100;
   public static final long RUNNER_PAUSE_AFTER_BUILD_SLEEP = 1000;
   public static final long RUNNER_PAUSE_BEFORE_PLAY_SLEEP = 1000;
-  public static final long RUNNER_PLAY_MIN_SLEEP = 100;
-  public static final long RUNNER_PLAY_MAX_SLEEP = 110;
+  public static final long RUNNER_PLAY_MIN_SLEEP = 30;
+  public static final long RUNNER_PLAY_MAX_SLEEP = 11 * RUNNER_PLAY_MIN_SLEEP / 10;
   public static final long RUNNER_PAUSE_AFTER_PLAY_SLEEP = 1000;
 
   // shot

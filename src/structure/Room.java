@@ -16,9 +16,11 @@ import mapobject.powerup.Powerup;
 import mapobject.scenery.Scenery;
 import mapobject.shot.Shot;
 import mapobject.unit.Unit;
+import mapobject.unit.pyro.Pyro;
 import util.MapUtils;
 
 import common.Constants;
+import common.ObjectType;
 import common.RoomSide;
 import component.MapEngine;
 
@@ -33,7 +35,8 @@ public class Room {
   private final HashSet<Scenery> sceneries;
   private final HashSet<Powerup> powerups;
   private final HashSet<Shot> shots;
-  private final HashSet<Unit> units;
+  private final HashSet<Pyro> pyros;
+  private final HashSet<Unit> units; // includes Pyros
   private final HashSet<MapObject> misc_objects;
 
   public Room(Point nw_corner, Point se_corner) {
@@ -45,6 +48,7 @@ public class Room {
     sceneries = new HashSet<Scenery>();
     powerups = new HashSet<Powerup>();
     shots = new HashSet<Shot>();
+    pyros = new HashSet<Pyro>();
     units = new HashSet<Unit>();
     misc_objects = new HashSet<MapObject>();
   }
@@ -91,6 +95,10 @@ public class Room {
 
   public HashSet<Shot> getShots() {
     return shots;
+  }
+
+  public HashSet<Pyro> getPyros() {
+    return pyros;
   }
 
   public HashSet<Unit> getUnits() {
@@ -212,6 +220,9 @@ public class Room {
       shots.add((Shot) object);
     }
     else if (object instanceof Unit) {
+      if (object.getType().equals(ObjectType.Pyro)) {
+        pyros.add((Pyro) object);
+      }
       units.add((Unit) object);
     }
     else {
@@ -230,6 +241,9 @@ public class Room {
       return shots.remove(child);
     }
     if (child instanceof Unit) {
+      if (child.getType().equals(ObjectType.Pyro)) {
+        pyros.remove(child);
+      }
       return units.remove(child);
     }
     return misc_objects.remove(child);
