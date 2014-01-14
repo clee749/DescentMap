@@ -4,10 +4,12 @@ import java.util.Map.Entry;
 
 import mapobject.MapObject;
 import mapobject.MovableObject;
+import mapobject.shot.Shot;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
+import common.Constants;
 import common.DescentMapException;
 import common.RoomSide;
 
@@ -137,6 +139,23 @@ public abstract class Pilot {
         throw new DescentMapException("Unexpected RoomSide: " + neighbor_side);
     }
     return MapUtils.isAngleBetween(angle_to_location, angle_to_connection_min, angle_to_connection_max);
+  }
+
+  public StrafeDirection reactToShots() {
+    for (Shot shot : current_room.getShots()) {
+      if (shot.getSource().equals(object)) {
+        continue;
+      }
+      double angle_to_object =
+              MapUtils.angleTo(shot.getDirection(), object.getX() - shot.getX(), object.getY() - shot.getY());
+      if (Math.abs(angle_to_object) < Constants.PILOT_SHOT_EVASION_THRESHOLD) {
+        if (Math.abs(MapUtils.angleTo(shot.getDirection(), object.getDirection())) < MapUtils.PI_OVER_TWO) {
+          angle_to_object *= -1;
+        }
+        return (angle_to_object < 0 ? StrafeDirection.LEFT : StrafeDirection.RIGHT);
+      }
+    }
+    return StrafeDirection.NONE;
   }
 
   public abstract PilotAction findNextAction(double s_elapsed);

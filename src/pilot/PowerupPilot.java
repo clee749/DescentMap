@@ -18,7 +18,7 @@ public class PowerupPilot extends Pilot {
   @Override
   public PilotAction findNextAction(double s_elapsed) {
     if (state.equals(PowerupPilotState.INACTIVE)) {
-      return new PilotAction();
+      return PilotAction.NO_ACTION;
     }
 
     if (object.getMoveSpeed() <= 0.0) {
@@ -27,9 +27,9 @@ public class PowerupPilot extends Pilot {
 
     switch (state) {
       case INACTIVE:
-        return new PilotAction();
+        return PilotAction.NO_ACTION;
       case DRIFT:
-        return new PilotAction(MoveDirection.FORWARD);
+        return PilotAction.MOVE_FORWARD;
       default:
         throw new DescentMapException("Unexpected PowerupPilotState: " + state);
     }

@@ -84,36 +84,39 @@ public class RobotPilot extends Pilot {
   @Override
   public PilotAction findNextAction(double s_elapsed) {
     updateState(s_elapsed);
+    StrafeDirection strafe = reactToShots();
+
     switch (state) {
       case INACTIVE:
-        return new PilotAction();
+        return new PilotAction(strafe);
       case TURN_TO_ROOM_EXIT:
-        return new PilotAction(TurnDirection.angleToTurnDirection(MapUtils.angleTo(object.getDirection(),
-                target_direction)));
+        return new PilotAction(strafe, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_direction)));
       case MOVE_TO_ROOM_EXIT:
-        return new PilotAction(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
+        return new PilotAction(MoveDirection.FORWARD, strafe, TurnDirection.angleToTurnDirection(MapUtils
+                .angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY())));
       case TURN_INTO_ROOM:
-        return new PilotAction(TurnDirection.angleToTurnDirection(MapUtils.angleTo(object.getDirection(),
-                target_direction)));
+        return new PilotAction(strafe, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_direction)));
       case MOVE_INTO_ROOM:
-        return new PilotAction(MoveDirection.FORWARD);
+        return new PilotAction(MoveDirection.FORWARD, strafe);
       case TURN_TO_ROOM_INTERIOR:
-        return new PilotAction(TurnDirection.angleToTurnDirection(MapUtils.angleTo(object.getDirection(),
-                target_direction)));
+        return new PilotAction(strafe, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_direction)));
       case MOVE_TO_ROOM_INTERIOR:
-        return new PilotAction(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
+        return new PilotAction(MoveDirection.FORWARD, strafe, TurnDirection.angleToTurnDirection(MapUtils
+                .angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY())));
       case REACT_TO_PYRO:
         double angle_to_target =
                 MapUtils.angleTo(object.getDirection(), target_object.getX() - object.getX(),
                         target_object.getY() - object.getY());
         double abs_angle_to_target = Math.abs(angle_to_target);
         if (abs_angle_to_target < Constants.PILOT_ROBOT_TARGET_DIRECTION_EPSILON) {
-          return new PilotAction(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(angle_to_target),
+          return new PilotAction(MoveDirection.FORWARD, strafe,
+                  TurnDirection.angleToTurnDirection(angle_to_target),
                   abs_angle_to_target < Constants.PILOT_DIRECTION_EPSILON);
         }
-        return new PilotAction(TurnDirection.angleToTurnDirection(angle_to_target));
+        return new PilotAction(strafe, TurnDirection.angleToTurnDirection(angle_to_target));
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
     }

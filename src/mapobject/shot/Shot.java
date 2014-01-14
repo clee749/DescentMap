@@ -29,6 +29,10 @@ public abstract class Shot extends MovableObject {
     return damage;
   }
 
+  public MapObject getSource() {
+    return source;
+  }
+
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     // check for collision with a Unit

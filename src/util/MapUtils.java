@@ -129,7 +129,36 @@ public class MapUtils {
             point_radius + Math.random() * y_range);
   }
 
+  /**
+   * 
+   * @param test_angle angle in range [-Math.PI, Math.PI]
+   * @param angle1 angle in same range
+   * @param angle2 angle in same range
+   * @return true if test_angle is between angle1 and angle2 exclusive, false otherwise
+   */
   public static boolean isAngleBetween(double test_angle, double angle1, double angle2) {
     return (angle1 < test_angle && test_angle < angle2) || (angle2 < test_angle && test_angle < angle1);
+  }
+
+  /**
+   * 
+   * @param magnitude magnitude of resultant vector
+   * @param direction any angle
+   * @return vector with magnitude magnitude and direction perpendicular to direction
+   */
+  public static Point2D.Double perpendicularVector(double magnitude, double direction) {
+    double axis = direction + MapUtils.PI_OVER_TWO;
+    return new Point2D.Double(Math.cos(axis) * magnitude, Math.sin(axis) * magnitude);
+  }
+
+  /**
+   * 
+   * @param x_coord x-coordinate of point
+   * @param y_coord y-coordinate of point
+   * @param line_info standard form info of line
+   * @return min distance from point to line
+   */
+  public static double pointToLineDistance(double x_coord, double y_coord, LineInfo line_info) {
+    return Math.abs(line_info.a * x_coord + line_info.b * y_coord + line_info.c) / line_info.hypot_a_b;
   }
 }

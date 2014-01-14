@@ -90,7 +90,7 @@ public abstract class Robot extends Unit {
   @Override
   public MapObject fireCannon() {
     ++cannon_side;
-    Point2D.Double abs_offset = findRightShotAbsOffset(cannon_offset);
+    Point2D.Double abs_offset = MapUtils.perpendicularVector(cannon_offset, direction);
     if (cannon_side % 2 == 0) {
       return new LaserShot(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y, direction, 2);
     }

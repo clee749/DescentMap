@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.geom.Point2D;
 
 import mapobject.MapObject;
 import mapobject.MovableObject;
@@ -68,11 +67,6 @@ public abstract class Unit extends MovableObject {
   public void planToFireCannon() {
     firing_cannon = true;
     reload_time_left = reload_time;
-  }
-
-  public Point2D.Double findRightShotAbsOffset(double offset) {
-    double axis = direction + MapUtils.PI_OVER_TWO;
-    return new Point2D.Double(Math.cos(axis) * offset, Math.sin(axis) * offset);
   }
 
   public void hitByShot(Shot shot) {

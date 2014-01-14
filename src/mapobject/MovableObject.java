@@ -3,11 +3,10 @@ package mapobject;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.geom.Point2D;
 
-import pilot.MoveDirection;
 import pilot.Pilot;
 import pilot.PilotAction;
-import pilot.TurnDirection;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
@@ -125,30 +124,49 @@ public abstract class MovableObject extends MapObject {
       return;
     }
 
-    MoveDirection move = next_action.move;
-    if (move != null) {
-      switch (move) {
-        case NONE:
-          break;
-        case FORWARD:
-          x_loc += move_speed * Math.cos(direction) * s_elapsed;
-          y_loc += move_speed * Math.sin(direction) * s_elapsed;
-          break;
-      }
+    switch (next_action.move) {
+      case NONE:
+        break;
+      case FORWARD:
+        x_loc += move_speed * Math.cos(direction) * s_elapsed;
+        y_loc += move_speed * Math.sin(direction) * s_elapsed;
+        break;
+      case BACKWARD:
+        x_loc -= move_speed * Math.cos(direction) * s_elapsed;
+        y_loc -= move_speed * Math.sin(direction) * s_elapsed;
+        break;
+      default:
+        throw new DescentMapException("Unexpected MoveDirection: " + next_action.move);
     }
 
-    TurnDirection turn = next_action.turn;
-    if (turn != null) {
-      switch (turn) {
-        case NONE:
-          break;
-        case COUNTER_CLOCKWISE:
-          direction = MapUtils.normalizeAngle(direction + turn_speed * s_elapsed);
-          break;
-        case CLOCKWISE:
-          direction = MapUtils.normalizeAngle(direction - turn_speed * s_elapsed);
-          break;
-      }
+    switch (next_action.strafe) {
+      case NONE:
+        break;
+      case LEFT:
+        Point2D.Double strafe_dxdy = MapUtils.perpendicularVector(move_speed * s_elapsed, direction);
+        x_loc -= strafe_dxdy.x;
+        y_loc -= strafe_dxdy.y;
+        break;
+      case RIGHT:
+        strafe_dxdy = MapUtils.perpendicularVector(move_speed * s_elapsed, direction);
+        x_loc += strafe_dxdy.x;
+        y_loc += strafe_dxdy.y;
+        break;
+      default:
+        throw new DescentMapException("Unexpected StrafeDirection: " + next_action.strafe);
+    }
+
+    switch (next_action.turn) {
+      case NONE:
+        break;
+      case COUNTER_CLOCKWISE:
+        direction = MapUtils.normalizeAngle(direction + turn_speed * s_elapsed);
+        break;
+      case CLOCKWISE:
+        direction = MapUtils.normalizeAngle(direction - turn_speed * s_elapsed);
+        break;
+      default:
+        throw new DescentMapException("Unexpected TurnDirection: " + next_action.turn);
     }
 
     next_action = null;

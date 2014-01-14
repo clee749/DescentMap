@@ -72,6 +72,7 @@ public class PyroPilot extends Pilot {
   @Override
   public PilotAction findNextAction(double s_elapsed) {
     updateState();
+    StrafeDirection strafe = StrafeDirection.NONE;
 
     boolean fire_cannon = false;
     for (Unit unit : current_room.getUnits()) {
@@ -91,11 +92,13 @@ public class PyroPilot extends Pilot {
       case INACTIVE:
         return null;
       case MOVE_TO_ROOM_CONNECTION:
-        return new PilotAction(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon);
+        return new PilotAction(MoveDirection.FORWARD, strafe, TurnDirection.angleToTurnDirection(MapUtils
+                .angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY())),
+                fire_cannon);
       case MOVE_TO_NEIGHBOR_ROOM:
-        return new PilotAction(MoveDirection.FORWARD, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon);
+        return new PilotAction(MoveDirection.FORWARD, strafe, TurnDirection.angleToTurnDirection(MapUtils
+                .angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY())),
+                fire_cannon);
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
     }
