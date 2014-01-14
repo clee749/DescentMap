@@ -107,13 +107,17 @@ public class RobotPilot extends Pilot {
         return new PilotAction(MoveDirection.FORWARD, strafe, TurnDirection.angleToTurnDirection(MapUtils
                 .angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY())));
       case REACT_TO_PYRO:
+        MoveDirection move =
+                (Math.abs(target_object.getX() - object.getX()) < Constants.PILOT_ROBOT_MIN_DISTANCE_TO_PYRO &&
+                        Math.abs(target_object.getY() - object.getY()) < Constants.PILOT_ROBOT_MIN_DISTANCE_TO_PYRO
+                        ? MoveDirection.BACKWARD
+                        : MoveDirection.FORWARD);
         double angle_to_target =
                 MapUtils.angleTo(object.getDirection(), target_object.getX() - object.getX(),
                         target_object.getY() - object.getY());
         double abs_angle_to_target = Math.abs(angle_to_target);
         if (abs_angle_to_target < Constants.PILOT_ROBOT_TARGET_DIRECTION_EPSILON) {
-          return new PilotAction(MoveDirection.FORWARD, strafe,
-                  TurnDirection.angleToTurnDirection(angle_to_target),
+          return new PilotAction(move, strafe, TurnDirection.angleToTurnDirection(angle_to_target),
                   abs_angle_to_target < Constants.PILOT_DIRECTION_EPSILON);
         }
         return new PilotAction(strafe, TurnDirection.angleToTurnDirection(angle_to_target));
