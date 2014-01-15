@@ -23,7 +23,7 @@ public class Class2Drone extends Robot {
   @Override
   public MapObject releasePowerups() {
     MultipleObject objects = new MultipleObject();
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < 3; ++i) {
       objects.addObject(new Shield(room, x_loc, y_loc, Math.random() * MapUtils.TWO_PI, Math.random() *
               Constants.POWERUP_MAX_SPEED));
     }

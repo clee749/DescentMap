@@ -146,8 +146,7 @@ public abstract class Pilot {
       if (shot.getSource().equals(object)) {
         continue;
       }
-      double angle_to_object =
-              MapUtils.angleTo(shot.getDirection(), object.getX() - shot.getX(), object.getY() - shot.getY());
+      double angle_to_object = MapUtils.angleTo(shot, object);
       if (Math.abs(angle_to_object) < Constants.PILOT_SHOT_EVASION_THRESHOLD) {
         if (Math.abs(MapUtils.angleTo(shot.getDirection(), object.getDirection())) < MapUtils.PI_OVER_TWO) {
           angle_to_object *= -1;

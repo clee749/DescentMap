@@ -32,6 +32,10 @@ public abstract class Unit extends MovableObject {
     shields = Constants.getStartingShields(type);
   }
 
+  public int getShields() {
+    return shields;
+  }
+
   @Override
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {

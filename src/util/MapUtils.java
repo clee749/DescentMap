@@ -3,6 +3,9 @@ package util;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 
+import mapobject.MapObject;
+import mapobject.MovableObject;
+
 public class MapUtils {
   public static final double PI_OVER_TWO = Math.PI / 2;
   public static final double THREE_PI_OVER_TWO = 3 * Math.PI / 2;
@@ -61,6 +64,17 @@ public class MapUtils {
    */
   public static double angleTo(double src_direction, double dst_x, double dst_y) {
     return angleTo(Math.cos(src_direction), Math.sin(src_direction), dst_x, dst_y);
+  }
+
+  /**
+   * 
+   * @param src_object any MovableObject with location and direction
+   * @param dst_object any MapObject
+   * @return smallest angle from src_object's direction to dst_object
+   */
+  public static double angleTo(MovableObject src_object, MapObject dst_object) {
+    return angleTo(src_object.getDirection(), dst_object.getX() - src_object.getX(), dst_object.getY() -
+            src_object.getY());
   }
 
   /**

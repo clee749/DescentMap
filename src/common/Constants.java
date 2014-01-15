@@ -29,7 +29,8 @@ public class Constants {
   public static final double PILOT_DIRECTION_EPSILON = Math.PI / 32;
   public static final double PILOT_ROBOT_TARGET_DIRECTION_EPSILON = MapUtils.PI_OVER_TWO;
   public static final double PILOT_SHOT_EVASION_THRESHOLD = Math.PI / 16;
-  public static final double PILOT_ROBOT_MIN_DISTANCE_TO_PYRO = 0.5;
+  public static final double PILOT_ROBOT_MIN_DISTANCE_TO_PYRO = 1.0;
+  public static final double PILOT_TIME_TURNING_UNTIL_STOP = 5.0;
 
   // play displayer
   public static final int PLAY_SIGHT_RADIUS = 3;
