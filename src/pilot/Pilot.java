@@ -17,7 +17,6 @@ public abstract class Pilot {
   protected MovableObject object;
   protected double object_radius;
   protected double object_diameter;
-  // we cannot just use object.getRoom because we could go into an unintentional Room while turning
   protected Room current_room;
   protected Entry<RoomSide, RoomConnection> target_room_info;
   protected double target_x;

@@ -37,6 +37,7 @@ public class Constants {
 
   // power up
   public static final double POWERUP_RADIUS = 0.1;
+  public static final double POWERUP_SECONDS_PER_FRAME = 0.03;
   public static final double POWERUP_MOVE_SPEED_DECELERATION = 0.5;
   public static final double POWERUP_MAX_SPEED = 2.0;
   public static final int POWERUP_SHIELD_AMOUNT = 18;
@@ -62,7 +63,7 @@ public class Constants {
   public static final long RUNNER_BUILD_SLEEP = 100;
   public static final long RUNNER_PAUSE_AFTER_BUILD_SLEEP = 1000;
   public static final long RUNNER_PAUSE_BEFORE_PLAY_SLEEP = 1000;
-  public static final long RUNNER_PLAY_MIN_SLEEP = 30;
+  public static final long RUNNER_PLAY_MIN_SLEEP = 50;
   public static final long RUNNER_PLAY_MAX_SLEEP = 11 * RUNNER_PLAY_MIN_SLEEP / 10;
   public static final long RUNNER_PAUSE_AFTER_PLAY_SLEEP = 1000;
 

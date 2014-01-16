@@ -1,8 +1,8 @@
 package pilot;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Stack;
 
@@ -30,16 +30,16 @@ enum PyroPilotState {
 
 
 public class PyroPilot extends Pilot {
-  private final Stack<RoomSide> path;
   private final HashSet<Room> visited;
+  private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
   private PyroPilotState state;
   private Pyro pyro;
   private double time_turning_to_target;
   private TurnDirection previous_turn_to_target;
 
   public PyroPilot() {
-    path = new Stack<RoomSide>();
     visited = new HashSet<Room>();
+    current_path = new LinkedList<Entry<RoomSide, RoomConnection>>();
     state = PyroPilotState.INACTIVE;
   }
 
@@ -62,11 +62,12 @@ public class PyroPilot extends Pilot {
 
   @Override
   public void updateCurrentRoom(Room room) {
-    if (target_room_info == null || room.equals(target_room_info.getValue().neighbor)) {
-      super.updateCurrentRoom(room);
-      visitRoom(room);
-      initState(PyroPilotState.REACT_TO_OBJECT);
+    super.updateCurrentRoom(room);
+    visitRoom(room);
+    if (target_room_info != null && !room.equals(target_room_info.getValue().neighbor)) {
+      current_path.clear();
     }
+    initState(PyroPilotState.REACT_TO_OBJECT);
   }
 
   public void initState(PyroPilotState next_state) {
@@ -75,10 +76,10 @@ public class PyroPilot extends Pilot {
         break;
       case MOVE_TO_ROOM_CONNECTION:
         findNextRoom();
-        planMoveToRoomConnection(target_room_info.getKey(), object_radius);
+        planMoveToRoomConnection(target_room_info.getKey(), object_diameter);
         break;
       case MOVE_TO_NEIGHBOR_ROOM:
-        planMoveToNeighborRoom(target_room_info.getKey(), object_radius);
+        planMoveToNeighborRoom(target_room_info.getKey(), object_diameter);
         break;
       case REACT_TO_OBJECT:
         target_object = findNextTargetObject();
@@ -115,7 +116,7 @@ public class PyroPilot extends Pilot {
 
     switch (state) {
       case INACTIVE:
-        return null;
+        return PilotAction.NO_ACTION;
       case MOVE_TO_ROOM_CONNECTION:
         return new PilotAction(MoveDirection.FORWARD, strafe, TurnDirection.angleToTurnDirection(MapUtils
                 .angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY())),
@@ -160,7 +161,7 @@ public class PyroPilot extends Pilot {
         }
         break;
       case REACT_TO_OBJECT:
-        if (!target_object.isInMap() ||
+        if (!target_object.isInMap() || !target_object.getRoom().equals(current_room) ||
                 ((target_object instanceof Powerup) && !shouldCollectPowerup((Powerup) target_object))) {
           initState(PyroPilotState.REACT_TO_OBJECT);
         }
@@ -180,6 +181,13 @@ public class PyroPilot extends Pilot {
   }
 
   public void findNextRoom() {
+    // if we still have a path to follow, then follow it
+    if (!current_path.isEmpty()) {
+      target_room_info = current_path.pop();
+      return;
+    }
+
+    // see if we still need to visit a neighbor Room
     ArrayList<Entry<RoomSide, RoomConnection>> possible_next_infos =
             new ArrayList<Entry<RoomSide, RoomConnection>>();
     for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
@@ -188,17 +196,89 @@ public class PyroPilot extends Pilot {
         possible_next_infos.add(entry);
       }
     }
+
+    // select an unvisited neighbor Room at random
     if (!possible_next_infos.isEmpty()) {
       target_room_info = possible_next_infos.get((int) (Math.random() * possible_next_infos.size()));
-      path.push(target_room_info.getKey());
     }
+
+    // find a path to an unvisited Room at min depth from the current Room
     else {
-      RoomSide original_direction = path.pop();
-      RoomSide return_direction = RoomSide.opposite(original_direction);
-      target_room_info =
-              new SimpleImmutableEntry<RoomSide, RoomConnection>(return_direction,
-                      current_room.getConnectionInDirection(return_direction));
+      findNextPath();
+      target_room_info = current_path.pop();
     }
+  }
+
+  public void findNextPath() {
+    ArrayList<LinkedList<Entry<RoomSide, RoomConnection>>> paths =
+            new ArrayList<LinkedList<Entry<RoomSide, RoomConnection>>>();
+    ArrayList<LinkedList<Entry<RoomSide, RoomConnection>>> partial_paths =
+            new ArrayList<LinkedList<Entry<RoomSide, RoomConnection>>>();
+    HashSet<Room> checked_rooms = new HashSet<Room>();
+
+    // init partial_paths with the current neighbor Rooms because we already know they are all
+    // visited
+    for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
+      LinkedList<Entry<RoomSide, RoomConnection>> partial_path =
+              new LinkedList<Entry<RoomSide, RoomConnection>>();
+      partial_path.push(entry);
+      partial_paths.add(partial_path);
+    }
+
+    do {
+      partial_paths = checkConnectedRooms(paths, partial_paths, checked_rooms);
+    } while (paths.isEmpty());
+    current_path = paths.get((int) (Math.random() * paths.size()));
+  }
+
+  @SuppressWarnings("unchecked")
+  public ArrayList<LinkedList<Entry<RoomSide, RoomConnection>>> checkConnectedRooms(
+          ArrayList<LinkedList<Entry<RoomSide, RoomConnection>>> paths_to_unvisited,
+          ArrayList<LinkedList<Entry<RoomSide, RoomConnection>>> partial_paths, HashSet<Room> checked_rooms) {
+
+    ArrayList<LinkedList<Entry<RoomSide, RoomConnection>>> next_partial_paths =
+            new ArrayList<LinkedList<Entry<RoomSide, RoomConnection>>>();
+    for (LinkedList<Entry<RoomSide, RoomConnection>> partial_path : partial_paths) {
+      Room base_room = partial_path.getLast().getValue().neighbor;
+      for (Entry<RoomSide, RoomConnection> entry : base_room.getNeighbors().entrySet()) {
+        Room neighbor = entry.getValue().neighbor;
+        if (!checked_rooms.add(neighbor)) {
+          continue;
+        }
+        LinkedList<Entry<RoomSide, RoomConnection>> next_partial_path =
+                (LinkedList<Entry<RoomSide, RoomConnection>>) partial_path.clone();
+        next_partial_path.add(entry);
+        next_partial_paths.add(next_partial_path);
+        if (!visited.contains(neighbor)) {
+          paths_to_unvisited.add(next_partial_path);
+        }
+      }
+    }
+    return next_partial_paths;
+  }
+
+  public ArrayList<Stack<RoomSide>> findPossiblePaths(HashSet<Room> checked_rooms, Room room_to_check) {
+    if (!checked_rooms.add(room_to_check)) {
+      return null;
+    }
+
+    ArrayList<Stack<RoomSide>> paths = new ArrayList<Stack<RoomSide>>();
+    if (!visited.contains(room_to_check)) {
+      paths.add(new Stack<RoomSide>());
+      return paths;
+    }
+
+    for (Entry<RoomSide, RoomConnection> entry : room_to_check.getNeighbors().entrySet()) {
+      ArrayList<Stack<RoomSide>> future_paths = findPossiblePaths(checked_rooms, entry.getValue().neighbor);
+      if (future_paths != null) {
+        for (Stack<RoomSide> path : future_paths) {
+          path.push(entry.getKey());
+        }
+        paths.addAll(future_paths);
+      }
+    }
+
+    return paths;
   }
 
   public MapObject findNextTargetObject() {

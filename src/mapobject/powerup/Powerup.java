@@ -17,10 +17,12 @@ import external.ImageHandler;
 
 public abstract class Powerup extends MovableObject {
   protected int frame_num;
+  protected double frame_time_left;
 
   public Powerup(Room room, double x_loc, double y_loc, double direction, double speed) {
     super(Constants.POWERUP_RADIUS, new PowerupPilot(), room, x_loc, y_loc, direction, speed, 0.0);
     frame_num = (int) (Math.random() * 9);
+    frame_time_left = Constants.POWERUP_SECONDS_PER_FRAME;
   }
 
   @Override
@@ -30,12 +32,20 @@ public abstract class Powerup extends MovableObject {
 
   @Override
   public Image getImage(ImageHandler images) {
-    return images.getImage(image_name, frame_num++);
+    return images.getImage(image_name, frame_num);
   }
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     MapObject created_object = super.doNextAction(engine, s_elapsed);
+
+    if (frame_time_left < 0.0) {
+      ++frame_num;
+      frame_time_left = Constants.POWERUP_SECONDS_PER_FRAME;
+    }
+    else {
+      frame_time_left -= s_elapsed;
+    }
 
     if (move_speed > 0.0) {
       move_speed = Math.max(move_speed - Constants.POWERUP_MOVE_SPEED_DECELERATION * s_elapsed, 0.0);

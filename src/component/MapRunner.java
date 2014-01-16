@@ -49,6 +49,10 @@ public class MapRunner {
     return state;
   }
 
+  public void sleepAfterStep() throws InterruptedException {
+    Thread.sleep(target_sleep_ms);
+  }
+
   public boolean doNextStep() {
     long ms_elapsed = System.currentTimeMillis() - last_update_time;
     if (ms_elapsed < target_sleep_ms) {
@@ -143,7 +147,7 @@ public class MapRunner {
         if (runner.doNextStep()) {
           panel.repaint();
         }
-        Thread.sleep(100);
+        runner.sleepAfterStep();
       } while (!runner.getState().equals(RunnerState.COMPLETE));
       System.out.println("DONE");
     }

@@ -52,7 +52,7 @@ public class RobotPilot extends Pilot {
         }
         else {
           previous_exploration_room = current_room;
-          planMoveToRoomConnection(target_room_info.getKey(), object_radius);
+          planMoveToRoomConnection(target_room_info.getKey(), object_diameter);
           planTurnToTarget();
         }
         break;
