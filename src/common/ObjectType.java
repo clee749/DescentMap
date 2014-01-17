@@ -59,7 +59,7 @@ public enum ObjectType {
   ConcussionCannon,
   HomingCannon,
 
-  // transients
+  // ephemerals
   Explosion,
   Zunggg,
   SpawningUnit,

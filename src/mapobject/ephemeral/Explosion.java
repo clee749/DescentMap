@@ -35,6 +35,10 @@ public class Explosion extends MapObject {
     return radius;
   }
 
+  public double getHalfLife() {
+    return half_life;
+  }
+
   @Override
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {

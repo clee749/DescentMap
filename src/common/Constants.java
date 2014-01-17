@@ -73,7 +73,9 @@ public class Constants {
 
   // unit
   public static final double UNIT_EXPLOSION_RADIUS_MULTIPLIER = 1.1;
-  public static final double UNIT_EXPLOSION_MAX_TIME = 1.0;
+  public static final double UNIT_EXPLOSION_MIN_TIME = 0.5;
+  public static final double UNIT_EXPLOSION_MAX_TIME = UNIT_EXPLOSION_MIN_TIME * 2;
+  public static final double UNIT_EXPLOSION_TIME_DIVISOR = 3.0;
 
   // objects
   public static Double getRadius(ObjectType type) {

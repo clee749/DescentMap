@@ -7,10 +7,10 @@ import java.awt.Point;
 
 import mapobject.MapObject;
 import mapobject.MovableObject;
-import mapobject.MultipleObject;
 import mapobject.ephemeral.Explosion;
 import mapobject.shot.Shot;
 import pilot.Pilot;
+import pilot.PilotAction;
 import structure.Room;
 import util.MapUtils;
 
@@ -25,6 +25,8 @@ public abstract class Unit extends MovableObject {
   protected double reload_time_left;
   protected boolean firing_cannon;
   protected int shields;
+  protected boolean is_exploded;
+  protected double exploding_time_left;
 
   public Unit(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(pilot, room, x_loc, y_loc, direction);
@@ -49,17 +51,32 @@ public abstract class Unit extends MovableObject {
   }
 
   @Override
+  public void planNextAction(double s_elapsed) {
+    if (!is_exploded) {
+      super.planNextAction(s_elapsed);
+    }
+    else {
+      next_action = PilotAction.NO_ACTION;
+    }
+  }
+
+  @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     if (shields < 0) {
-      is_in_map = false;
-      MultipleObject objects = new MultipleObject();
-      objects.addObject(new Explosion(room, x_loc, y_loc,
-              radius * Constants.UNIT_EXPLOSION_RADIUS_MULTIPLIER, Constants.UNIT_EXPLOSION_MAX_TIME));
-      MapObject powerups = releasePowerups();
-      if (powerups != null) {
-        objects.addObject(powerups);
+      if (!is_exploded) {
+        is_exploded = true;
+        double explosion_time =
+                Math.random() * (Constants.UNIT_EXPLOSION_MAX_TIME - Constants.UNIT_EXPLOSION_MIN_TIME) +
+                        Constants.UNIT_EXPLOSION_MIN_TIME;
+        exploding_time_left = explosion_time / Constants.UNIT_EXPLOSION_TIME_DIVISOR;
+        return new Explosion(room, x_loc, y_loc, radius * Constants.UNIT_EXPLOSION_RADIUS_MULTIPLIER,
+                explosion_time);
       }
-      return objects;
+      if (exploding_time_left < 0.0) {
+        is_in_map = false;
+        return releasePowerups();
+      }
+      exploding_time_left -= s_elapsed;
     }
     return super.doNextAction(engine, s_elapsed);
   }

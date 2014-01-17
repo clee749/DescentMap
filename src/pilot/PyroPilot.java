@@ -79,7 +79,7 @@ public class PyroPilot extends Pilot {
         planMoveToRoomConnection(target_room_info.getKey(), object_diameter);
         break;
       case MOVE_TO_NEIGHBOR_ROOM:
-        planMoveToNeighborRoom(target_room_info.getKey(), object_diameter);
+        planMoveToNeighborRoom(target_room_info.getKey(), object_radius);
         break;
       case REACT_TO_OBJECT:
         target_object = findNextTargetObject();
