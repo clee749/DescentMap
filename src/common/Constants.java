@@ -43,6 +43,11 @@ public class Constants {
   public static final int POWERUP_SHIELD_AMOUNT = 18;
 
   // Pyro additional constants
+  public static final double PYRO_DEATH_SPIN_TIME = 5.0;
+  public static final double PYRO_DEATH_SPIN_MOVE_SPEED_DIVISOR = 2.0;
+  public static final double PYRO_DEATH_SPIN_TURN_SPEED_MULTIPLIER = 1.5;
+  public static final double PYRO_DEATH_SPIN_EXPLOSION_RADIUS = 0.1;
+  public static final double PYRO_DEATH_SPIN_EXPLOSION_TIME = 1.0;
   public static final double PYRO_OUTER_CANNON_OFFSET = 0.8;
   public static final double PYRO_CANNON_FORWARD_OFFSET = 0.2;
   public static final double PYRO_MISSILE_OFFSET = 0.2;

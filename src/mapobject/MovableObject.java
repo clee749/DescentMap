@@ -168,8 +168,6 @@ public abstract class MovableObject extends MapObject {
       default:
         throw new DescentMapException("Unexpected TurnDirection: " + next_action.turn);
     }
-
-    next_action = null;
   }
 
   public boolean boundInsideAndUpdateRoom(MapEngine engine) {

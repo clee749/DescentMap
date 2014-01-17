@@ -42,7 +42,7 @@ public abstract class Unit extends MovableObject {
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
     Point center_pixel = MapUtils.coordsToPixel(x_loc, y_loc, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
-    Image image = images.getImage(image_name, direction);
+    Image image = getImage(images);
     Point nw_corner_pixel =
             new Point(center_pixel.x - image.getWidth(null) / 2, center_pixel.y - image.getHeight(null) / 2);
     g.drawImage(image, nw_corner_pixel.x, nw_corner_pixel.y, null);
@@ -63,20 +63,7 @@ public abstract class Unit extends MovableObject {
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     if (shields < 0) {
-      if (!is_exploded) {
-        is_exploded = true;
-        double explosion_time =
-                Math.random() * (Constants.UNIT_EXPLOSION_MAX_TIME - Constants.UNIT_EXPLOSION_MIN_TIME) +
-                        Constants.UNIT_EXPLOSION_MIN_TIME;
-        exploding_time_left = explosion_time / Constants.UNIT_EXPLOSION_TIME_DIVISOR;
-        return new Explosion(room, x_loc, y_loc, radius * Constants.UNIT_EXPLOSION_RADIUS_MULTIPLIER,
-                explosion_time);
-      }
-      if (exploding_time_left < 0.0) {
-        is_in_map = false;
-        return releasePowerups();
-      }
-      exploding_time_left -= s_elapsed;
+      return handleDeath(s_elapsed);
     }
     return super.doNextAction(engine, s_elapsed);
   }
@@ -92,6 +79,24 @@ public abstract class Unit extends MovableObject {
 
   public void hitByShot(Shot shot) {
     shields -= shot.getDamage();
+  }
+
+  public MapObject handleDeath(double s_elapsed) {
+    if (!is_exploded) {
+      is_exploded = true;
+      double explosion_time =
+              Math.random() * (Constants.UNIT_EXPLOSION_MAX_TIME - Constants.UNIT_EXPLOSION_MIN_TIME) +
+                      Constants.UNIT_EXPLOSION_MIN_TIME;
+      exploding_time_left = explosion_time / Constants.UNIT_EXPLOSION_TIME_DIVISOR;
+      return new Explosion(room, x_loc, y_loc, radius * Constants.UNIT_EXPLOSION_RADIUS_MULTIPLIER,
+              explosion_time);
+    }
+    if (exploding_time_left < 0.0) {
+      is_in_map = false;
+      return releasePowerups();
+    }
+    exploding_time_left -= s_elapsed;
+    return null;
   }
 
   public abstract MapObject fireCannon();

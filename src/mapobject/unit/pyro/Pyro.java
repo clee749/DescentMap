@@ -2,15 +2,19 @@ package mapobject.unit.pyro;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
+import mapobject.ephemeral.Explosion;
 import mapobject.shot.LaserShot;
 import mapobject.unit.Unit;
 import pilot.Pilot;
+import pilot.PilotAction;
 import pilot.PyroPilot;
+import pilot.TurnDirection;
 import structure.Room;
 import util.MapUtils;
 
@@ -24,6 +28,10 @@ public class Pyro extends Unit {
   private final double outer_cannon_offset;
   private final double cannon_forward_offset;
   private final boolean has_quad_lasers;
+  private boolean death_spin_started;
+  private double death_spin_time_left;
+  private double death_spin_direction;
+  private double death_spin_delta_direction;
 
   public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(pilot, room, x_loc, y_loc, direction);
@@ -44,6 +52,14 @@ public class Pyro extends Unit {
   }
 
   @Override
+  public Image getImage(ImageHandler images) {
+    if (shields >= 0) {
+      return super.getImage(images);
+    }
+    return images.getImage(image_name, death_spin_direction);
+  }
+
+  @Override
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
     super.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
@@ -56,6 +72,10 @@ public class Pyro extends Unit {
 
   @Override
   public void planNextAction(double s_elapsed) {
+    if (shields < 0) {
+      next_action = PilotAction.MOVE_FORWARD;
+      return;
+    }
     super.planNextAction(s_elapsed);
     if (next_action.fire_cannon && reload_time_left < 0.0) {
       planToFireCannon();
@@ -67,12 +87,43 @@ public class Pyro extends Unit {
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
+    if (shields < 0) {
+      return doNextDeathSpinAction(engine, s_elapsed);
+    }
     MapObject object_created = super.doNextAction(engine, s_elapsed);
     if (firing_cannon) {
       firing_cannon = false;
       return fireCannon();
     }
     return object_created;
+  }
+
+  public MapObject doNextDeathSpinAction(MapEngine engine, double s_elapsed) {
+    if (!death_spin_started) {
+      death_spin_started = true;
+      death_spin_direction = direction;
+      death_spin_time_left = Constants.PYRO_DEATH_SPIN_TIME;
+      move_speed /= Constants.PYRO_DEATH_SPIN_MOVE_SPEED_DIVISOR;
+      death_spin_delta_direction = turn_speed * Constants.PYRO_DEATH_SPIN_TURN_SPEED_MULTIPLIER;
+      if (next_action.turn.equals(TurnDirection.CLOCKWISE) ||
+              (next_action.turn.equals(TurnDirection.NONE) && Math.random() < 0.5)) {
+        death_spin_delta_direction *= -1;
+      }
+    }
+    else {
+      death_spin_direction =
+              MapUtils.normalizeAngle(death_spin_direction + death_spin_delta_direction * s_elapsed);
+      if (death_spin_time_left < 0.0) {
+        return handleDeath(s_elapsed);
+      }
+      if (!doNextMovement(engine, s_elapsed)) {
+        death_spin_time_left = 0.0;
+      }
+      death_spin_time_left -= s_elapsed;
+    }
+    return new Explosion(room, x_loc + Math.random() * 2 * radius - radius, y_loc + Math.random() * 2 *
+            radius - radius, Constants.PYRO_DEATH_SPIN_EXPLOSION_RADIUS,
+            Constants.PYRO_DEATH_SPIN_EXPLOSION_TIME);
   }
 
   @Override

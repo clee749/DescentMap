@@ -187,6 +187,8 @@ public class MapBuilder {
             new MineExteriorRoom(exterior_nw_corner, new Point(exterior_nw_corner.x + 1,
                     exterior_nw_corner.y + 1));
     exit_room.addNeighbor(direction, new RoomConnection(exit_room, exterior_room, direction));
+    exterior_room.addNeighbor(opposite_direction, new RoomConnection(exterior_room, exit_room,
+            opposite_direction));
     all_rooms.add(exterior_room);
     updateMapRanges(exterior_room);
   }
