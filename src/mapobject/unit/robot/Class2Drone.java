@@ -4,6 +4,7 @@ import mapobject.MapObject;
 import mapobject.powerup.Shield;
 import structure.Room;
 import util.MapUtils;
+import cannon.LaserCannon;
 
 import common.Constants;
 import common.ObjectType;
@@ -11,7 +12,7 @@ import common.ObjectType;
 public class Class2Drone extends Robot {
 
   public Class2Drone(Room room, double x_loc, double y_loc, double direction) {
-    super(room, x_loc, y_loc, direction);
+    super(new LaserCannon(Constants.getDamage(ObjectType.LaserShot), 2), room, x_loc, y_loc, direction);
   }
 
   @Override

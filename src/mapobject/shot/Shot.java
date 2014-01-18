@@ -13,16 +13,17 @@ import component.MapEngine;
 
 public abstract class Shot extends MovableObject {
   protected final int damage;
-  protected MapObject source;
+  protected final MapObject source;
 
-  public Shot(Pilot pilot, MapObject source, Room room, double x_loc, double y_loc, double direction) {
+  public Shot(Pilot pilot, MapObject source, int damage, Room room, double x_loc, double y_loc,
+          double direction) {
     super(0.0, pilot, room, x_loc, y_loc, direction);
-    damage = Constants.getDamage(type);
     this.source = source;
+    this.damage = damage;
   }
 
-  public Shot(MapObject source, Room room, double x_loc, double y_loc, double direction) {
-    this(new ShotPilot(), source, room, x_loc, y_loc, direction);
+  public Shot(MapObject source, int damage, Room room, double x_loc, double y_loc, double direction) {
+    this(new ShotPilot(), source, damage, room, x_loc, y_loc, direction);
   }
 
   public int getDamage() {

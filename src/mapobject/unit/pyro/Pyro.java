@@ -9,7 +9,6 @@ import java.awt.geom.Point2D;
 import mapobject.MapObject;
 import mapobject.MultipleObject;
 import mapobject.ephemeral.Explosion;
-import mapobject.shot.LaserShot;
 import mapobject.unit.Unit;
 import pilot.Pilot;
 import pilot.PilotAction;
@@ -17,6 +16,8 @@ import pilot.PyroPilot;
 import pilot.TurnDirection;
 import structure.Room;
 import util.MapUtils;
+import cannon.Cannon;
+import cannon.LaserCannon;
 
 import common.Constants;
 import common.ObjectType;
@@ -32,6 +33,7 @@ public class Pyro extends Unit {
   private double death_spin_time_left;
   private double death_spin_direction;
   private double death_spin_delta_direction;
+  private final Cannon selected_primary_cannon;
 
   public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(pilot, room, x_loc, y_loc, direction);
@@ -40,6 +42,7 @@ public class Pyro extends Unit {
     ((PyroPilot) pilot).startPilot();
     has_quad_lasers = true;
     reload_time = 0.25;
+    selected_primary_cannon = new LaserCannon(Constants.getDamage(ObjectType.LaserShot), 1);
   }
 
   public Pyro(Room room, double x_loc, double y_loc, double direction) {
@@ -130,16 +133,18 @@ public class Pyro extends Unit {
   public MapObject fireCannon() {
     MultipleObject shots = new MultipleObject();
     Point2D.Double abs_offset = MapUtils.perpendicularVector(cannon_offset, direction);
-    shots.addObject(new LaserShot(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y, direction, 1));
-    shots.addObject(new LaserShot(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y, direction, 1));
-    if (has_quad_lasers) {
+    shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc + abs_offset.x,
+            y_loc + abs_offset.y, direction));
+    shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc - abs_offset.x,
+            y_loc - abs_offset.y, direction));
+    if (has_quad_lasers && selected_primary_cannon instanceof LaserCannon) {
       abs_offset = MapUtils.perpendicularVector(outer_cannon_offset, direction);
       double x_forward_abs_offset = Math.cos(direction) * cannon_forward_offset;
       double y_forward_abs_offset = Math.sin(direction) * cannon_forward_offset;
-      shots.addObject(new LaserShot(this, room, x_loc + abs_offset.x + x_forward_abs_offset, y_loc +
-              abs_offset.y + y_forward_abs_offset, direction, 1));
-      shots.addObject(new LaserShot(this, room, x_loc - abs_offset.x + x_forward_abs_offset, y_loc -
-              abs_offset.y + y_forward_abs_offset, direction, 1));
+      shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc + abs_offset.x +
+              x_forward_abs_offset, y_loc + abs_offset.y + y_forward_abs_offset, direction));
+      shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc - abs_offset.x +
+              x_forward_abs_offset, y_loc - abs_offset.y + y_forward_abs_offset, direction));
     }
     return shots;
   }

@@ -6,12 +6,12 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 
 import mapobject.MapObject;
-import mapobject.shot.LaserShot;
 import mapobject.unit.Unit;
 import pilot.Pilot;
 import pilot.RobotPilot;
 import structure.Room;
 import util.MapUtils;
+import cannon.Cannon;
 
 import common.Constants;
 import component.MapEngine;
@@ -19,22 +19,24 @@ import component.MapEngine;
 import external.ImageHandler;
 
 public abstract class Robot extends Unit {
+  protected final Cannon cannon;
   protected final int shots_per_volley;
   protected final double volley_reload_time;
   protected double shots_left_in_volley;
   protected double volley_reload_time_left;
   protected int cannon_side;
 
-  public Robot(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
+  public Robot(Pilot pilot, Cannon cannon, Room room, double x_loc, double y_loc, double direction) {
     super(pilot, room, x_loc, y_loc, direction);
+    this.cannon = cannon;
     shots_per_volley = Constants.getShotsPerVolley(type);
     reload_time = Constants.getReloadTime(type);
     volley_reload_time = Constants.getVolleyReloadTime(type);
     cannon_side = (int) (Math.random() * 2);
   }
 
-  public Robot(Room room, double x_loc, double y_loc, double direction) {
-    this(new RobotPilot(), room, x_loc, y_loc, direction);
+  public Robot(Cannon cannon, Room room, double x_loc, double y_loc, double direction) {
+    this(new RobotPilot(), cannon, room, x_loc, y_loc, direction);
   }
 
   @Override
@@ -92,9 +94,9 @@ public abstract class Robot extends Unit {
     ++cannon_side;
     Point2D.Double abs_offset = MapUtils.perpendicularVector(cannon_offset, direction);
     if (cannon_side % 2 == 0) {
-      return new LaserShot(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y, direction, 2);
+      return cannon.fireCannon(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y, direction);
     }
-    return new LaserShot(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y, direction, 2);
+    return cannon.fireCannon(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y, direction);
   }
 
   public void handleCannonVolleyReload(double s_elapsed) {
