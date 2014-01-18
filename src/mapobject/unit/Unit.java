@@ -28,8 +28,8 @@ public abstract class Unit extends MovableObject {
   protected boolean is_exploded;
   protected double exploding_time_left;
 
-  public Unit(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
-    super(pilot, room, x_loc, y_loc, direction);
+  public Unit(double radius, Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
+    super(radius, pilot, room, x_loc, y_loc, direction);
     cannon_offset = Constants.getCannonOffset(type) * radius;
     shields = Constants.getStartingShields(type);
   }

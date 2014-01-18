@@ -21,16 +21,8 @@ public abstract class MapObject {
 
   public MapObject() {
     type = getType();
-    radius = getRadius();
+    radius = 0.0;
     is_in_map = true;
-  }
-
-  public MapObject(Room room, double x_loc, double y_loc) {
-    this();
-    image_name = type.name();
-    this.room = room;
-    this.x_loc = x_loc;
-    this.y_loc = y_loc;
   }
 
   public MapObject(double radius, Room room, double x_loc, double y_loc) {
@@ -47,6 +39,10 @@ public abstract class MapObject {
     return is_in_map;
   }
 
+  public double getRadius() {
+    return radius;
+  }
+
   public Room getRoom() {
     return room;
   }
@@ -60,8 +56,6 @@ public abstract class MapObject {
   }
 
   public abstract ObjectType getType();
-
-  public abstract double getRadius();
 
   public abstract void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell);

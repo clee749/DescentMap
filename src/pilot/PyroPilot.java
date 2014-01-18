@@ -101,6 +101,7 @@ public class PyroPilot extends Pilot {
   public PilotAction findNextAction(double s_elapsed) {
     updateState();
     StrafeDirection strafe = StrafeDirection.NONE;
+    // StrafeDirection strafe = reactToShots();
 
     boolean fire_cannon = false;
     for (Unit unit : current_room.getUnits()) {

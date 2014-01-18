@@ -22,11 +22,6 @@ public class MultipleObject extends MapObject {
     return ObjectType.MultipleObject;
   }
 
-  @Override
-  public double getRadius() {
-    return 0.0;
-  }
-
   public void addObject(MapObject object) {
     objects.add(object);
   }

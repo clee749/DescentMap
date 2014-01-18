@@ -149,9 +149,9 @@ public class ImageHandler {
       loadAnimatedGif(path, type.name(), pixels_per_cell, Constants.POWERUP_RADIUS);
     }
     loadRotatedImages(path, "Pyro", pixels_per_cell, Constants.getRadius(ObjectType.Pyro));
-    loadRotatedImages(path, "LaserShot1", pixels_per_cell, Constants.getRadius(ObjectType.LaserShot));
     loadRotatedImages(path, "Class2Drone", pixels_per_cell, Constants.getRadius(ObjectType.Class2Drone));
-    loadRotatedImages(path, "LaserShot2", pixels_per_cell, Constants.getRadius(ObjectType.LaserShot));
+    loadRotatedImages(path, "LaserShot1", pixels_per_cell, Constants.IMAGES_SHOT_RADIUS);
+    loadRotatedImages(path, "LaserShot2", pixels_per_cell, Constants.IMAGES_SHOT_RADIUS);
   }
 
   public boolean loadAnimatedGif(String path, String name, int pixels_per_cell, double radius) {

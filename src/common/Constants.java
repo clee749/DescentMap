@@ -16,6 +16,11 @@ public class Constants {
   // construction displayer
   public static final int CONSTRUCTION_MIN_SIGHT_DIAMETER = 10;
 
+  // entrance
+  public static final double ENTRANCE_COOLDOWN_TIME = 5.0;
+  public static final double ENTRANCE_TIME_TO_SPAWN = 0.25;
+  public static final double ENTRANCE_ZUNGGG_TIME = ENTRANCE_TIME_TO_SPAWN * 2;
+
   // explosion
   public static final Color[] EXPLOSION_COLORS = {Color.magenta, Color.orange, Color.pink, Color.red,
           Color.yellow, Color.white};
@@ -24,6 +29,7 @@ public class Constants {
   // images
   public static final String IMAGES_PATH = "/images";
   public static final int IMAGES_NUM_IN_QUADRANT = 10;
+  public static final double IMAGES_SHOT_RADIUS = 0.1;
 
   // pilot
   public static final double PILOT_DIRECTION_EPSILON = Math.PI / 32;
@@ -51,6 +57,7 @@ public class Constants {
   public static final double PYRO_OUTER_CANNON_OFFSET = 0.8;
   public static final double PYRO_CANNON_FORWARD_OFFSET = 0.2;
   public static final double PYRO_MISSILE_OFFSET = 0.2;
+  public static final double PYRO_LASER_RELOAD_TIME = 0.25;
   public static final int PYRO_MAX_SHIELDS = 200;
   public static final int PYRO_STARTING_ENERGY = 100;
   public static final int PYRO_MAX_ENERGY = 200;
@@ -81,6 +88,11 @@ public class Constants {
   public static final double UNIT_EXPLOSION_MIN_TIME = 0.5;
   public static final double UNIT_EXPLOSION_MAX_TIME = UNIT_EXPLOSION_MIN_TIME * 2;
   public static final double UNIT_EXPLOSION_TIME_DIVISOR = 3.0;
+
+  // zunggg
+  public static final int ZUNGGG_STROKE_WIDTH_DIVISOR = 20;
+  public static final int ZUNGGG_NUM_BOLTS_DIVISOR = 5;
+  public static final int ZUNGGG_MIN_NUM_BOLTS = 10;
 
   // objects
   public static Double getRadius(ObjectType type) {
@@ -119,20 +131,20 @@ public class Constants {
     return DAMAGES.get(type);
   }
 
-  private static final HashMap<ObjectType, Double> RADII = getRadii();
-  private static final HashMap<ObjectType, Double> MAX_MOVE_SPEEDS = getMaxMoveSpeeds();
-  private static final HashMap<ObjectType, Double> MAX_TURN_SPEEDS = getMaxTurnSpeeds();
-  private static final HashMap<ObjectType, Double> RELOAD_TIMES = getReloadTimes();
-  private static final HashMap<ObjectType, Integer> SHOTS_PER_VOLLEYS = getShotsPerVolleys();
-  private static final HashMap<ObjectType, Double> VOLLEY_RELOAD_TIMES = getVolleyReloadTimes();
-  private static final HashMap<ObjectType, Double> CANNON_OFFSETS = getCannonOffsets();
-  private static final HashMap<ObjectType, Integer> STARTING_SHIELDS = getStartingShields();
-  private static final HashMap<ObjectType, Integer> DAMAGES = getDamages();
+  private static final HashMap<ObjectType, Double> RADII = getRadii(); // Units
+  private static final HashMap<ObjectType, Double> MAX_MOVE_SPEEDS = getMaxMoveSpeeds(); // MovableObjects
+  private static final HashMap<ObjectType, Double> MAX_TURN_SPEEDS = getMaxTurnSpeeds(); // MovableObjects
+  private static final HashMap<ObjectType, Double> RELOAD_TIMES = getReloadTimes(); // Robots
+  private static final HashMap<ObjectType, Integer> SHOTS_PER_VOLLEYS = getShotsPerVolleys(); // Robots
+  private static final HashMap<ObjectType, Double> VOLLEY_RELOAD_TIMES = getVolleyReloadTimes(); // Robots
+  private static final HashMap<ObjectType, Double> CANNON_OFFSETS = getCannonOffsets(); // Units
+  private static final HashMap<ObjectType, Integer> STARTING_SHIELDS = getStartingShields(); // Units
+  private static final HashMap<ObjectType, Integer> DAMAGES = getDamages(); // Shots
 
   private static HashMap<ObjectType, Double> getRadii() {
     HashMap<ObjectType, Double> radii = new HashMap<ObjectType, Double>();
+    // 1m == 0.05
     radii.put(ObjectType.Pyro, 0.25);
-    radii.put(ObjectType.LaserShot, 0.1);
     radii.put(ObjectType.Class2Drone, 0.2);
     return radii;
   }
@@ -154,7 +166,6 @@ public class Constants {
 
   private static HashMap<ObjectType, Double> getReloadTimes() {
     HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
-    times.put(ObjectType.Pyro, 0.25);
     times.put(ObjectType.Class2Drone, 2.0);
     return times;
   }

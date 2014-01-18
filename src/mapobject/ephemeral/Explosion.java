@@ -30,11 +30,6 @@ public class Explosion extends MapObject {
     return ObjectType.Explosion;
   }
 
-  @Override
-  public double getRadius() {
-    return radius;
-  }
-
   public double getHalfLife() {
     return half_life;
   }

@@ -26,8 +26,9 @@ public abstract class Robot extends Unit {
   protected double volley_reload_time_left;
   protected int cannon_side;
 
-  public Robot(Pilot pilot, Cannon cannon, Room room, double x_loc, double y_loc, double direction) {
-    super(pilot, room, x_loc, y_loc, direction);
+  public Robot(double radius, Pilot pilot, Cannon cannon, Room room, double x_loc, double y_loc,
+          double direction) {
+    super(radius, pilot, room, x_loc, y_loc, direction);
     this.cannon = cannon;
     shots_per_volley = Constants.getShotsPerVolley(type);
     reload_time = Constants.getReloadTime(type);
@@ -35,8 +36,8 @@ public abstract class Robot extends Unit {
     cannon_side = (int) (Math.random() * 2);
   }
 
-  public Robot(Cannon cannon, Room room, double x_loc, double y_loc, double direction) {
-    this(new RobotPilot(), cannon, room, x_loc, y_loc, direction);
+  public Robot(double radius, Cannon cannon, Room room, double x_loc, double y_loc, double direction) {
+    this(radius, new RobotPilot(), cannon, room, x_loc, y_loc, direction);
   }
 
   @Override

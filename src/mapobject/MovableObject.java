@@ -47,21 +47,6 @@ public abstract class MovableObject extends MapObject {
     pilot.bindToObject(this);
   }
 
-  public MovableObject(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
-    super(room, x_loc, y_loc);
-    move_speed = Constants.getMaxMoveSpeed(type);
-    Double raw_turn_speed = Constants.getMaxTurnSpeed(type);
-    turn_speed = (raw_turn_speed != null ? raw_turn_speed : 0.0);
-    this.pilot = pilot;
-    this.direction = direction;
-    pilot.bindToObject(this);
-  }
-
-  @Override
-  public double getRadius() {
-    return Constants.getRadius(type);
-  }
-
   public double getDirection() {
     return direction;
   }

@@ -14,14 +14,9 @@ public abstract class Scenery extends MapObject {
   protected final double nw_corner_y;
 
   public Scenery(Room room, double x_loc, double y_loc) {
-    super(room, x_loc, y_loc);
+    super(0.5, room, x_loc, y_loc);
     nw_corner_x = x_loc - 0.5;
     nw_corner_y = y_loc - 0.5;
-  }
-
-  @Override
-  public double getRadius() {
-    return 0.5;
   }
 
   @Override

@@ -36,12 +36,12 @@ public class Pyro extends Unit {
   private final Cannon selected_primary_cannon;
 
   public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
-    super(pilot, room, x_loc, y_loc, direction);
+    super(Constants.getRadius(ObjectType.Pyro), pilot, room, x_loc, y_loc, direction);
     outer_cannon_offset = Constants.PYRO_OUTER_CANNON_OFFSET * radius;
     cannon_forward_offset = Constants.PYRO_CANNON_FORWARD_OFFSET * radius;
     ((PyroPilot) pilot).startPilot();
     has_quad_lasers = true;
-    reload_time = 0.25;
+    reload_time = Constants.PYRO_LASER_RELOAD_TIME;
     selected_primary_cannon = new LaserCannon(Constants.getDamage(ObjectType.LaserShot), 1);
   }
 

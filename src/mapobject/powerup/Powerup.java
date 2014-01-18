@@ -26,11 +26,6 @@ public abstract class Powerup extends MovableObject {
   }
 
   @Override
-  public double getRadius() {
-    return Constants.POWERUP_RADIUS;
-  }
-
-  @Override
   public Image getImage(ImageHandler images) {
     return images.getImage(image_name, frame_num);
   }
