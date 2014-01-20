@@ -9,13 +9,13 @@ import java.util.Stack;
 import mapobject.MapObject;
 import mapobject.MovableObject;
 import mapobject.powerup.Powerup;
+import mapobject.powerup.Shield;
 import mapobject.unit.Unit;
 import mapobject.unit.pyro.Pyro;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
-import common.Constants;
 import common.DescentMapException;
 import common.ObjectType;
 import common.RoomSide;
@@ -30,6 +30,8 @@ enum PyroPilotState {
 
 
 public class PyroPilot extends Pilot {
+  public static final double TIME_TURNING_UNTIL_STOP = 5.0;
+
   private final HashSet<Room> visited;
   private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
   private PyroPilotState state;
@@ -109,7 +111,7 @@ public class PyroPilot extends Pilot {
         continue;
       }
       double abs_angle_to_unit = Math.abs(MapUtils.angleTo(object, unit));
-      if (abs_angle_to_unit < Constants.PILOT_DIRECTION_EPSILON) {
+      if (abs_angle_to_unit < DIRECTION_EPSILON) {
         fire_cannon = true;
         break;
       }
@@ -119,15 +121,13 @@ public class PyroPilot extends Pilot {
       case INACTIVE:
         return PilotAction.NO_ACTION;
       case MOVE_TO_ROOM_CONNECTION:
-        return new PilotAction(MoveDirection.FORWARD, strafe, TurnDirection.angleToTurnDirection(MapUtils
-                .angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY())),
-                fire_cannon);
+        return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon);
       case MOVE_TO_NEIGHBOR_ROOM:
-        return new PilotAction(MoveDirection.FORWARD, strafe, TurnDirection.angleToTurnDirection(MapUtils
-                .angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY())),
-                fire_cannon);
+        return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon);
       case REACT_TO_OBJECT:
-        TurnDirection turn = TurnDirection.angleToTurnDirection(MapUtils.angleTo(object, target_object));
+        TurnDirection turn = angleToTurnDirection(MapUtils.angleTo(object, target_object));
         if (turn.equals(previous_turn_to_target)) {
           time_turning_to_target += s_elapsed;
         }
@@ -137,8 +137,8 @@ public class PyroPilot extends Pilot {
         }
         return new PilotAction(MoveDirection.FORWARD, strafe, turn, fire_cannon);
       case TURN_TO_OBJECT:
-        return new PilotAction(MoveDirection.NONE, strafe, TurnDirection.angleToTurnDirection(MapUtils
-                .angleTo(object, target_object)), fire_cannon);
+        return new PilotAction(MoveDirection.NONE, strafe, angleToTurnDirection(MapUtils.angleTo(object,
+                target_object)), fire_cannon);
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
     }
@@ -166,12 +166,12 @@ public class PyroPilot extends Pilot {
                 ((target_object instanceof Powerup) && !shouldCollectPowerup((Powerup) target_object))) {
           initState(PyroPilotState.REACT_TO_OBJECT);
         }
-        else if (time_turning_to_target > Constants.PILOT_TIME_TURNING_UNTIL_STOP) {
+        else if (time_turning_to_target > TIME_TURNING_UNTIL_STOP) {
           initState(PyroPilotState.TURN_TO_OBJECT);
         }
         break;
       case TURN_TO_OBJECT:
-        if (MapUtils.angleTo(object, target_object) < Constants.PILOT_DIRECTION_EPSILON) {
+        if (MapUtils.angleTo(object, target_object) < DIRECTION_EPSILON) {
           // no need to init state because we are still targeting the same object
           state = PyroPilotState.REACT_TO_OBJECT;
         }
@@ -308,7 +308,7 @@ public class PyroPilot extends Pilot {
 
     switch (powerup.getType()) {
       case Shield:
-        return pyro.getShields() + Constants.POWERUP_SHIELD_AMOUNT <= Constants.PYRO_MAX_SHIELDS;
+        return pyro.getShields() + Shield.SHIELD_AMOUNT <= Pyro.MAX_SHIELDS;
       default:
         throw new DescentMapException("Unexpected Powerup: " + powerup);
     }

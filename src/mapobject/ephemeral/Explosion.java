@@ -1,5 +1,6 @@
 package mapobject.ephemeral;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
@@ -7,13 +8,16 @@ import mapobject.MapObject;
 import structure.Room;
 import util.MapUtils;
 
-import common.Constants;
 import common.ObjectType;
 import component.MapEngine;
 
 import external.ImageHandler;
 
 public class Explosion extends MapObject {
+  public static final Color[] COLORS = {Color.magenta, Color.orange, Color.pink, Color.red, Color.yellow,
+          Color.white};
+  public static final double DISTANCE_BETWEEN_LAYERS = 0.1;
+
   private final double total_time;
   private final double half_life;
   private double time_elapsed;
@@ -38,12 +42,12 @@ public class Explosion extends MapObject {
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
     for (double layer_radius = radius * (half_life - Math.abs(time_elapsed - half_life)) / half_life; layer_radius > 0; layer_radius -=
-            Constants.EXPLOSION_DISTANCE_BETWEEN_LAYERS) {
+            DISTANCE_BETWEEN_LAYERS) {
       Point layer_nw_corner_pixel =
               MapUtils.coordsToPixel(x_loc - layer_radius, y_loc - layer_radius, ref_cell, ref_cell_nw_pixel,
                       pixels_per_cell);
       int pixel_diameter = (int) (pixels_per_cell * 2 * layer_radius);
-      g.setColor(Constants.EXPLOSION_COLORS[(int) (Math.random() * Constants.EXPLOSION_COLORS.length)]);
+      g.setColor(COLORS[(int) (Math.random() * COLORS.length)]);
       g.fillOval(layer_nw_corner_pixel.x, layer_nw_corner_pixel.y, pixel_diameter, pixel_diameter);
     }
   }

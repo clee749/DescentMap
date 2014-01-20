@@ -1,5 +1,6 @@
 package structure;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -19,7 +20,6 @@ import mapobject.unit.Unit;
 import mapobject.unit.pyro.Pyro;
 import util.MapUtils;
 
-import common.Constants;
 import common.ObjectType;
 import common.RoomSide;
 import component.MapEngine;
@@ -27,6 +27,9 @@ import component.MapEngine;
 import external.ImageHandler;
 
 public class Room {
+  public static final Color WALL_COLOR = Color.gray;
+  public static final Stroke WALL_STROKE = new BasicStroke(2);
+
   private final Point nw_corner;
   private final Point se_corner;
   private final int width;
@@ -116,8 +119,7 @@ public class Room {
 
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
-    paint(g, images, Constants.ROOM_WALL_COLOR, Constants.ROOM_WALL_STROKE, ref_cell, ref_cell_nw_pixel,
-            pixels_per_cell);
+    paint(g, images, WALL_COLOR, WALL_STROKE, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
   }
 
   public void paint(Graphics2D g, ImageHandler images, Color wall_color, Stroke wall_stroke, Point ref_cell,

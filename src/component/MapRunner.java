@@ -10,7 +10,6 @@ import mapobject.unit.pyro.Pyro;
 import structure.DescentMap;
 import structure.Room;
 
-import common.Constants;
 import common.DescentMapException;
 
 enum RunnerState {
@@ -24,6 +23,16 @@ enum RunnerState {
 
 
 public class MapRunner {
+  public static final int DEFAULT_MAX_ROOM_SIZE = 10;
+  public static final int DEFAULT_MAX_NUM_ROOMS = 10;
+  public static final int DEFAULT_NUM_LEVELS = 5;
+  public static final long BUILD_SLEEP = 100;
+  public static final long PAUSE_AFTER_BUILD_SLEEP = 1000;
+  public static final long PAUSE_BEFORE_PLAY_SLEEP = 1000;
+  public static final long PLAY_MIN_SLEEP = 50;
+  public static final long PLAY_MAX_SLEEP = 11 * PLAY_MIN_SLEEP / 10;
+  public static final long PAUSE_AFTER_PLAY_SLEEP = 1000;
+
   private final MapDisplayer displayer;
   private final DescentMap map;
   private MapEngine engine;
@@ -34,9 +43,9 @@ public class MapRunner {
 
   public MapRunner(MapDisplayer displayer) {
     this.displayer = displayer;
-    map = new DescentMap(Constants.BUILDER_MAX_ROOM_SIZE);
+    map = new DescentMap(DEFAULT_MAX_ROOM_SIZE);
     state = RunnerState.BUILD_MAP;
-    target_sleep_ms = Constants.RUNNER_BUILD_SLEEP;
+    target_sleep_ms = BUILD_SLEEP;
     last_update_time = 0L;
     num_build_steps = 0;
   }
@@ -69,7 +78,7 @@ public class MapRunner {
         doPauseBeforePlayStep();
         break;
       case PLAY_MAP:
-        doPlayStep(Math.min(ms_elapsed / 1000.0, Constants.RUNNER_PLAY_MAX_SLEEP));
+        doPlayStep(Math.min(ms_elapsed, PLAY_MAX_SLEEP) / 1000.0);
         break;
       case PAUSE_AFTER_PLAY:
         doPauseAfterPlayStep();
@@ -82,7 +91,7 @@ public class MapRunner {
   }
 
   public void doBuildStep() {
-    if (num_build_steps < Constants.BUILDER_MAX_NUM_ROOMS) {
+    if (num_build_steps < DEFAULT_MAX_NUM_ROOMS) {
       map.addRoom();
       ++num_build_steps;
     }
@@ -100,19 +109,19 @@ public class MapRunner {
       map.setCenterObject(ship);
       engine.setCenterObject(ship);
       state = RunnerState.PAUSE_AFTER_BUILD;
-      target_sleep_ms = Constants.RUNNER_PAUSE_AFTER_BUILD_SLEEP;
+      target_sleep_ms = PAUSE_AFTER_BUILD_SLEEP;
     }
   }
 
   public void doPauseAfterBuildStep() {
     displayer.finishBuildingMap();
     state = RunnerState.PAUSE_BEFORE_PLAY;
-    target_sleep_ms = Constants.RUNNER_PAUSE_BEFORE_PLAY_SLEEP;
+    target_sleep_ms = PAUSE_BEFORE_PLAY_SLEEP;
   }
 
   public void doPauseBeforePlayStep() {
     state = RunnerState.PLAY_MAP;
-    target_sleep_ms = Constants.RUNNER_PLAY_MIN_SLEEP;
+    target_sleep_ms = PLAY_MIN_SLEEP;
   }
 
   public void doPlayStep(double s_elapsed) {
@@ -120,7 +129,7 @@ public class MapRunner {
     engine.doNextStep(s_elapsed);
     if (engine.levelComplete()) {
       state = RunnerState.PAUSE_AFTER_PLAY;
-      target_sleep_ms = Constants.RUNNER_PAUSE_AFTER_PLAY_SLEEP;
+      target_sleep_ms = PAUSE_AFTER_PLAY_SLEEP;
     }
   }
 
@@ -139,7 +148,7 @@ public class MapRunner {
     frame.setMinimumSize(new Dimension(100, 100));
     frame.setVisible(true);
 
-    for (int level = 1; level <= Constants.RUNNER_NUM_LEVELS; ++level) {
+    for (int level = 1; level <= DEFAULT_NUM_LEVELS; ++level) {
       System.out.println("Level " + level);
       MapRunner runner = new MapRunner(panel);
       panel.setMap(runner.getMap());

@@ -9,7 +9,6 @@ import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
-import common.Constants;
 import common.RoomSide;
 
 class EdgeRoom {
@@ -24,6 +23,8 @@ class EdgeRoom {
 
 
 public class MapBuilder {
+  public static final int DEFAULT_EXIT_ROOM_LENGTH = 5;
+
   private final int max_room_size;
   private final ArrayList<Room> all_rooms;
   private final ArrayList<Room> available_rooms;
@@ -153,10 +154,10 @@ public class MapBuilder {
     RoomSide direction = pre_exit_edge_room.direction;
     Dimension exit_room_dims;
     if (direction.equals(RoomSide.EAST) || direction.equals(RoomSide.WEST)) {
-      exit_room_dims = new Dimension(Constants.BUILDER_EXIT_ROOM_LENGTH, 1);
+      exit_room_dims = new Dimension(DEFAULT_EXIT_ROOM_LENGTH, 1);
     }
     else {
-      exit_room_dims = new Dimension(1, Constants.BUILDER_EXIT_ROOM_LENGTH);
+      exit_room_dims = new Dimension(1, DEFAULT_EXIT_ROOM_LENGTH);
     }
     RoomConnection connection = positionRoom(pre_exit_edge_room.room, exit_room_dims, direction);
     pre_exit_edge_room.room.addNeighbor(direction, connection);

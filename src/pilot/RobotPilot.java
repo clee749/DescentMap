@@ -9,7 +9,6 @@ import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
-import common.Constants;
 import common.DescentMapException;
 import common.RoomSide;
 
@@ -26,6 +25,11 @@ enum RobotPilotState {
 
 
 public class RobotPilot extends Pilot {
+  public static final double TARGET_DIRECTION_EPSILON = MapUtils.PI_OVER_TWO;
+  public static final double MIN_DISTANCE_TO_PYRO = 1.0;
+  public static final double START_EXPLORE_PROB = 0.1;
+  public static final double STOP_EXPLORE_PROB = 0.1;
+
   private RobotPilotState state;
   private Room previous_exploration_room;
 
@@ -90,35 +94,35 @@ public class RobotPilot extends Pilot {
       case INACTIVE:
         return new PilotAction(strafe);
       case TURN_TO_ROOM_EXIT:
-        return new PilotAction(strafe, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_direction)));
+        return new PilotAction(strafe, angleToTurnDirection(MapUtils.angleTo(object.getDirection(),
+                target_direction)));
       case MOVE_TO_ROOM_EXIT:
-        return new PilotAction(MoveDirection.FORWARD, strafe, TurnDirection.angleToTurnDirection(MapUtils
-                .angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY())));
+        return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
       case TURN_INTO_ROOM:
-        return new PilotAction(strafe, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_direction)));
+        return new PilotAction(strafe, angleToTurnDirection(MapUtils.angleTo(object.getDirection(),
+                target_direction)));
       case MOVE_INTO_ROOM:
         return new PilotAction(MoveDirection.FORWARD, strafe);
       case TURN_TO_ROOM_INTERIOR:
-        return new PilotAction(strafe, TurnDirection.angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_direction)));
+        return new PilotAction(strafe, angleToTurnDirection(MapUtils.angleTo(object.getDirection(),
+                target_direction)));
       case MOVE_TO_ROOM_INTERIOR:
-        return new PilotAction(MoveDirection.FORWARD, strafe, TurnDirection.angleToTurnDirection(MapUtils
-                .angleTo(object.getDirection(), target_x - object.getX(), target_y - object.getY())));
+        return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
       case REACT_TO_PYRO:
         MoveDirection move =
-                (Math.abs(target_object.getX() - object.getX()) < Constants.PILOT_ROBOT_MIN_DISTANCE_TO_PYRO &&
-                        Math.abs(target_object.getY() - object.getY()) < Constants.PILOT_ROBOT_MIN_DISTANCE_TO_PYRO
+                (Math.abs(target_object.getX() - object.getX()) < MIN_DISTANCE_TO_PYRO &&
+                        Math.abs(target_object.getY() - object.getY()) < MIN_DISTANCE_TO_PYRO
                         ? MoveDirection.BACKWARD
                         : MoveDirection.FORWARD);
         double angle_to_target = MapUtils.angleTo(object, target_object);
         double abs_angle_to_target = Math.abs(angle_to_target);
-        if (abs_angle_to_target < Constants.PILOT_ROBOT_TARGET_DIRECTION_EPSILON) {
-          return new PilotAction(move, strafe, TurnDirection.angleToTurnDirection(angle_to_target),
-                  abs_angle_to_target < Constants.PILOT_DIRECTION_EPSILON);
+        if (abs_angle_to_target < TARGET_DIRECTION_EPSILON) {
+          return new PilotAction(move, strafe, angleToTurnDirection(angle_to_target),
+                  abs_angle_to_target < DIRECTION_EPSILON);
         }
-        return new PilotAction(strafe, TurnDirection.angleToTurnDirection(angle_to_target));
+        return new PilotAction(strafe, angleToTurnDirection(angle_to_target));
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
     }
@@ -153,12 +157,12 @@ public class RobotPilot extends Pilot {
     // handle states if already reacting to Pyro or no Pyro found
     switch (state) {
       case INACTIVE:
-        if (Math.random() / s_elapsed < Constants.ROBOT_START_EXPLORE_PROB) {
+        if (Math.random() / s_elapsed < START_EXPLORE_PROB) {
           initState(RobotPilotState.TURN_TO_ROOM_EXIT);
         }
         break;
       case TURN_TO_ROOM_EXIT:
-        if (Math.abs(target_direction - object.getDirection()) < Constants.PILOT_DIRECTION_EPSILON) {
+        if (Math.abs(target_direction - object.getDirection()) < DIRECTION_EPSILON) {
           initState(RobotPilotState.MOVE_TO_ROOM_EXIT);
         }
         break;
@@ -169,21 +173,21 @@ public class RobotPilot extends Pilot {
         }
         break;
       case TURN_INTO_ROOM:
-        if (Math.abs(target_direction - object.getDirection()) < Constants.PILOT_DIRECTION_EPSILON) {
+        if (Math.abs(target_direction - object.getDirection()) < DIRECTION_EPSILON) {
           initState(RobotPilotState.MOVE_INTO_ROOM);
         }
         break;
       case MOVE_INTO_ROOM:
         break;
       case TURN_TO_ROOM_INTERIOR:
-        if (Math.abs(target_direction - object.getDirection()) < Constants.PILOT_DIRECTION_EPSILON) {
+        if (Math.abs(target_direction - object.getDirection()) < DIRECTION_EPSILON) {
           initState(RobotPilotState.MOVE_TO_ROOM_INTERIOR);
         }
         break;
       case MOVE_TO_ROOM_INTERIOR:
         if (Math.abs(target_x - object.getX()) < object_radius &&
                 Math.abs(target_y - object.getY()) < object_radius) {
-          if (Math.random() / s_elapsed < Constants.ROBOT_END_EXPLORE_PROB) {
+          if (Math.random() / s_elapsed < STOP_EXPLORE_PROB) {
             initState(RobotPilotState.INACTIVE);
           }
           else {

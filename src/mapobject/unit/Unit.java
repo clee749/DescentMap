@@ -20,6 +20,12 @@ import component.MapEngine;
 import external.ImageHandler;
 
 public abstract class Unit extends MovableObject {
+  public static final double EXPLOSION_RADIUS_MULTIPLIER = 1.1;
+  public static final double EXPLOSION_MIN_TIME = 0.5;
+  public static final double EXPLOSION_MAX_TIME = EXPLOSION_MIN_TIME * 2;
+  public static final double EXPLOSION_TIME_DIVISOR = 3.0;
+  public static final double POWERUP_MAX_SPEED = 2.0;
+
   protected final double cannon_offset;
   protected double reload_time;
   protected double reload_time_left;
@@ -84,12 +90,9 @@ public abstract class Unit extends MovableObject {
   public MapObject handleDeath(double s_elapsed) {
     if (!is_exploded) {
       is_exploded = true;
-      double explosion_time =
-              Math.random() * (Constants.UNIT_EXPLOSION_MAX_TIME - Constants.UNIT_EXPLOSION_MIN_TIME) +
-                      Constants.UNIT_EXPLOSION_MIN_TIME;
-      exploding_time_left = explosion_time / Constants.UNIT_EXPLOSION_TIME_DIVISOR;
-      return new Explosion(room, x_loc, y_loc, radius * Constants.UNIT_EXPLOSION_RADIUS_MULTIPLIER,
-              explosion_time);
+      double explosion_time = Math.random() * (EXPLOSION_MAX_TIME - EXPLOSION_MIN_TIME) + EXPLOSION_MIN_TIME;
+      exploding_time_left = explosion_time / EXPLOSION_TIME_DIVISOR;
+      return new Explosion(room, x_loc, y_loc, radius * EXPLOSION_RADIUS_MULTIPLIER, explosion_time);
     }
     if (exploding_time_left < 0.0) {
       is_in_map = false;

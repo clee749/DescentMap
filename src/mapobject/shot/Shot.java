@@ -8,10 +8,12 @@ import pilot.Pilot;
 import pilot.ShotPilot;
 import structure.Room;
 
-import common.Constants;
 import component.MapEngine;
 
 public abstract class Shot extends MovableObject {
+  public static final double EXPLOSION_RADIUS_DIVISOR = 30.0;
+  public static final double EXPLOSION_TIME_DIVISOR = 3.0;
+
   protected final int damage;
   protected final MapObject source;
 
@@ -45,8 +47,8 @@ public abstract class Shot extends MovableObject {
               Math.abs(y_loc - unit.getY()) < unit.getRadius()) {
         unit.hitByShot(this);
         is_in_map = false;
-        return new Explosion(room, x_loc, y_loc, damage / Constants.SHOT_EXPLOSION_RADIUS_DIVISOR, damage /
-                Constants.SHOT_EXPLOSION_TIME_DIVISOR);
+        return new Explosion(room, x_loc, y_loc, damage / EXPLOSION_RADIUS_DIVISOR, damage /
+                EXPLOSION_TIME_DIVISOR);
       }
     }
 

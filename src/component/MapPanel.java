@@ -10,7 +10,6 @@ import javax.swing.JPanel;
 
 import structure.DescentMap;
 
-import common.Constants;
 import common.DescentMapException;
 
 enum DisplayMode {
@@ -20,6 +19,8 @@ enum DisplayMode {
 
 
 public class MapPanel extends JPanel implements ComponentListener, MapDisplayer {
+  public static final int SIGHT_RADIUS = 3;
+
   private DisplayMode display_mode;
   private MapConstructionDisplayer construction_displayer;
   private MapPlayDisplayer play_displayer;
@@ -28,7 +29,7 @@ public class MapPanel extends JPanel implements ComponentListener, MapDisplayer 
   public void setMap(DescentMap map) {
     display_mode = DisplayMode.CONSTRUCTION;
     construction_displayer = new MapConstructionDisplayer(map);
-    play_displayer = new MapPlayDisplayer(map, Constants.PLAY_SIGHT_RADIUS);
+    play_displayer = new MapPlayDisplayer(map, SIGHT_RADIUS);
     play_displayer.setSizes(getSize());
   }
 

@@ -7,9 +7,9 @@ import java.awt.Point;
 import structure.DescentMap;
 import structure.Room;
 
-import common.Constants;
-
 public class MapConstructionDisplayer {
+  public static final int MIN_SIGHT_DIAMETER = 10;
+
   private final DescentMap map;
   private int pixels_per_cell;
   private Point ref_cell;
@@ -26,7 +26,7 @@ public class MapConstructionDisplayer {
     int max_y = map.getMaxY();
     int x_range = max_x - min_x + 1;
     int y_range = max_y - min_y + 1;
-    int sight_diameter = Math.max(Math.max(x_range, y_range), Constants.CONSTRUCTION_MIN_SIGHT_DIAMETER);
+    int sight_diameter = Math.max(Math.max(x_range, y_range), MIN_SIGHT_DIAMETER);
     pixels_per_cell = Math.min(dims.width / sight_diameter, dims.height / sight_diameter);
     ref_cell = new Point((min_x + max_x) / 2, (min_y + max_y) / 2);
     Point center_pixel = new Point(dims.width / 2, dims.height / 2);

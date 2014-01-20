@@ -7,7 +7,6 @@ import mapobject.ephemeral.Zunggg;
 import mapobject.unit.pyro.Pyro;
 import structure.Room;
 
-import common.Constants;
 import common.DescentMapException;
 import common.ObjectType;
 import component.MapEngine;
@@ -20,6 +19,10 @@ enum EntranceState {
 
 
 public class Entrance extends Scenery {
+  public static final double COOLDOWN_TIME = 5.0;
+  public static final double TIME_TO_SPAWN = 0.25;
+  public static final double ZUNGGG_TIME = TIME_TO_SPAWN * 2;
+
   private final LinkedList<Pyro> spawn_queue;
   private EntranceState state;
   private double state_time_left;
@@ -46,14 +49,14 @@ public class Entrance extends Scenery {
       case INACTIVE:
         if (!spawn_queue.isEmpty()) {
           state = EntranceState.SPAWN;
-          state_time_left = Constants.ENTRANCE_TIME_TO_SPAWN;
-          return new Zunggg(room, x_loc, y_loc, Constants.ENTRANCE_ZUNGGG_TIME);
+          state_time_left = TIME_TO_SPAWN;
+          return new Zunggg(room, x_loc, y_loc, ZUNGGG_TIME);
         }
         break;
       case SPAWN:
         if (state_time_left < 0.0) {
           state = EntranceState.COOLDOWN;
-          state_time_left = Constants.ENTRANCE_COOLDOWN_TIME;
+          state_time_left = COOLDOWN_TIME;
           return spawn_queue.pop();
         }
         break;

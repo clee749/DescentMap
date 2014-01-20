@@ -8,9 +8,6 @@ import mapobject.MapObject;
 import structure.DescentMap;
 import structure.Room;
 import util.MapUtils;
-
-import common.Constants;
-
 import external.ImageHandler;
 
 public class MapPlayDisplayer {
@@ -35,7 +32,7 @@ public class MapPlayDisplayer {
     num_rows = (int) ((double) dims.height / pixels_per_cell) + 2;
 
     images = new ImageHandler();
-    images.loadImages(Constants.IMAGES_PATH, pixels_per_cell);
+    images.loadImages(pixels_per_cell);
   }
 
   public void paintMap(Graphics2D g) {

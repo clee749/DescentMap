@@ -26,6 +26,19 @@ import component.MapEngine;
 import external.ImageHandler;
 
 public class Pyro extends Unit {
+  public static final double DEATH_SPIN_TIME = 5.0;
+  public static final double DEATH_SPIN_MOVE_SPEED_DIVISOR = 2.0;
+  public static final double DEATH_SPIN_TURN_SPEED_MULTIPLIER = 1.5;
+  public static final double DEATH_SPIN_EXPLOSION_RADIUS = 0.1;
+  public static final double DEATH_SPIN_EXPLOSION_TIME = 1.0;
+  public static final double OUTER_CANNON_OFFSET = 0.8;
+  public static final double CANNON_FORWARD_OFFSET = 0.2;
+  public static final double MISSILE_OFFSET = 0.2;
+  public static final double LASER_RELOAD_TIME = 0.25;
+  public static final int MAX_SHIELDS = 200;
+  public static final int STARTING_ENERGY = 100;
+  public static final int MAX_ENERGY = 200;
+
   private final double outer_cannon_offset;
   private final double cannon_forward_offset;
   private final boolean has_quad_lasers;
@@ -37,11 +50,11 @@ public class Pyro extends Unit {
 
   public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(Constants.getRadius(ObjectType.Pyro), pilot, room, x_loc, y_loc, direction);
-    outer_cannon_offset = Constants.PYRO_OUTER_CANNON_OFFSET * radius;
-    cannon_forward_offset = Constants.PYRO_CANNON_FORWARD_OFFSET * radius;
+    outer_cannon_offset = OUTER_CANNON_OFFSET * radius;
+    cannon_forward_offset = CANNON_FORWARD_OFFSET * radius;
     ((PyroPilot) pilot).startPilot();
     has_quad_lasers = true;
-    reload_time = Constants.PYRO_LASER_RELOAD_TIME;
+    reload_time = LASER_RELOAD_TIME;
     selected_primary_cannon = new LaserCannon(Constants.getDamage(ObjectType.LaserShot), 1);
   }
 
@@ -105,9 +118,9 @@ public class Pyro extends Unit {
     if (!death_spin_started) {
       death_spin_started = true;
       death_spin_direction = direction;
-      death_spin_time_left = Constants.PYRO_DEATH_SPIN_TIME;
-      move_speed /= Constants.PYRO_DEATH_SPIN_MOVE_SPEED_DIVISOR;
-      death_spin_delta_direction = turn_speed * Constants.PYRO_DEATH_SPIN_TURN_SPEED_MULTIPLIER;
+      death_spin_time_left = DEATH_SPIN_TIME;
+      move_speed /= DEATH_SPIN_MOVE_SPEED_DIVISOR;
+      death_spin_delta_direction = turn_speed * DEATH_SPIN_TURN_SPEED_MULTIPLIER;
       if (next_action.turn.equals(TurnDirection.CLOCKWISE) ||
               (next_action.turn.equals(TurnDirection.NONE) && Math.random() < 0.5)) {
         death_spin_delta_direction *= -1;
@@ -125,8 +138,7 @@ public class Pyro extends Unit {
       death_spin_time_left -= s_elapsed;
     }
     return new Explosion(room, x_loc + Math.random() * 2 * radius - radius, y_loc + Math.random() * 2 *
-            radius - radius, Constants.PYRO_DEATH_SPIN_EXPLOSION_RADIUS,
-            Constants.PYRO_DEATH_SPIN_EXPLOSION_TIME);
+            radius - radius, DEATH_SPIN_EXPLOSION_RADIUS, DEATH_SPIN_EXPLOSION_TIME);
   }
 
   @Override
@@ -155,8 +167,8 @@ public class Pyro extends Unit {
   }
 
   public boolean acquireShield(int amount) {
-    if (shields < Constants.PYRO_MAX_SHIELDS) {
-      shields = Math.min(shields + amount, Constants.PYRO_MAX_SHIELDS);
+    if (shields < MAX_SHIELDS) {
+      shields = Math.min(shields + amount, MAX_SHIELDS);
       return true;
     }
     return false;

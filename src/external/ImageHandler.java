@@ -22,6 +22,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.ImageIcon;
 
+import mapobject.powerup.Powerup;
 import util.MapUtils;
 
 import common.Constants;
@@ -135,8 +136,11 @@ class ImageUtils {
 
 
 public class ImageHandler {
-  public static final int NUM_IMAGES_IN_CIRCLE = Constants.IMAGES_NUM_IN_QUADRANT * 4;
-  public static final double RADIANS_PER_IMAGE = MapUtils.PI_OVER_TWO / Constants.IMAGES_NUM_IN_QUADRANT;
+  public static final String DEFAULT_PATH = "/images";
+  public static final int NUM_IMAGES_IN_QUADRANT = 10;
+  public static final double SHOT_IMAGE_RADIUS = 0.1;
+  public static final int NUM_IMAGES_IN_CIRCLE = NUM_IMAGES_IN_QUADRANT * 4;
+  public static final double RADIANS_PER_IMAGE = MapUtils.PI_OVER_TWO / NUM_IMAGES_IN_QUADRANT;
 
   private HashMap<String, ArrayList<Image>> images;
 
@@ -146,12 +150,16 @@ public class ImageHandler {
       loadAnimatedGif(path, type.name(), pixels_per_cell, 0.5);
     }
     for (ObjectType type : ObjectType.getPowerups()) {
-      loadAnimatedGif(path, type.name(), pixels_per_cell, Constants.POWERUP_RADIUS);
+      loadAnimatedGif(path, type.name(), pixels_per_cell, Powerup.RADIUS);
     }
     loadRotatedImages(path, "Pyro", pixels_per_cell, Constants.getRadius(ObjectType.Pyro));
     loadRotatedImages(path, "Class2Drone", pixels_per_cell, Constants.getRadius(ObjectType.Class2Drone));
-    loadRotatedImages(path, "LaserShot1", pixels_per_cell, Constants.IMAGES_SHOT_RADIUS);
-    loadRotatedImages(path, "LaserShot2", pixels_per_cell, Constants.IMAGES_SHOT_RADIUS);
+    loadRotatedImages(path, "LaserShot1", pixels_per_cell, SHOT_IMAGE_RADIUS);
+    loadRotatedImages(path, "LaserShot2", pixels_per_cell, SHOT_IMAGE_RADIUS);
+  }
+
+  public void loadImages(int pixels_per_cell) {
+    loadImages(DEFAULT_PATH, pixels_per_cell);
   }
 
   public boolean loadAnimatedGif(String path, String name, int pixels_per_cell, double radius) {

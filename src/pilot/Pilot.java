@@ -9,11 +9,13 @@ import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
-import common.Constants;
 import common.DescentMapException;
 import common.RoomSide;
 
 public abstract class Pilot {
+  public static final double DIRECTION_EPSILON = Math.PI / 32;
+  public static final double SHOT_EVASION_THRESHOLD = Math.PI / 16;
+
   protected MovableObject object;
   protected double object_radius;
   protected double object_diameter;
@@ -146,7 +148,7 @@ public abstract class Pilot {
         continue;
       }
       double angle_to_object = MapUtils.angleTo(shot, object);
-      if (Math.abs(angle_to_object) < Constants.PILOT_SHOT_EVASION_THRESHOLD) {
+      if (Math.abs(angle_to_object) < SHOT_EVASION_THRESHOLD) {
         if (Math.abs(MapUtils.angleTo(shot.getDirection(), object.getDirection())) < MapUtils.PI_OVER_TWO) {
           angle_to_object *= -1;
         }
@@ -154,6 +156,14 @@ public abstract class Pilot {
       }
     }
     return StrafeDirection.NONE;
+  }
+
+  public TurnDirection angleToTurnDirection(double angle) {
+    double abs_angle = Math.abs(angle);
+    if (abs_angle < Pilot.DIRECTION_EPSILON) {
+      return TurnDirection.NONE;
+    }
+    return (angle < 0 ? TurnDirection.COUNTER_CLOCKWISE : TurnDirection.CLOCKWISE);
   }
 
   public abstract PilotAction findNextAction(double s_elapsed);
