@@ -3,6 +3,8 @@ package structure;
 import java.util.ArrayList;
 
 import mapobject.MapObject;
+import mapobject.scenery.Entrance;
+import pilot.PyroPilot;
 
 import common.RoomSide;
 import component.MapBuilder;
@@ -14,6 +16,7 @@ public class DescentMap {
   private Room exit_room;
   private MineExteriorRoom exterior_room;
   private MapObject center_object;
+  private Entrance entrance;
 
   public DescentMap(int max_room_size) {
     builder = new MapBuilder(max_room_size);
@@ -76,10 +79,18 @@ public class DescentMap {
     this.center_object = center_object;
   }
 
+  public void setEntrance(Entrance entrance) {
+    this.entrance = entrance;
+  }
+
   public void finishBuildingMap() {
     builder.placeEntranceAndExitRooms();
     entrance_room = builder.getEntranceRoom();
     exit_room = builder.getExitRoom();
     exterior_room = builder.getExteriorRoom();
+  }
+
+  public void spawnPyro(PyroPilot pilot, boolean is_center_object) {
+    entrance.spawnPyro(pilot, is_center_object);
   }
 }

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import mapobject.MapObject;
 import mapobject.ephemeral.Zunggg;
 import mapobject.unit.pyro.Pyro;
+import pilot.PyroPilot;
 import structure.Room;
 
 import common.DescentMapException;
@@ -18,18 +19,31 @@ enum EntranceState {
 }
 
 
+class SpawningPyro {
+  public final PyroPilot pilot;
+  public final boolean is_center_object;
+
+  public SpawningPyro(PyroPilot pilot, boolean is_center_object) {
+    this.pilot = pilot;
+    this.is_center_object = is_center_object;
+  }
+}
+
+
 public class Entrance extends Scenery {
   public static final double COOLDOWN_TIME = 5.0;
   public static final double TIME_TO_SPAWN = 0.25;
-  public static final double ZUNGGG_TIME = TIME_TO_SPAWN * 2;
+  public static final double ZUNGGG_TIME = 1.0;
 
-  private final LinkedList<Pyro> spawn_queue;
+  private final LinkedList<SpawningPyro> spawn_queue;
+  private final double spawn_direction;
   private EntranceState state;
   private double state_time_left;
 
   public Entrance(Room room, double x_loc, double y_loc) {
     super(room, x_loc, y_loc);
-    spawn_queue = new LinkedList<Pyro>();
+    spawn_queue = new LinkedList<SpawningPyro>();
+    spawn_direction = 0.0;
     state = EntranceState.INACTIVE;
   }
 
@@ -45,11 +59,18 @@ public class Entrance extends Scenery {
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
+    for (SpawningPyro spawning_pyro : spawn_queue) {
+      spawning_pyro.pilot.handleRespawnDelay(s_elapsed);
+    }
+
     switch (state) {
       case INACTIVE:
-        if (!spawn_queue.isEmpty()) {
+        if (!spawn_queue.isEmpty() && spawn_queue.peek().pilot.isReadyToRespawn()) {
           state = EntranceState.SPAWN;
           state_time_left = TIME_TO_SPAWN;
+          if (spawn_queue.peek().is_center_object) {
+            engine.setCenterObject(this);
+          }
           return new Zunggg(room, x_loc, y_loc, ZUNGGG_TIME);
         }
         break;
@@ -57,7 +78,12 @@ public class Entrance extends Scenery {
         if (state_time_left < 0.0) {
           state = EntranceState.COOLDOWN;
           state_time_left = COOLDOWN_TIME;
-          return spawn_queue.pop();
+          SpawningPyro spawning_pyro = spawn_queue.pop();
+          Pyro pyro = new Pyro(spawning_pyro.pilot, room, x_loc, y_loc, spawn_direction);
+          if (spawning_pyro.is_center_object) {
+            engine.setCenterObject(pyro);
+          }
+          return pyro;
         }
         break;
       case COOLDOWN:
@@ -68,11 +94,12 @@ public class Entrance extends Scenery {
       default:
         throw new DescentMapException("Unexpected EntranceState: " + state);
     }
+
     state_time_left -= s_elapsed;
     return null;
   }
 
-  public void spawnPyro(Pyro pyro) {
-    spawn_queue.push(pyro);
+  public void spawnPyro(PyroPilot pilot, boolean is_center_object) {
+    spawn_queue.add(new SpawningPyro(pilot, is_center_object));
   }
 }

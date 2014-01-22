@@ -9,6 +9,7 @@ import java.awt.geom.Point2D;
 import mapobject.MapObject;
 import mapobject.MultipleObject;
 import mapobject.ephemeral.Explosion;
+import mapobject.powerup.Shield;
 import mapobject.unit.Unit;
 import pilot.Pilot;
 import pilot.PilotAction;
@@ -26,11 +27,6 @@ import component.MapEngine;
 import external.ImageHandler;
 
 public class Pyro extends Unit {
-  public static final double DEATH_SPIN_TIME = 5.0;
-  public static final double DEATH_SPIN_MOVE_SPEED_DIVISOR = 2.0;
-  public static final double DEATH_SPIN_TURN_SPEED_MULTIPLIER = 1.5;
-  public static final double DEATH_SPIN_EXPLOSION_RADIUS = 0.1;
-  public static final double DEATH_SPIN_EXPLOSION_TIME = 1.0;
   public static final double OUTER_CANNON_OFFSET = 0.8;
   public static final double CANNON_FORWARD_OFFSET = 0.2;
   public static final double MISSILE_OFFSET = 0.2;
@@ -38,15 +34,20 @@ public class Pyro extends Unit {
   public static final int MAX_SHIELDS = 200;
   public static final int STARTING_ENERGY = 100;
   public static final int MAX_ENERGY = 200;
+  public static final double DEATH_SPIN_TIME = 5.0;
+  public static final double DEATH_SPIN_MOVE_SPEED_DIVISOR = 2.0;
+  public static final double DEATH_SPIN_TURN_SPEED_MULTIPLIER = 1.5;
+  public static final double DEATH_SPIN_EXPLOSION_RADIUS = 0.1;
+  public static final double DEATH_SPIN_EXPLOSION_TIME = 1.0;
 
   private final double outer_cannon_offset;
   private final double cannon_forward_offset;
   private final boolean has_quad_lasers;
+  private final Cannon selected_primary_cannon;
   private boolean death_spin_started;
   private double death_spin_time_left;
   private double death_spin_direction;
   private double death_spin_delta_direction;
-  private final Cannon selected_primary_cannon;
 
   public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(Constants.getRadius(ObjectType.Pyro), pilot, room, x_loc, y_loc, direction);
@@ -130,7 +131,12 @@ public class Pyro extends Unit {
       death_spin_direction =
               MapUtils.normalizeAngle(death_spin_direction + death_spin_delta_direction * s_elapsed);
       if (death_spin_time_left < 0.0) {
-        return handleDeath(s_elapsed);
+        MapObject created_object = handleDeath(s_elapsed);
+        if (!is_in_map) {
+          ((PyroPilot) pilot).prepareForRespawn();
+          engine.spawnPyro(this);
+        }
+        return created_object;
       }
       if (!doNextMovement(engine, s_elapsed)) {
         death_spin_time_left = 0.0;
@@ -163,7 +169,7 @@ public class Pyro extends Unit {
 
   @Override
   public MapObject releasePowerups() {
-    return null;
+    return new Shield(room, x_loc, y_loc, Math.random() * MapUtils.TWO_PI, Math.random() * POWERUP_MAX_SPEED);
   }
 
   public boolean acquireShield(int amount) {

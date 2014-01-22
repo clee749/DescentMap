@@ -16,5 +16,4 @@ public class LaserCannon extends Cannon {
   public MapObject fireCannon(MapObject source, Room room, double x_loc, double y_loc, double direction) {
     return new LaserShot(source, damage, room, x_loc, y_loc, direction, level);
   }
-
 }

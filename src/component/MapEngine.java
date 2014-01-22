@@ -4,6 +4,8 @@ import java.util.LinkedList;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
+import mapobject.unit.pyro.Pyro;
+import pilot.PyroPilot;
 import structure.DescentMap;
 import structure.Room;
 
@@ -34,6 +36,7 @@ public class MapEngine {
 
   public void setCenterObject(MapObject center_object) {
     this.center_object = center_object;
+    map.setCenterObject(center_object);
   }
 
   public void addObject(MapObject object) {
@@ -73,6 +76,14 @@ public class MapEngine {
   }
 
   public boolean levelComplete() {
-    return center_object.getRoom().equals(map.getExitRoom()) || !center_object.isInMap();
+    return map.getExitRoom().equals(center_object.getRoom());
+  }
+
+  public void spawnPyro(PyroPilot pilot, boolean is_center_object) {
+    map.spawnPyro(pilot, is_center_object);
+  }
+
+  public void spawnPyro(Pyro pyro) {
+    spawnPyro((PyroPilot) pyro.getPilot(), pyro.equals(center_object));
   }
 }

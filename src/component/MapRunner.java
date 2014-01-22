@@ -1,14 +1,12 @@
 package component;
 
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 
-import mapobject.unit.pyro.Pyro;
+import pilot.PyroPilot;
 import structure.DescentMap;
-import structure.Room;
 
 import common.DescentMapException;
 
@@ -98,16 +96,8 @@ public class MapRunner {
     else {
       map.finishBuildingMap();
       MapPopulator.populateMap(map);
-      Room entrance_room = map.getEntranceRoom();
-      Point nw_corner = entrance_room.getNWCorner();
-      Point se_corner = entrance_room.getSECorner();
-      Pyro ship =
-              new Pyro(entrance_room, (nw_corner.x + se_corner.x) / 2.0, (nw_corner.y + se_corner.y) / 2.0,
-                      0.0);
       engine = new MapEngine(map);
-      engine.addObject(ship);
-      map.setCenterObject(ship);
-      engine.setCenterObject(ship);
+      engine.spawnPyro(new PyroPilot(), true);
       state = RunnerState.PAUSE_AFTER_BUILD;
       target_sleep_ms = PAUSE_AFTER_BUILD_SLEEP;
     }

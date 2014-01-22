@@ -10,6 +10,7 @@ import mapobject.MapObject;
 import mapobject.MovableObject;
 import mapobject.powerup.Powerup;
 import mapobject.powerup.Shield;
+import mapobject.scenery.Entrance;
 import mapobject.unit.Unit;
 import mapobject.unit.pyro.Pyro;
 import structure.Room;
@@ -31,6 +32,8 @@ enum PyroPilotState {
 
 public class PyroPilot extends Pilot {
   public static final double TIME_TURNING_UNTIL_STOP = 5.0;
+  public static final double RESPAWN_DELAY = 5.0;
+  public static final double SPAWNING_SICKNESS = Entrance.ZUNGGG_TIME - Entrance.TIME_TO_SPAWN;
 
   private final HashSet<Room> visited;
   private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
@@ -38,6 +41,8 @@ public class PyroPilot extends Pilot {
   private Pyro pyro;
   private double time_turning_to_target;
   private TurnDirection previous_turn_to_target;
+  private double respawn_delay_left;
+  private double inactive_time_left;
 
   public PyroPilot() {
     visited = new HashSet<Room>();
@@ -55,7 +60,23 @@ public class PyroPilot extends Pilot {
 
   public void startPilot() {
     visitRoom(current_room);
-    initState(PyroPilotState.REACT_TO_OBJECT);
+    inactive_time_left = SPAWNING_SICKNESS;
+    initState(PyroPilotState.INACTIVE);
+  }
+
+  public void prepareForRespawn() {
+    visited.remove(current_room);
+    current_path.clear();
+    respawn_delay_left = RESPAWN_DELAY;
+    initState(PyroPilotState.INACTIVE);
+  }
+
+  public void handleRespawnDelay(double s_elapsed) {
+    respawn_delay_left -= s_elapsed;
+  }
+
+  public boolean isReadyToRespawn() {
+    return respawn_delay_left < 0.0;
   }
 
   public void visitRoom(Room room) {
@@ -106,10 +127,7 @@ public class PyroPilot extends Pilot {
     // StrafeDirection strafe = reactToShots();
 
     boolean fire_cannon = false;
-    for (Unit unit : current_room.getUnits()) {
-      if (unit.getType().equals(ObjectType.Pyro)) {
-        continue;
-      }
+    for (Unit unit : current_room.getMechs()) {
       double abs_angle_to_unit = Math.abs(MapUtils.angleTo(object, unit));
       if (abs_angle_to_unit < DIRECTION_EPSILON) {
         fire_cannon = true;
@@ -119,6 +137,7 @@ public class PyroPilot extends Pilot {
 
     switch (state) {
       case INACTIVE:
+        inactive_time_left -= s_elapsed;
         return PilotAction.NO_ACTION;
       case MOVE_TO_ROOM_CONNECTION:
         return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
@@ -147,6 +166,9 @@ public class PyroPilot extends Pilot {
   public void updateState() {
     switch (state) {
       case INACTIVE:
+        if (inactive_time_left < 0.0) {
+          initState(PyroPilotState.REACT_TO_OBJECT);
+        }
         break;
       case MOVE_TO_ROOM_CONNECTION:
         if (Math.abs(target_x - object.getX()) < object_radius &&
@@ -283,8 +305,8 @@ public class PyroPilot extends Pilot {
   }
 
   public MapObject findNextTargetObject() {
-    for (Unit unit : current_room.getUnits()) {
-      if (!unit.getType().equals(ObjectType.Pyro) && shouldTargetObject(unit)) {
+    for (Unit unit : current_room.getMechs()) {
+      if (shouldTargetObject(unit)) {
         return unit;
       }
     }

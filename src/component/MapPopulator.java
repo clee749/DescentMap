@@ -37,8 +37,11 @@ public class MapPopulator {
     map.getEntranceSide();
     Point nw_corner = entrance_room.getNWCorner();
     Point se_corner = entrance_room.getSECorner();
-    entrance_room.addChild(new Entrance(entrance_room, (nw_corner.x + se_corner.x) / 2.0,
-            (nw_corner.y + se_corner.y) / 2.0));
+    Entrance entrance =
+            new Entrance(entrance_room, (nw_corner.x + se_corner.x) / 2.0, (nw_corner.y + se_corner.y) / 2.0);
+    entrance_room.addChild(entrance);
+    map.setEntrance(entrance);
+    map.setCenterObject(entrance);
   }
 
   public static void placeExit(DescentMap map) {

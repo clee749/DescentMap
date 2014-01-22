@@ -196,7 +196,10 @@ public class RobotPilot extends Pilot {
         }
         break;
       case REACT_TO_PYRO:
-        if (target_object_room.equals(current_room)) {
+        if (!target_object.isInMap()) {
+          initState(RobotPilotState.INACTIVE);
+        }
+        else if (target_object_room.equals(current_room)) {
           if (!target_object.getRoom().equals(target_object_room)) {
             initState(RobotPilotState.INACTIVE);
           }

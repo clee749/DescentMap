@@ -35,11 +35,11 @@ public class Room {
   private final int width;
   private final int height;
   private final HashMap<RoomSide, RoomConnection> neighbors;
-  private final HashSet<Scenery> sceneries;
-  private final HashSet<Powerup> powerups;
   private final HashSet<Shot> shots;
+  private final HashSet<Powerup> powerups;
   private final HashSet<Pyro> pyros;
-  private final HashSet<Unit> units; // includes Pyros
+  private final HashSet<Unit> mechs; // all non-Pyro Units
+  private final HashSet<Scenery> sceneries;
   private final HashSet<MapObject> misc_objects;
 
   public Room(Point nw_corner, Point se_corner) {
@@ -48,11 +48,11 @@ public class Room {
     width = se_corner.x - nw_corner.x;
     height = se_corner.y - nw_corner.y;
     neighbors = new HashMap<RoomSide, RoomConnection>();
-    sceneries = new HashSet<Scenery>();
-    powerups = new HashSet<Powerup>();
     shots = new HashSet<Shot>();
+    powerups = new HashSet<Powerup>();
     pyros = new HashSet<Pyro>();
-    units = new HashSet<Unit>();
+    mechs = new HashSet<Unit>();
+    sceneries = new HashSet<Scenery>();
     misc_objects = new HashSet<MapObject>();
   }
 
@@ -88,24 +88,24 @@ public class Room {
     return neighbors.get(direction);
   }
 
-  public HashSet<Scenery> getSceneries() {
-    return sceneries;
+  public HashSet<Shot> getShots() {
+    return shots;
   }
 
   public HashSet<Powerup> getPowerups() {
     return powerups;
   }
 
-  public HashSet<Shot> getShots() {
-    return shots;
-  }
-
   public HashSet<Pyro> getPyros() {
     return pyros;
   }
 
-  public HashSet<Unit> getUnits() {
-    return units;
+  public HashSet<Unit> getMechs() {
+    return mechs;
+  }
+
+  public HashSet<Scenery> getSceneries() {
+    return sceneries;
   }
 
   public HashSet<MapObject> getMiscObjects() {
@@ -188,8 +188,11 @@ public class Room {
       for (Shot shot : shots) {
         shot.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
-      for (Unit unit : units) {
+      for (Unit unit : mechs) {
         unit.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      }
+      for (Pyro pyro : pyros) {
+        pyro.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
       for (MapObject object : misc_objects) {
         object.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
@@ -212,20 +215,20 @@ public class Room {
   }
 
   public void addChild(MapObject object) {
-    if (object instanceof Scenery) {
-      sceneries.add((Scenery) object);
+    if (object instanceof Shot) {
+      shots.add((Shot) object);
     }
     else if (object instanceof Powerup) {
       powerups.add((Powerup) object);
     }
-    else if (object instanceof Shot) {
-      shots.add((Shot) object);
+    else if (object.getType().equals(ObjectType.Pyro)) {
+      pyros.add((Pyro) object);
     }
     else if (object instanceof Unit) {
-      if (object.getType().equals(ObjectType.Pyro)) {
-        pyros.add((Pyro) object);
-      }
-      units.add((Unit) object);
+      mechs.add((Unit) object);
+    }
+    else if (object instanceof Scenery) {
+      sceneries.add((Scenery) object);
     }
     else {
       misc_objects.add(object);
@@ -233,36 +236,39 @@ public class Room {
   }
 
   public boolean removeChild(MapObject child) {
-    if (child instanceof Scenery) {
-      return sceneries.remove(child);
+    if (child instanceof Shot) {
+      return shots.remove(child);
     }
     if (child instanceof Powerup) {
       return powerups.remove(child);
     }
-    if (child instanceof Shot) {
-      return shots.remove(child);
+    if (child.getType().equals(ObjectType.Pyro)) {
+      return pyros.remove(child);
     }
     if (child instanceof Unit) {
-      if (child.getType().equals(ObjectType.Pyro)) {
-        pyros.remove(child);
-      }
-      return units.remove(child);
+      return mechs.remove(child);
+    }
+    if (child instanceof Scenery) {
+      return sceneries.remove(child);
     }
     return misc_objects.remove(child);
   }
 
   public void computeNextStep(double s_elapsed) {
-    for (Scenery scenery : sceneries) {
-      scenery.planNextAction(s_elapsed);
+    for (Shot shot : shots) {
+      shot.planNextAction(s_elapsed);
     }
     for (Powerup powerup : powerups) {
       powerup.planNextAction(s_elapsed);
     }
-    for (Shot shot : shots) {
-      shot.planNextAction(s_elapsed);
+    for (Pyro pyro : pyros) {
+      pyro.planNextAction(s_elapsed);
     }
-    for (Unit unit : units) {
+    for (Unit unit : mechs) {
       unit.planNextAction(s_elapsed);
+    }
+    for (Scenery scenery : sceneries) {
+      scenery.planNextAction(s_elapsed);
     }
     for (MapObject object : misc_objects) {
       object.planNextAction(s_elapsed);
@@ -270,10 +276,11 @@ public class Room {
   }
 
   public LinkedList<MapObject> doNextStep(MapEngine engine, double s_elapsed) {
-    LinkedList<MapObject> created_objects = doNextStep(engine, s_elapsed, sceneries);
+    LinkedList<MapObject> created_objects = doNextStep(engine, s_elapsed, shots);
     created_objects.addAll(doNextStep(engine, s_elapsed, powerups));
-    created_objects.addAll(doNextStep(engine, s_elapsed, shots));
-    created_objects.addAll(doNextStep(engine, s_elapsed, units));
+    created_objects.addAll(doNextStep(engine, s_elapsed, pyros));
+    created_objects.addAll(doNextStep(engine, s_elapsed, mechs));
+    created_objects.addAll(doNextStep(engine, s_elapsed, sceneries));
     created_objects.addAll(doNextStep(engine, s_elapsed, misc_objects));
     return created_objects;
   }

@@ -51,8 +51,8 @@ public abstract class Powerup extends MovableObject {
 
     for (Pyro pyro : room.getPyros()) {
       double pyro_radius = pyro.getRadius();
-      if (Math.abs(x_loc - pyro.getX()) < pyro_radius && Math.abs(y_loc - pyro.getY()) < pyro_radius &&
-              beAcquired(pyro)) {
+      if (pyro.getShields() >= 0 && Math.abs(x_loc - pyro.getX()) < pyro_radius &&
+              Math.abs(y_loc - pyro.getY()) < pyro_radius && beAcquired(pyro)) {
         is_in_map = false;
         break;
       }
