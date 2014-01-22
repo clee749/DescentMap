@@ -28,7 +28,10 @@ public class MapPopulator {
       if (room.equals(exit_room) || room.equals(exterior_room)) {
         continue;
       }
+      placeRobotInRoom(room, ObjectType.BabySpider);
       placeRobotInRoom(room, ObjectType.Class2Drone);
+      placeRobotInRoom(room, ObjectType.LightHulk);
+      placeRobotInRoom(room, ObjectType.PlatformLaser);
     }
   }
 

@@ -153,9 +153,14 @@ public class ImageHandler {
       loadAnimatedGif(path, type.name(), pixels_per_cell, Powerup.RADIUS);
     }
     loadRotatedImages(path, "Pyro", pixels_per_cell, Constants.getRadius(ObjectType.Pyro));
+    loadRotatedImages(path, "BabySpider", pixels_per_cell, Constants.getRadius(ObjectType.BabySpider));
     loadRotatedImages(path, "Class2Drone", pixels_per_cell, Constants.getRadius(ObjectType.Class2Drone));
+    loadRotatedImages(path, "LightHulk", pixels_per_cell, Constants.getRadius(ObjectType.LightHulk));
+    loadRotatedImages(path, "PlatformLaser", pixels_per_cell, Constants.getRadius(ObjectType.PlatformLaser));
     loadRotatedImages(path, "LaserShot1", pixels_per_cell, SHOT_IMAGE_RADIUS);
     loadRotatedImages(path, "LaserShot2", pixels_per_cell, SHOT_IMAGE_RADIUS);
+    loadRotatedImages(path, "LaserShot3", pixels_per_cell, SHOT_IMAGE_RADIUS);
+    loadRotatedImages(path, "LaserShot4", pixels_per_cell, SHOT_IMAGE_RADIUS);
   }
 
   public void loadImages(int pixels_per_cell) {
