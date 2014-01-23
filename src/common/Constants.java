@@ -76,7 +76,7 @@ public class Constants {
     HashMap<ObjectType, Double> radii = new HashMap<ObjectType, Double>();
     // 1m == 0.05
     radii.put(ObjectType.Pyro, 0.25);
-    radii.put(ObjectType.BabySpider, 0.1);
+    radii.put(ObjectType.BabySpider, 0.12);
     radii.put(ObjectType.Class2Drone, 0.2);
     radii.put(ObjectType.LightHulk, 0.25);
     radii.put(ObjectType.PlatformLaser, 0.25);

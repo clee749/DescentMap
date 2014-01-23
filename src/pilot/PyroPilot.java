@@ -147,7 +147,7 @@ public class PyroPilot extends Pilot {
                 object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon);
       case REACT_TO_OBJECT:
         TurnDirection turn = angleToTurnDirection(MapUtils.angleTo(object, target_object));
-        if (turn.equals(previous_turn_to_target)) {
+        if (!turn.equals(TurnDirection.NONE) && turn.equals(previous_turn_to_target)) {
           time_turning_to_target += s_elapsed;
         }
         else {
