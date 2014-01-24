@@ -88,6 +88,11 @@ public class Room {
     return neighbors.get(direction);
   }
 
+  public Room getNeighborInDirection(RoomSide direction) {
+    RoomConnection connection = neighbors.get(direction);
+    return (connection != null ? connection.neighbor : null);
+  }
+
   public HashSet<Shot> getShots() {
     return shots;
   }
@@ -299,5 +304,63 @@ public class Room {
       }
     }
     return created_objects;
+  }
+
+  public void doSplashDamage(Unit already_damaged, double x_center, double y_center, int max_damage,
+          double damage_radius) {
+    doSplashDamage(already_damaged, x_center, y_center, max_damage, damage_radius, true);
+  }
+
+  public void doSplashDamage(Unit already_damaged, double x_center, double y_center, int max_damage,
+          double damage_radius, boolean check_neighbors) {
+    for (Pyro pyro : pyros) {
+      if (!pyro.equals(already_damaged)) {
+        applySplashDamage(pyro, x_center, y_center, max_damage, damage_radius);
+      }
+    }
+    for (Unit unit : mechs) {
+      if (!unit.equals(already_damaged)) {
+        applySplashDamage(unit, x_center, y_center, max_damage, damage_radius);
+      }
+    }
+
+    // check in neighbor Rooms
+    if (check_neighbors) {
+      // north neighbor
+      if (nw_corner.y - y_center < damage_radius) {
+        doSplashDamageInNeighbor(x_center, y_center, max_damage, damage_radius, RoomSide.NORTH);
+      }
+
+      // south neighbor
+      if (y_center - se_corner.y < damage_radius) {
+        doSplashDamageInNeighbor(x_center, y_center, max_damage, damage_radius, RoomSide.SOUTH);
+      }
+
+      // west neighbor
+      if (nw_corner.x - x_center < damage_radius) {
+        doSplashDamageInNeighbor(x_center, y_center, max_damage, damage_radius, RoomSide.WEST);
+      }
+
+      // east neighbor
+      if (x_center - se_corner.x < damage_radius) {
+        doSplashDamageInNeighbor(x_center, y_center, max_damage, damage_radius, RoomSide.EAST);
+      }
+    }
+  }
+
+  public void doSplashDamageInNeighbor(double x_center, double y_center, int max_damage,
+          double damage_radius, RoomSide direction) {
+    Room neighbor = getNeighborInDirection(direction);
+    if (neighbor != null) {
+      neighbor.doSplashDamage(null, x_center, y_center, max_damage, damage_radius, false);
+    }
+  }
+
+  public void applySplashDamage(Unit unit, double x_center, double y_center, int max_damage,
+          double damage_radius) {
+    double distance = Math.hypot(unit.getX() - x_center, unit.getY() - y_center);
+    if (distance < damage_radius) {
+      unit.beDamaged((int) (max_damage * (1 - distance / damage_radius)));
+    }
   }
 }

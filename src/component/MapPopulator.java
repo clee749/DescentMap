@@ -31,6 +31,7 @@ public class MapPopulator {
       placeRobotInRoom(room, ObjectType.BabySpider);
       placeRobotInRoom(room, ObjectType.Class2Drone);
       placeRobotInRoom(room, ObjectType.LightHulk);
+      placeRobotInRoom(room, ObjectType.MediumHulk);
       placeRobotInRoom(room, ObjectType.PlatformLaser);
     }
   }

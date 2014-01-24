@@ -39,6 +39,9 @@ public class Pyro extends Unit {
   public static final double DEATH_SPIN_TURN_SPEED_MULTIPLIER = 1.5;
   public static final double DEATH_SPIN_EXPLOSION_RADIUS = 0.1;
   public static final double DEATH_SPIN_EXPLOSION_TIME = 1.0;
+  public static final double DEATH_SPLASH_DAMAGE_RADIUS = 1.0;
+  public static final int MIN_DEATH_SPLASH_DAMAGE = 10;
+  public static final int MAX_DEATH_SPLASH_DAMAGE = 50;
 
   private final double outer_cannon_offset;
   private final double cannon_forward_offset;
@@ -133,6 +136,9 @@ public class Pyro extends Unit {
       if (death_spin_time_left < 0.0) {
         MapObject created_object = handleDeath(s_elapsed);
         if (!is_in_map) {
+          room.doSplashDamage(this, x_loc, y_loc,
+                  Math.max(MAX_DEATH_SPLASH_DAMAGE + shields, MIN_DEATH_SPLASH_DAMAGE),
+                  DEATH_SPLASH_DAMAGE_RADIUS);
           ((PyroPilot) pilot).prepareForRespawn();
           engine.spawnPyro(this);
         }

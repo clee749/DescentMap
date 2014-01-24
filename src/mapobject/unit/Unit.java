@@ -8,7 +8,6 @@ import java.awt.Point;
 import mapobject.MapObject;
 import mapobject.MovableObject;
 import mapobject.ephemeral.Explosion;
-import mapobject.shot.Shot;
 import pilot.Pilot;
 import pilot.PilotAction;
 import structure.Room;
@@ -83,8 +82,8 @@ public abstract class Unit extends MovableObject {
     reload_time_left = reload_time;
   }
 
-  public void hitByShot(Shot shot) {
-    shields -= shot.getDamage();
+  public void beDamaged(int amount) {
+    shields -= amount;
   }
 
   public MapObject handleDeath(double s_elapsed) {

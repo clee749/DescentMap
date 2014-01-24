@@ -30,7 +30,7 @@ public enum ObjectType {
   MediumHulkCloaked,
   PlatformMissile,
 
-  // weapons
+  // shots
   LaserShot,
   PlasmaShot,
   FusionShot,
@@ -62,7 +62,6 @@ public enum ObjectType {
   // ephemerals
   Explosion,
   Zunggg,
-  SpawningUnit,
 
   // miscellaneous
   ProximityBomb,

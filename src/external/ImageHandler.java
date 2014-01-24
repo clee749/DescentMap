@@ -138,7 +138,7 @@ class ImageUtils {
 public class ImageHandler {
   public static final String DEFAULT_PATH = "/images";
   public static final int NUM_IMAGES_IN_QUADRANT = 10;
-  public static final double SHOT_IMAGE_RADIUS = 0.1;
+  public static final double SHOT_IMAGE_RADIUS = 0.12;
   public static final int NUM_IMAGES_IN_CIRCLE = NUM_IMAGES_IN_QUADRANT * 4;
   public static final double RADIANS_PER_IMAGE = MapUtils.PI_OVER_TWO / NUM_IMAGES_IN_QUADRANT;
 
@@ -156,11 +156,13 @@ public class ImageHandler {
     loadRotatedImages(path, "BabySpider", pixels_per_cell, Constants.getRadius(ObjectType.BabySpider));
     loadRotatedImages(path, "Class2Drone", pixels_per_cell, Constants.getRadius(ObjectType.Class2Drone));
     loadRotatedImages(path, "LightHulk", pixels_per_cell, Constants.getRadius(ObjectType.LightHulk));
+    loadRotatedImages(path, "MediumHulk", pixels_per_cell, Constants.getRadius(ObjectType.MediumHulk));
     loadRotatedImages(path, "PlatformLaser", pixels_per_cell, Constants.getRadius(ObjectType.PlatformLaser));
     loadRotatedImages(path, "LaserShot1", pixels_per_cell, SHOT_IMAGE_RADIUS);
     loadRotatedImages(path, "LaserShot2", pixels_per_cell, SHOT_IMAGE_RADIUS);
     loadRotatedImages(path, "LaserShot3", pixels_per_cell, SHOT_IMAGE_RADIUS);
     loadRotatedImages(path, "LaserShot4", pixels_per_cell, SHOT_IMAGE_RADIUS);
+    loadRotatedImages(path, "ConcussionMissile", pixels_per_cell, SHOT_IMAGE_RADIUS);
   }
 
   public void loadImages(int pixels_per_cell) {

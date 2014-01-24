@@ -19,6 +19,7 @@ enum DisplayMode {
 
 
 public class MapPanel extends JPanel implements ComponentListener, MapDisplayer {
+  public static final Color BACKGROUND_COLOR = Color.black;
   public static final int SIGHT_RADIUS = 3;
 
   private DisplayMode display_mode;
@@ -40,7 +41,7 @@ public class MapPanel extends JPanel implements ComponentListener, MapDisplayer 
 
   @Override
   public void paint(Graphics g) {
-    g.setColor(Color.black);
+    g.setColor(BACKGROUND_COLOR);
     g.fillRect(0, 0, getWidth(), getHeight());
     switch (display_mode) {
       case CONSTRUCTION:

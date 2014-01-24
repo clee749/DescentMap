@@ -3,6 +3,7 @@ package util;
 import mapobject.unit.robot.BabySpider;
 import mapobject.unit.robot.Class2Drone;
 import mapobject.unit.robot.LightHulk;
+import mapobject.unit.robot.MediumHulk;
 import mapobject.unit.robot.PlatformLaser;
 import mapobject.unit.robot.Robot;
 import structure.Room;
@@ -23,6 +24,8 @@ public class RobotFactory {
         return new Class2Drone(room, x_loc, y_loc, direction);
       case LightHulk:
         return new LightHulk(room, x_loc, y_loc, direction);
+      case MediumHulk:
+        return new MediumHulk(room, x_loc, y_loc, direction);
       case PlatformLaser:
         return new PlatformLaser(room, x_loc, y_loc, direction);
       default:

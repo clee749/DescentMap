@@ -14,6 +14,8 @@ import component.MapEngine;
 public abstract class Shot extends MovableObject {
   public static final double EXPLOSION_RADIUS_DIVISOR = 30.0;
   public static final double EXPLOSION_TIME_DIVISOR = 3.0;
+  public static final double EXPLOSION_MAX_RADIUS = 0.2;
+  public static final double EXPLOSION_MAX_TIME = 0.5;
 
   protected final int damage;
   protected final MapObject source;
@@ -39,38 +41,47 @@ public abstract class Shot extends MovableObject {
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
-    // check for collision with a Unit
-    for (Pyro pyro : room.getPyros()) {
-      MapObject created_object = checkForUnitCollision(pyro);
-      if (created_object != null) {
-        return created_object;
-      }
-    }
-    for (Unit unit : room.getMechs()) {
-      MapObject created_object = checkForUnitCollision(unit);
-      if (created_object != null) {
-        return created_object;
-      }
+    Unit hit_unit = checkForUnitCollisions();
+    if (hit_unit != null) {
+      return handleUnitCollision(hit_unit);
     }
 
-    // check for collision with a wall
     boolean location_accepted = doNextMovement(engine, s_elapsed);
     if (!location_accepted) {
-      is_in_map = false;
+      return handleWallCollision();
     }
     return null;
   }
 
-  public MapObject checkForUnitCollision(Unit unit) {
-    if (unit.equals(source)) {
-      return null;
+  public Unit checkForUnitCollisions() {
+    for (Pyro pyro : room.getPyros()) {
+      if (hitsUnit(pyro)) {
+        return pyro;
+      }
     }
-    if (Math.abs(x_loc - unit.getX()) < unit.getRadius() && Math.abs(y_loc - unit.getY()) < unit.getRadius()) {
-      unit.hitByShot(this);
-      is_in_map = false;
-      return new Explosion(room, x_loc, y_loc, damage / EXPLOSION_RADIUS_DIVISOR, damage /
-              EXPLOSION_TIME_DIVISOR);
+    for (Unit unit : room.getMechs()) {
+      if (hitsUnit(unit)) {
+        return unit;
+      }
     }
+    return null;
+  }
+
+  public boolean hitsUnit(Unit unit) {
+    return !unit.equals(source) && Math.abs(x_loc - unit.getX()) < unit.getRadius() &&
+            Math.abs(y_loc - unit.getY()) < unit.getRadius();
+  }
+
+  public MapObject handleUnitCollision(Unit hit_unit) {
+    is_in_map = false;
+    hit_unit.beDamaged(damage);
+    return new Explosion(room, x_loc, y_loc,
+            Math.min(damage / EXPLOSION_RADIUS_DIVISOR, EXPLOSION_MAX_RADIUS), Math.min(damage /
+                    EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));
+  }
+
+  public MapObject handleWallCollision() {
+    is_in_map = false;
     return null;
   }
 }
