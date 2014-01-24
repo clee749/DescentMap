@@ -128,10 +128,21 @@ public class PyroPilot extends Pilot {
 
     boolean fire_cannon = false;
     for (Unit unit : current_room.getMechs()) {
-      double abs_angle_to_unit = Math.abs(MapUtils.angleTo(object, unit));
-      if (abs_angle_to_unit < DIRECTION_EPSILON) {
+      if (Math.abs(MapUtils.angleTo(object, unit)) < DIRECTION_EPSILON) {
         fire_cannon = true;
         break;
+      }
+    }
+
+    if (!fire_cannon && state.equals(PyroPilotState.MOVE_TO_ROOM_CONNECTION)) {
+      RoomConnection connection = target_room_info.getValue();
+      for (Unit unit : connection.neighbor.getMechs()) {
+        double abs_angle_to_unit = Math.abs(MapUtils.angleTo(object, unit));
+        if (abs_angle_to_unit < DIRECTION_EPSILON &&
+                canSeeLocationInNeighborRoom(unit.getX(), unit.getY(), target_room_info.getKey(), connection)) {
+          fire_cannon = true;
+          break;
+        }
       }
     }
 

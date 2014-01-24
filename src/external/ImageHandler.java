@@ -146,11 +146,21 @@ public class ImageHandler {
 
   public void loadImages(String path, int pixels_per_cell) {
     images = new HashMap<String, ArrayList<Image>>();
+    for (ObjectType type : ObjectType.getPowerups()) {
+      loadAnimatedGif(path, type.name(), pixels_per_cell, Powerup.RADIUS);
+    }
     for (ObjectType type : ObjectType.getSceneries()) {
       loadAnimatedGif(path, type.name(), pixels_per_cell, 0.5);
     }
-    for (ObjectType type : ObjectType.getPowerups()) {
-      loadAnimatedGif(path, type.name(), pixels_per_cell, Powerup.RADIUS);
+    for (ObjectType type : ObjectType.getShots()) {
+      if (type.equals(ObjectType.LaserShot)) {
+        for (int level = 1; level <= 4; ++level) {
+          loadRotatedImages(path, type.name() + level, pixels_per_cell, SHOT_IMAGE_RADIUS);
+        }
+      }
+      else {
+        loadRotatedImages(path, type.name(), pixels_per_cell, SHOT_IMAGE_RADIUS);
+      }
     }
     loadRotatedImages(path, "Pyro", pixels_per_cell, Constants.getRadius(ObjectType.Pyro));
     loadRotatedImages(path, "BabySpider", pixels_per_cell, Constants.getRadius(ObjectType.BabySpider));
@@ -158,11 +168,6 @@ public class ImageHandler {
     loadRotatedImages(path, "LightHulk", pixels_per_cell, Constants.getRadius(ObjectType.LightHulk));
     loadRotatedImages(path, "MediumHulk", pixels_per_cell, Constants.getRadius(ObjectType.MediumHulk));
     loadRotatedImages(path, "PlatformLaser", pixels_per_cell, Constants.getRadius(ObjectType.PlatformLaser));
-    loadRotatedImages(path, "LaserShot1", pixels_per_cell, SHOT_IMAGE_RADIUS);
-    loadRotatedImages(path, "LaserShot2", pixels_per_cell, SHOT_IMAGE_RADIUS);
-    loadRotatedImages(path, "LaserShot3", pixels_per_cell, SHOT_IMAGE_RADIUS);
-    loadRotatedImages(path, "LaserShot4", pixels_per_cell, SHOT_IMAGE_RADIUS);
-    loadRotatedImages(path, "ConcussionMissile", pixels_per_cell, SHOT_IMAGE_RADIUS);
   }
 
   public void loadImages(int pixels_per_cell) {

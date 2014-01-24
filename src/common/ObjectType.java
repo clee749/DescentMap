@@ -80,7 +80,7 @@ public enum ObjectType {
     return robots;
   }
 
-  public static ObjectType[] getWeapons() {
+  public static ObjectType[] getShots() {
     ObjectType[] weapons =
             {LaserShot, PlasmaShot, FusionShot, FireShot, ConcussionMissile, HomingMissile, SmartMissile,
                     SmartPlasma};

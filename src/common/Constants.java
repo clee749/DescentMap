@@ -53,59 +53,59 @@ public class Constants {
 
   private static HashMap<ObjectType, Double> getMaxMoveSpeeds() {
     HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
-    speeds.put(ObjectType.Pyro, 1.0);
-    speeds.put(ObjectType.BabySpider, 0.6);
-    speeds.put(ObjectType.Class2Drone, 0.5);
-    speeds.put(ObjectType.LightHulk, 0.4);
     speeds.put(ObjectType.MediumHulk, 0.2);
     speeds.put(ObjectType.PlatformLaser, 0.3);
-    speeds.put(ObjectType.LaserShot, 3.0);
+    speeds.put(ObjectType.LightHulk, 0.4);
+    speeds.put(ObjectType.Class2Drone, 0.5);
+    speeds.put(ObjectType.BabySpider, 0.6);
+    speeds.put(ObjectType.Pyro, 1.0);
     speeds.put(ObjectType.ConcussionMissile, 2.5);
+    speeds.put(ObjectType.LaserShot, 3.0);
     return speeds;
   }
 
   private static HashMap<ObjectType, Double> getMaxTurnSpeeds() {
     HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
     speeds.put(ObjectType.Pyro, MapUtils.PI_OVER_TWO);
-    speeds.put(ObjectType.BabySpider, Math.PI);
     speeds.put(ObjectType.Class2Drone, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.LightHulk, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.MediumHulk, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.PlatformLaser, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.BabySpider, Math.PI);
     return speeds;
   }
 
   private static HashMap<ObjectType, Double> getRadii() {
     HashMap<ObjectType, Double> radii = new HashMap<ObjectType, Double>();
     // 1m == 0.05
-    radii.put(ObjectType.Pyro, 0.25);
     radii.put(ObjectType.BabySpider, 0.12);
     radii.put(ObjectType.Class2Drone, 0.2);
+    radii.put(ObjectType.Pyro, 0.25);
     radii.put(ObjectType.LightHulk, 0.25);
-    radii.put(ObjectType.MediumHulk, 0.35);
     radii.put(ObjectType.PlatformLaser, 0.25);
+    radii.put(ObjectType.MediumHulk, 0.35);
     return radii;
   }
 
   private static HashMap<ObjectType, Double> getCannonOffsets() {
     HashMap<ObjectType, Double> offsets = new HashMap<ObjectType, Double>();
-    offsets.put(ObjectType.Pyro, 0.525);
     offsets.put(ObjectType.BabySpider, 0.0);
     offsets.put(ObjectType.Class2Drone, 0.0);
+    offsets.put(ObjectType.PlatformLaser, 0.0);
+    offsets.put(ObjectType.Pyro, 0.525);
     offsets.put(ObjectType.LightHulk, 0.79);
     offsets.put(ObjectType.MediumHulk, 0.83);
-    offsets.put(ObjectType.PlatformLaser, 0.0);
     return offsets;
   }
 
   private static HashMap<ObjectType, Integer> getStartingShields() {
     HashMap<ObjectType, Integer> shields = new HashMap<ObjectType, Integer>();
-    shields.put(ObjectType.Pyro, 100);
     shields.put(ObjectType.BabySpider, 8);
     shields.put(ObjectType.Class2Drone, 11);
     shields.put(ObjectType.LightHulk, 23);
-    shields.put(ObjectType.MediumHulk, 32);
     shields.put(ObjectType.PlatformLaser, 23);
+    shields.put(ObjectType.MediumHulk, 32);
+    shields.put(ObjectType.Pyro, 100);
     return shields;
   }
 
@@ -114,8 +114,8 @@ public class Constants {
     times.put(ObjectType.BabySpider, 2.0);
     times.put(ObjectType.Class2Drone, 2.0);
     times.put(ObjectType.LightHulk, 2.0);
-    times.put(ObjectType.MediumHulk, 3.0);
     times.put(ObjectType.PlatformLaser, 2.0);
+    times.put(ObjectType.MediumHulk, 3.0);
     return times;
   }
 

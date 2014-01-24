@@ -27,7 +27,7 @@ import component.MapEngine;
 import external.ImageHandler;
 
 public class Room {
-  public static final Color WALL_COLOR = Color.gray;
+  public static final Color WALL_COLOR = Color.lightGray;
   public static final Stroke WALL_STROKE = new BasicStroke(2);
 
   private final Point nw_corner;
