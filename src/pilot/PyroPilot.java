@@ -17,6 +17,7 @@ import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
+import common.Constants;
 import common.DescentMapException;
 import common.ObjectType;
 import common.RoomSide;
@@ -34,6 +35,10 @@ public class PyroPilot extends Pilot {
   public static final double TIME_TURNING_UNTIL_STOP = 5.0;
   public static final double RESPAWN_DELAY = 5.0;
   public static final double SPAWNING_SICKNESS = Entrance.ZUNGGG_TIME - Entrance.TIME_TO_SPAWN;
+  public static final int CONCUSSION_MISSILE_SHIELD_THRESHOLD = Constants
+          .getDamage(ObjectType.ConcussionMissile);
+  public static final double CONCUSSION_MISSILE_MIN_DISTANCE2 = 4.0;
+  public static final double CONCUSSION_MISSILE_MAX_DISTANCE2 = 25.0;
 
   private final HashSet<Room> visited;
   private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
@@ -53,9 +58,7 @@ public class PyroPilot extends Pilot {
   @Override
   public void bindToObject(MovableObject object) {
     super.bindToObject(object);
-    if (object.getType().equals(ObjectType.Pyro)) {
-      pyro = (Pyro) object;
-    }
+    pyro = (Pyro) object;
   }
 
   public void startPilot() {
@@ -127,10 +130,17 @@ public class PyroPilot extends Pilot {
     // StrafeDirection strafe = reactToShots();
 
     boolean fire_cannon = false;
+    boolean fire_secondary = false;
     for (Unit unit : current_room.getMechs()) {
       if (Math.abs(MapUtils.angleTo(object, unit)) < DIRECTION_EPSILON) {
         fire_cannon = true;
-        break;
+        if (unit.getShields() > CONCUSSION_MISSILE_SHIELD_THRESHOLD) {
+          double distance2 = MapUtils.distance2(object, unit);
+          if (distance2 > CONCUSSION_MISSILE_MIN_DISTANCE2 && distance2 < CONCUSSION_MISSILE_MAX_DISTANCE2) {
+            fire_secondary = true;
+            break;
+          }
+        }
       }
     }
 
@@ -141,7 +151,13 @@ public class PyroPilot extends Pilot {
         if (abs_angle_to_unit < DIRECTION_EPSILON &&
                 canSeeLocationInNeighborRoom(unit.getX(), unit.getY(), target_room_info.getKey(), connection)) {
           fire_cannon = true;
-          break;
+          if (unit.getShields() > CONCUSSION_MISSILE_SHIELD_THRESHOLD) {
+            double distance2 = MapUtils.distance2(object, unit);
+            if (distance2 > CONCUSSION_MISSILE_MIN_DISTANCE2 && distance2 < CONCUSSION_MISSILE_MAX_DISTANCE2) {
+              fire_secondary = true;
+              break;
+            }
+          }
         }
       }
     }
@@ -152,10 +168,12 @@ public class PyroPilot extends Pilot {
         return PilotAction.NO_ACTION;
       case MOVE_TO_ROOM_CONNECTION:
         return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon);
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon,
+                fire_secondary);
       case MOVE_TO_NEIGHBOR_ROOM:
         return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon);
+                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon,
+                fire_secondary);
       case REACT_TO_OBJECT:
         TurnDirection turn = angleToTurnDirection(MapUtils.angleTo(object, target_object));
         if (!turn.equals(TurnDirection.NONE) && turn.equals(previous_turn_to_target)) {
@@ -165,10 +183,10 @@ public class PyroPilot extends Pilot {
           previous_turn_to_target = turn;
           time_turning_to_target = 0.0;
         }
-        return new PilotAction(MoveDirection.FORWARD, strafe, turn, fire_cannon);
+        return new PilotAction(MoveDirection.FORWARD, strafe, turn, fire_cannon, fire_secondary);
       case TURN_TO_OBJECT:
         return new PilotAction(MoveDirection.NONE, strafe, angleToTurnDirection(MapUtils.angleTo(object,
-                target_object)), fire_cannon);
+                target_object)), fire_cannon, fire_secondary);
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
     }
@@ -335,13 +353,11 @@ public class PyroPilot extends Pilot {
   }
 
   public boolean shouldCollectPowerup(Powerup powerup) {
-    if (pyro == null) {
-      return false;
-    }
-
     switch (powerup.getType()) {
       case Shield:
         return pyro.getShields() + Shield.SHIELD_AMOUNT <= Pyro.MAX_SHIELDS;
+      case ConcussionMissilePowerup:
+        return pyro.getNumConcussionMissiles() < Pyro.MAX_CONCUSSION_MISSILES;
       default:
         throw new DescentMapException("Unexpected Powerup: " + powerup);
     }

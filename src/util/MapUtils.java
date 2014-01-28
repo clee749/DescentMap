@@ -167,6 +167,18 @@ public class MapUtils {
 
   /**
    * 
+   * @param obj1 any MapObject
+   * @param obj2 any MapObject
+   * @return squared distance between the two MapObjects
+   */
+  public static double distance2(MapObject obj1, MapObject obj2) {
+    double dx = obj2.getX() - obj1.getX();
+    double dy = obj2.getY() - obj1.getY();
+    return dx * dx + dy * dy;
+  }
+
+  /**
+   * 
    * @param x_coord x-coordinate of point
    * @param y_coord y-coordinate of point
    * @param line_info standard form info of line

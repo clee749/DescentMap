@@ -5,9 +5,13 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 
 import mapobject.MapObject;
+import mapobject.unit.pyro.Pyro;
 import structure.DescentMap;
 import structure.Room;
 import util.MapUtils;
+
+import common.ObjectType;
+
 import external.ImageHandler;
 
 public class MapPlayDisplayer {
@@ -49,6 +53,9 @@ public class MapPlayDisplayer {
     Point se_corner = new Point(min_x + num_cols, min_y + num_rows);
     for (Room room : map.getAllRooms()) {
       paintRoomIfOnScreen(g, room, nw_corner, se_corner, center_cell, center_cell_nw_pixel);
+    }
+    if (center_object.getType().equals(ObjectType.Pyro)) {
+      ((Pyro) center_object).paintInfo(g);
     }
   }
 

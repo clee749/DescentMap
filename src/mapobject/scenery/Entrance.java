@@ -1,5 +1,7 @@
 package mapobject.scenery;
 
+import inventory.PyroInventory;
+
 import java.util.LinkedList;
 
 import mapobject.MapObject;
@@ -21,10 +23,12 @@ enum EntranceState {
 
 class SpawningPyro {
   public final PyroPilot pilot;
+  public final PyroInventory inventory;
   public final boolean is_center_object;
 
-  public SpawningPyro(PyroPilot pilot, boolean is_center_object) {
+  public SpawningPyro(PyroPilot pilot, PyroInventory inventory, boolean is_center_object) {
     this.pilot = pilot;
+    this.inventory = inventory;
     this.is_center_object = is_center_object;
   }
 }
@@ -79,7 +83,8 @@ public class Entrance extends Scenery {
           state = EntranceState.COOLDOWN;
           state_time_left = COOLDOWN_TIME;
           SpawningPyro spawning_pyro = spawn_queue.pop();
-          Pyro pyro = new Pyro(spawning_pyro.pilot, room, x_loc, y_loc, spawn_direction);
+          Pyro pyro =
+                  new Pyro(spawning_pyro.pilot, spawning_pyro.inventory, room, x_loc, y_loc, spawn_direction);
           if (spawning_pyro.is_center_object) {
             engine.setCenterObject(pyro);
           }
@@ -99,7 +104,7 @@ public class Entrance extends Scenery {
     return null;
   }
 
-  public void spawnPyro(PyroPilot pilot, boolean is_center_object) {
-    spawn_queue.add(new SpawningPyro(pilot, is_center_object));
+  public void spawnPyro(PyroPilot pilot, PyroInventory inventory, boolean is_center_object) {
+    spawn_queue.add(new SpawningPyro(pilot, inventory, is_center_object));
   }
 }

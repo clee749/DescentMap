@@ -73,13 +73,13 @@ public abstract class Unit extends MovableObject {
     return super.doNextAction(engine, s_elapsed);
   }
 
-  public void handleCannonReload(double s_elapsed) {
-    reload_time_left -= s_elapsed;
-  }
-
   public void planToFireCannon() {
     firing_cannon = true;
     reload_time_left = reload_time;
+  }
+
+  public void handleCannonReload(double s_elapsed) {
+    reload_time_left -= s_elapsed;
   }
 
   public void beDamaged(int amount) {

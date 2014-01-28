@@ -5,7 +5,6 @@ import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 
-import pilot.PyroPilot;
 import structure.DescentMap;
 
 import common.DescentMapException;
@@ -97,7 +96,7 @@ public class MapRunner {
       map.finishBuildingMap();
       MapPopulator.populateMap(map);
       engine = new MapEngine(map);
-      engine.spawnPyro(new PyroPilot(), true);
+      engine.injectPyro(null, true);
       state = RunnerState.PAUSE_AFTER_BUILD;
       target_sleep_ms = PAUSE_AFTER_BUILD_SLEEP;
     }

@@ -8,6 +8,7 @@ public class PilotAction {
   public final StrafeDirection strafe;
   public final TurnDirection turn;
   public final boolean fire_cannon;
+  public final boolean fire_secondary;
 
   public PilotAction() {
     this(MoveDirection.NONE, StrafeDirection.NONE, TurnDirection.NONE, false);
@@ -42,9 +43,15 @@ public class PilotAction {
   }
 
   public PilotAction(MoveDirection move, StrafeDirection strafe, TurnDirection turn, boolean fire_cannon) {
+    this(move, strafe, turn, fire_cannon, false);
+  }
+
+  public PilotAction(MoveDirection move, StrafeDirection strafe, TurnDirection turn, boolean fire_cannon,
+          boolean fire_secondary) {
     this.move = (move != null ? move : MoveDirection.NONE);
     this.strafe = (strafe != null ? strafe : StrafeDirection.NONE);
     this.turn = (turn != null ? turn : TurnDirection.NONE);
     this.fire_cannon = fire_cannon;
+    this.fire_secondary = fire_secondary;
   }
 }

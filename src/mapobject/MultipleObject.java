@@ -23,7 +23,9 @@ public class MultipleObject extends MapObject {
   }
 
   public void addObject(MapObject object) {
-    objects.add(object);
+    if (object != null) {
+      objects.add(object);
+    }
   }
 
   public LinkedList<MapObject> getObjects() {
