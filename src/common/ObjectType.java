@@ -34,7 +34,7 @@ public enum ObjectType {
   LaserShot,
   PlasmaShot,
   FusionShot,
-  FireShot,
+  FireballShot,
   ConcussionMissile,
   HomingMissile,
   SmartMissile,
@@ -70,8 +70,8 @@ public enum ObjectType {
           Class2Drone, DefenseRobot, LightHulk, MediumHulk, PlatformLaser, SecondaryLifter, Spider, Bomber,
           HeavyDriller, HeavyHulk, MediumHulkCloaked, PlatformMissile, ProximityBomb};
 
-  public static final ObjectType[] SHOTS = {LaserShot, PlasmaShot, FusionShot, FireShot, ConcussionMissile,
-          HomingMissile, SmartMissile, SmartPlasma};
+  public static final ObjectType[] SHOTS = {LaserShot, PlasmaShot, FusionShot, FireballShot,
+          ConcussionMissile, HomingMissile, SmartMissile, SmartPlasma};
 
   public static final ObjectType[] POWERUPS = {Shield, Energy, QuadLasers, Cloak, Invulnerability,
           ConcussionMissilePowerup, ConcussionPack, HomingMissilePowerup, HomingPack, ProximityPack,

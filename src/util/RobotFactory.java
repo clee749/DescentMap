@@ -1,6 +1,7 @@
 package util;
 
 import mapobject.unit.robot.BabySpider;
+import mapobject.unit.robot.Class1Drone;
 import mapobject.unit.robot.Class2Drone;
 import mapobject.unit.robot.DefenseRobot;
 import mapobject.unit.robot.LightHulk;
@@ -9,6 +10,7 @@ import mapobject.unit.robot.PlatformLaser;
 import mapobject.unit.robot.PlatformMissile;
 import mapobject.unit.robot.Robot;
 import mapobject.unit.robot.SecondaryLifter;
+import mapobject.unit.robot.Spider;
 import structure.Room;
 
 import common.DescentMapException;
@@ -23,6 +25,8 @@ public class RobotFactory {
     switch (type) {
       case BabySpider:
         return new BabySpider(room, x_loc, y_loc, direction);
+      case Class1Drone:
+        return new Class1Drone(room, x_loc, y_loc, direction);
       case Class2Drone:
         return new Class2Drone(room, x_loc, y_loc, direction);
       case DefenseRobot:
@@ -37,6 +41,8 @@ public class RobotFactory {
         return new PlatformMissile(room, x_loc, y_loc, direction);
       case SecondaryLifter:
         return new SecondaryLifter(room, x_loc, y_loc, direction);
+      case Spider:
+        return new Spider(room, x_loc, y_loc, direction);
       default:
         throw new DescentMapException("Unexpected Robot type: " + type);
     }

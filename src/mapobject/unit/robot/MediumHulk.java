@@ -24,7 +24,7 @@ public class MediumHulk extends Robot {
 
   @Override
   public MapObject releasePowerups() {
-    int num_concussion_missiles = (int) (Math.random() * MAX_CONCUSSION_MISSILES_RELEASED);
+    int num_concussion_missiles = (int) (Math.random() * (MAX_CONCUSSION_MISSILES_RELEASED + 1));
     if (num_concussion_missiles < 1) {
       return null;
     }

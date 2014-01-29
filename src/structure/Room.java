@@ -358,7 +358,8 @@ public class Room {
 
   public void applySplashDamage(Unit unit, double x_center, double y_center, int max_damage,
           double damage_radius) {
-    double distance = Math.hypot(unit.getX() - x_center, unit.getY() - y_center);
+    double distance =
+            Math.max(Math.hypot(unit.getX() - x_center, unit.getY() - y_center) - unit.getRadius(), 0.0);
     if (distance < damage_radius) {
       unit.beDamaged((int) (max_damage * (1 - distance / damage_radius)));
     }
