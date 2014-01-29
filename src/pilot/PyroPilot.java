@@ -8,6 +8,8 @@ import java.util.Stack;
 
 import mapobject.MapObject;
 import mapobject.MovableObject;
+import mapobject.powerup.ConcussionPack;
+import mapobject.powerup.Energy;
 import mapobject.powerup.Powerup;
 import mapobject.powerup.Shield;
 import mapobject.scenery.Entrance;
@@ -16,6 +18,7 @@ import mapobject.unit.pyro.Pyro;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
+import cannon.LaserCannon;
 
 import common.Constants;
 import common.DescentMapException;
@@ -356,8 +359,16 @@ public class PyroPilot extends Pilot {
     switch (powerup.getType()) {
       case Shield:
         return pyro.getShields() + Shield.SHIELD_AMOUNT <= Pyro.MAX_SHIELDS;
+      case Energy:
+        return pyro.getEnergy() + Energy.ENERGY_AMOUNT <= Pyro.MAX_ENERGY;
+      case QuadLasers:
+        return !pyro.hasQuadLasers();
+      case LaserCannonPowerup:
+        return pyro.getLaserLevel() < LaserCannon.MAX_LEVEL;
       case ConcussionMissilePowerup:
         return pyro.getNumConcussionMissiles() < Pyro.MAX_CONCUSSION_MISSILES;
+      case ConcussionPack:
+        return pyro.getNumConcussionMissiles() + ConcussionPack.NUM_MISSILES <= Pyro.MAX_CONCUSSION_MISSILES;
       default:
         throw new DescentMapException("Unexpected Powerup: " + powerup);
     }

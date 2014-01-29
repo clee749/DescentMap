@@ -12,6 +12,8 @@ import java.awt.geom.Point2D;
 import mapobject.MapObject;
 import mapobject.MultipleObject;
 import mapobject.ephemeral.Explosion;
+import mapobject.powerup.ConcussionPack;
+import mapobject.powerup.Energy;
 import mapobject.powerup.Shield;
 import mapobject.unit.Unit;
 import pilot.Pilot;
@@ -20,6 +22,7 @@ import pilot.PyroPilot;
 import pilot.TurnDirection;
 import structure.Room;
 import util.MapUtils;
+import util.PowerupFactory;
 import cannon.Cannon;
 import cannon.ConcussionMissileCannon;
 import cannon.LaserCannon;
@@ -49,13 +52,16 @@ public class Pyro extends Unit {
   public static final double DEATH_SPLASH_DAMAGE_RADIUS = 1.0;
   public static final int MIN_DEATH_SPLASH_DAMAGE = 10;
   public static final int MAX_DEATH_SPLASH_DAMAGE = 50;
+  public static final Color SELECTED_WEAPON_COLOR = Color.green;
+  public static final Color UNSELECTED_WEAPON_COLOR = Color.gray;
+  public static final Color WEAPON_AMOUNT_COLOR = Color.red;
 
   private final double outer_cannon_offset;
   private final double cannon_forward_offset;
   private final double missile_offset;
   private double energy;
+  private boolean has_quad_lasers;
   private final double cannon_energy_cost;
-  private final boolean has_quad_lasers;
   private final Cannon selected_primary_cannon;
   protected double secondary_reload_time_left;
   protected boolean firing_secondary;
@@ -81,7 +87,6 @@ public class Pyro extends Unit {
     }
     ((PyroPilot) pilot).startPilot();
     cannon_energy_cost = 0.5;
-    has_quad_lasers = true;
     reload_time = LASER_RELOAD_TIME;
     selected_primary_cannon = new LaserCannon(Constants.getDamage(ObjectType.LaserShot), 1);
     missile_side = (int) (Math.random() * 2);
@@ -100,6 +105,14 @@ public class Pyro extends Unit {
 
   public double getEnergy() {
     return energy;
+  }
+
+  public boolean hasQuadLasers() {
+    return has_quad_lasers;
+  }
+
+  public int getLaserLevel() {
+    return ((LaserCannon) selected_primary_cannon).getLevel();
   }
 
   public int getNumConcussionMissiles() {
@@ -141,6 +154,10 @@ public class Pyro extends Unit {
     g.setColor(Color.cyan);
     g.drawString("Shield: " + shields, 10, 40);
     int text_offset = 70;
+    g.setColor(SELECTED_WEAPON_COLOR);
+    g.drawString("Laser Lvl: " + getLaserLevel() + (has_quad_lasers ? " Quad" : ""), 10, text_offset);
+    text_offset += 20;
+    text_offset += 10;
     if (num_concussion_missiles > 0) {
       paintSecondaryWeaponInfo(g, text_offset, "Concsn Missile: ", num_concussion_missiles);
       text_offset += 20;
@@ -149,9 +166,9 @@ public class Pyro extends Unit {
 
   public void paintSecondaryWeaponInfo(Graphics2D g, int text_offset, String weapon_text, int num) {
     FontMetrics metrics = g.getFontMetrics();
-    g.setColor(Color.green);
+    g.setColor(SELECTED_WEAPON_COLOR);
     g.drawString(weapon_text, 10, text_offset);
-    g.setColor(Color.red);
+    g.setColor(WEAPON_AMOUNT_COLOR);
     g.drawString(String.format("%03d", num), 10 + metrics.stringWidth(weapon_text), text_offset);
   }
 
@@ -279,7 +296,28 @@ public class Pyro extends Unit {
 
   @Override
   public MapObject releasePowerups() {
-    return new Shield(room, x_loc, y_loc, Math.random() * MapUtils.TWO_PI, Math.random() * POWERUP_MAX_SPEED);
+    MultipleObject powerups = new MultipleObject();
+    powerups.addObject(PowerupFactory.newPowerup(ObjectType.Shield, room, x_loc, y_loc));
+    shields -= Shield.SHIELD_AMOUNT;
+    if (energy >= Energy.ENERGY_AMOUNT) {
+      powerups.addObject(PowerupFactory.newPowerup(ObjectType.Energy, room, x_loc, y_loc));
+      energy -= Energy.ENERGY_AMOUNT;
+    }
+    if (has_quad_lasers) {
+      powerups.addObject(PowerupFactory.newPowerup(ObjectType.QuadLasers, room, x_loc, y_loc));
+    }
+    if (((LaserCannon) selected_primary_cannon).getLevel() > 1) {
+      powerups.addObject(PowerupFactory.newPowerup(ObjectType.LaserCannonPowerup, room, x_loc, y_loc));
+    }
+    if (num_concussion_missiles >= ConcussionPack.NUM_MISSILES) {
+      powerups.addObject(PowerupFactory.newPowerup(ObjectType.ConcussionPack, room, x_loc, y_loc));
+      num_concussion_missiles -= ConcussionPack.NUM_MISSILES;
+    }
+    if (num_concussion_missiles > 0) {
+      powerups.addObject(PowerupFactory.newPowerup(ObjectType.ConcussionMissilePowerup, room, x_loc, y_loc));
+      --num_concussion_missiles;
+    }
+    return powerups;
   }
 
   public boolean acquireShield(int amount) {
@@ -288,6 +326,29 @@ public class Pyro extends Unit {
       return true;
     }
     return false;
+  }
+
+  public boolean acquireEnergy(int amount) {
+    if (energy < MAX_ENERGY) {
+      energy = Math.min(energy + amount, MAX_ENERGY);
+      return true;
+    }
+    return false;
+  }
+
+  public boolean acquireQuadLasers() {
+    if (!has_quad_lasers) {
+      has_quad_lasers = true;
+      return true;
+    }
+    return acquireEnergy(Energy.ENERGY_AMOUNT);
+  }
+
+  public boolean acquireLaserCannon() {
+    if (((LaserCannon) selected_primary_cannon).incrementLevel()) {
+      return true;
+    }
+    return acquireEnergy(Energy.ENERGY_AMOUNT);
   }
 
   public boolean acquireConcussionMissiles(int amount) {

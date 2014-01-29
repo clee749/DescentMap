@@ -54,7 +54,7 @@ public class MapPlayDisplayer {
     for (Room room : map.getAllRooms()) {
       paintRoomIfOnScreen(g, room, nw_corner, se_corner, center_cell, center_cell_nw_pixel);
     }
-    if (center_object.getType().equals(ObjectType.Pyro)) {
+    if (center_object.getType().equals(ObjectType.Pyro) && center_object.isInMap()) {
       ((Pyro) center_object).paintInfo(g);
     }
   }

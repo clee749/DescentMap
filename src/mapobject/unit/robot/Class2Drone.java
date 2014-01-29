@@ -1,8 +1,8 @@
 package mapobject.unit.robot;
 
 import mapobject.MapObject;
-import mapobject.powerup.Shield;
 import structure.Room;
+import util.PowerupFactory;
 import cannon.LaserCannon;
 
 import common.Constants;
@@ -22,7 +22,7 @@ public class Class2Drone extends Robot {
   @Override
   public MapObject releasePowerups() {
     if (Math.random() < 0.1) {
-      return new Shield(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
+      return PowerupFactory.newPowerup(ObjectType.Shield, room, x_loc, y_loc);
     }
     return null;
   }

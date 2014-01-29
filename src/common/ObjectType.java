@@ -52,12 +52,9 @@ public enum ObjectType {
   HomingPack,
   ProximityPack,
   SmartMissilePowerup,
-  LaserCannon,
-  PlasmaCannon,
-  FusionCannon,
-  FireCannon,
-  ConcussionCannon,
-  HomingCannon,
+  LaserCannonPowerup,
+  PlasmaCannonPowerup,
+  FusionCannonPowerup,
 
   // ephemerals
   Explosion,
@@ -67,31 +64,16 @@ public enum ObjectType {
   ProximityBomb,
   MultipleObject;
 
-  public static ObjectType[] getSceneries() {
-    ObjectType[] scenery = {Barrier, EnergyCenter, RobotGenerator, Entrance, Exit};
-    return scenery;
-  }
+  public static final ObjectType[] SCENERIES = {Barrier, EnergyCenter, RobotGenerator, Entrance, Exit};
 
-  public static ObjectType[] getRobots() {
-    ObjectType[] robots =
-            {GreenRobot, YellowRobot, RedRobot, BabySpider, Class1Drone, Class2Drone, DefenseRobot,
-                    LightHulk, MediumHulk, PlatformLaser, SecondaryLifter, Spider, Bomber, HeavyDriller,
-                    HeavyHulk, MediumHulkCloaked, PlatformMissile, ProximityBomb};
-    return robots;
-  }
+  public static final ObjectType[] ROBOTS = {GreenRobot, YellowRobot, RedRobot, BabySpider, Class1Drone,
+          Class2Drone, DefenseRobot, LightHulk, MediumHulk, PlatformLaser, SecondaryLifter, Spider, Bomber,
+          HeavyDriller, HeavyHulk, MediumHulkCloaked, PlatformMissile, ProximityBomb};
 
-  public static ObjectType[] getShots() {
-    ObjectType[] weapons =
-            {LaserShot, PlasmaShot, FusionShot, FireShot, ConcussionMissile, HomingMissile, SmartMissile,
-                    SmartPlasma};
-    return weapons;
-  }
+  public static final ObjectType[] SHOTS = {LaserShot, PlasmaShot, FusionShot, FireShot, ConcussionMissile,
+          HomingMissile, SmartMissile, SmartPlasma};
 
-  public static ObjectType[] getPowerups() {
-    ObjectType[] powerups =
-            {Shield, Energy, QuadLasers, Cloak, Invulnerability, ConcussionMissilePowerup, ConcussionPack,
-                    HomingMissilePowerup, HomingPack, ProximityPack, SmartMissilePowerup, LaserCannon,
-                    PlasmaCannon, FusionCannon, FireCannon, ConcussionCannon, HomingCannon};
-    return powerups;
-  }
+  public static final ObjectType[] POWERUPS = {Shield, Energy, QuadLasers, Cloak, Invulnerability,
+          ConcussionMissilePowerup, ConcussionPack, HomingMissilePowerup, HomingPack, ProximityPack,
+          SmartMissilePowerup, LaserCannonPowerup, PlasmaCannonPowerup, FusionCannonPowerup};
 }

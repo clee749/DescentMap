@@ -5,7 +5,9 @@ import mapobject.shot.LaserShot;
 import structure.Room;
 
 public class LaserCannon extends Cannon {
-  private final int level;
+  public static final int MAX_LEVEL = 4;
+
+  private int level;
 
   public LaserCannon(int damage, int level) {
     super(damage);
@@ -15,5 +17,17 @@ public class LaserCannon extends Cannon {
   @Override
   public MapObject fireCannon(MapObject source, Room room, double x_loc, double y_loc, double direction) {
     return new LaserShot(source, damage, room, x_loc, y_loc, direction, level);
+  }
+
+  public int getLevel() {
+    return level;
+  }
+
+  public boolean incrementLevel() {
+    if (level < MAX_LEVEL) {
+      ++level;
+      return true;
+    }
+    return false;
   }
 }

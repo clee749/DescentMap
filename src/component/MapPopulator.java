@@ -15,6 +15,10 @@ import common.DescentMapException;
 import common.ObjectType;
 
 public class MapPopulator {
+  public static ObjectType[] IMPLEMENTED_ROBOTS = {ObjectType.BabySpider, ObjectType.Class2Drone,
+          ObjectType.DefenseRobot, ObjectType.LightHulk, ObjectType.MediumHulk, ObjectType.PlatformLaser,
+          ObjectType.PlatformMissile, ObjectType.SecondaryLifter};
+
   protected MapPopulator() {
 
   }
@@ -28,11 +32,7 @@ public class MapPopulator {
       if (room.equals(exit_room) || room.equals(exterior_room)) {
         continue;
       }
-      placeRobotInRoom(room, ObjectType.BabySpider);
-      placeRobotInRoom(room, ObjectType.Class2Drone);
-      placeRobotInRoom(room, ObjectType.LightHulk);
-      placeRobotInRoom(room, ObjectType.MediumHulk);
-      placeRobotInRoom(room, ObjectType.PlatformLaser);
+      placeRobotsInRoom(room);
     }
   }
 
@@ -75,6 +75,15 @@ public class MapPopulator {
         throw new DescentMapException("Unexpected RoomSide: " + map.getExitSide());
     }
     exit_room.addChild(new Exit(exit_room, x_loc, y_loc));
+  }
+
+  public static void placeRobotsInRoom(Room room) {
+    int room_area = room.getHeight() * room.getWidth();
+    for (ObjectType type : IMPLEMENTED_ROBOTS) {
+      if (Constants.getStartingShields(type) < room_area) {
+        placeRobotInRoom(room, type);
+      }
+    }
   }
 
   public static void placeRobotInRoom(Room room, ObjectType type) {

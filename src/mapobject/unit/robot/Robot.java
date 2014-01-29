@@ -103,12 +103,4 @@ public abstract class Robot extends Unit {
   public void handleCannonVolleyReload(double s_elapsed) {
     volley_reload_time_left -= s_elapsed;
   }
-
-  public double randomPowerupDirection() {
-    return Math.random() * MapUtils.TWO_PI;
-  }
-
-  public double randomPowerupSpeed() {
-    return Math.random() * POWERUP_MAX_SPEED;
-  }
 }

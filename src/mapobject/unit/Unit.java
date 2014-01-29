@@ -23,7 +23,6 @@ public abstract class Unit extends MovableObject {
   public static final double EXPLOSION_MIN_TIME = 0.5;
   public static final double EXPLOSION_MAX_TIME = EXPLOSION_MIN_TIME * 2;
   public static final double EXPLOSION_TIME_DIVISOR = 3.0;
-  public static final double POWERUP_MAX_SPEED = 2.0;
 
   protected final double cannon_offset;
   protected double reload_time;

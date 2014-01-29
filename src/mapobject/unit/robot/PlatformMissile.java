@@ -9,17 +9,17 @@ import cannon.ConcussionMissileCannon;
 import common.Constants;
 import common.ObjectType;
 
-public class MediumHulk extends Robot {
-  public static final int MAX_CONCUSSION_MISSILES_RELEASED = 3;
+public class PlatformMissile extends Robot {
+  public static final int MAX_CONCUSSION_MISSILES_RELEASED = 5;
 
-  public MediumHulk(Room room, double x_loc, double y_loc, double direction) {
-    super(Constants.getRadius(ObjectType.MediumHulk), new ConcussionMissileCannon(
+  public PlatformMissile(Room room, double x_loc, double y_loc, double direction) {
+    super(Constants.getRadius(ObjectType.PlatformMissile), new ConcussionMissileCannon(
             Constants.getDamage(ObjectType.ConcussionMissile)), room, x_loc, y_loc, direction);
   }
 
   @Override
   public ObjectType getType() {
-    return ObjectType.MediumHulk;
+    return ObjectType.PlatformMissile;
   }
 
   @Override
