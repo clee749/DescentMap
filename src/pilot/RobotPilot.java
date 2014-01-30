@@ -143,7 +143,7 @@ public class RobotPilot extends Pilot {
       for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
         RoomConnection connection = entry.getValue();
         for (Pyro pyro : connection.neighbor.getPyros()) {
-          if (canSeeLocationInNeighborRoom(pyro.getX(), pyro.getY(), entry.getKey(), connection)) {
+          if (MapUtils.canSeeObjectInNeighborRoom(object, pyro, entry.getKey())) {
             target_object = pyro;
             target_object_room = connection.neighbor;
             target_object_room_info = entry;
@@ -205,8 +205,7 @@ public class RobotPilot extends Pilot {
           }
         }
         else if (!target_object.getRoom().equals(target_object_room) ||
-                !canSeeLocationInNeighborRoom(target_object.getX(), target_object.getY(),
-                        target_object_room_info.getKey(), target_object_room_info.getValue())) {
+                !MapUtils.canSeeObjectInNeighborRoom(object, target_object, target_object_room_info.getKey())) {
           initState(RobotPilotState.INACTIVE);
         }
         break;

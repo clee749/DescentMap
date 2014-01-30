@@ -238,9 +238,9 @@ public class Pyro extends Unit {
       if (death_spin_time_left < 0.0) {
         MapObject created_object = handleDeath(s_elapsed);
         if (!is_in_map) {
-          room.doSplashDamage(this, x_loc, y_loc,
-                  Math.max(MAX_DEATH_SPLASH_DAMAGE + shields, MIN_DEATH_SPLASH_DAMAGE),
-                  DEATH_SPLASH_DAMAGE_RADIUS);
+          room.doSplashDamage(this, Math.max(MAX_DEATH_SPLASH_DAMAGE + shields, MIN_DEATH_SPLASH_DAMAGE),
+                  DEATH_SPLASH_DAMAGE_RADIUS,
+                  this);
           ((PyroPilot) pilot).prepareForRespawn();
           engine.respawnPyroAfterDeath(this);
         }

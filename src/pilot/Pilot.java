@@ -106,42 +106,6 @@ public abstract class Pilot {
     setTargetDirection(-MapUtils.absoluteAngleTo(object.getX(), object.getY(), target_x, target_y));
   }
 
-  public boolean canSeeLocationInNeighborRoom(double location_x, double location_y, RoomSide neighbor_side,
-          RoomConnection connection) {
-    double current_x = object.getX();
-    double current_y = object.getY();
-    double neighbor_direction = RoomSide.directionToRadians(neighbor_side);
-    double angle_to_location =
-            MapUtils.angleTo(neighbor_direction, location_x - current_x, location_y - current_y);
-    double angle_to_connection_min;
-    double angle_to_connection_max;
-    switch (neighbor_side) {
-      case NORTH:
-        double dy = current_room.getNWCorner().y - current_y;
-        angle_to_connection_min = MapUtils.angleTo(neighbor_direction, connection.min - current_x, dy);
-        angle_to_connection_max = MapUtils.angleTo(neighbor_direction, connection.max - current_x, dy);
-        break;
-      case SOUTH:
-        dy = current_room.getSECorner().y - current_y;
-        angle_to_connection_min = MapUtils.angleTo(neighbor_direction, connection.min - current_x, dy);
-        angle_to_connection_max = MapUtils.angleTo(neighbor_direction, connection.max - current_x, dy);
-        break;
-      case WEST:
-        double dx = current_room.getNWCorner().x - current_x;
-        angle_to_connection_min = MapUtils.angleTo(neighbor_direction, dx, connection.min - current_y);
-        angle_to_connection_max = MapUtils.angleTo(neighbor_direction, dx, connection.max - current_y);
-        break;
-      case EAST:
-        dx = current_room.getSECorner().x - current_x;
-        angle_to_connection_min = MapUtils.angleTo(neighbor_direction, dx, connection.min - current_y);
-        angle_to_connection_max = MapUtils.angleTo(neighbor_direction, dx, connection.max - current_y);
-        break;
-      default:
-        throw new DescentMapException("Unexpected RoomSide: " + neighbor_side);
-    }
-    return MapUtils.isAngleBetween(angle_to_location, angle_to_connection_min, angle_to_connection_max);
-  }
-
   public StrafeDirection reactToShots() {
     for (Shot shot : current_room.getShots()) {
       if (shot.getSource().equals(object)) {

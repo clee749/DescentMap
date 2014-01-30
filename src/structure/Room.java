@@ -306,61 +306,64 @@ public class Room {
     return created_objects;
   }
 
-  public void doSplashDamage(Unit already_damaged, double x_center, double y_center, int max_damage,
-          double damage_radius) {
-    doSplashDamage(already_damaged, x_center, y_center, max_damage, damage_radius, true);
+  public void doSplashDamage(MapObject src_object, int max_damage, double damage_radius,
+          Unit already_damaged) {
+    doSplashDamage(src_object, max_damage, damage_radius, null, already_damaged);
   }
 
-  public void doSplashDamage(Unit already_damaged, double x_center, double y_center, int max_damage,
-          double damage_radius, boolean check_neighbors) {
+  public void doSplashDamage(MapObject src_object, int max_damage, double damage_radius,
+          RoomSide which_neighbor, Unit already_damaged) {
     for (Pyro pyro : pyros) {
       if (!pyro.equals(already_damaged)) {
-        applySplashDamage(pyro, x_center, y_center, max_damage, damage_radius);
+        applySplashDamage(pyro, src_object, max_damage, damage_radius, which_neighbor);
       }
     }
     for (Unit unit : mechs) {
       if (!unit.equals(already_damaged)) {
-        applySplashDamage(unit, x_center, y_center, max_damage, damage_radius);
+        applySplashDamage(unit, src_object, max_damage, damage_radius, which_neighbor);
       }
     }
 
     // check in neighbor Rooms
-    if (check_neighbors) {
+    double src_x = src_object.getX();
+    double src_y = src_object.getY();
+    if (which_neighbor == null) {
       // north neighbor
-      if (nw_corner.y - y_center < damage_radius) {
-        doSplashDamageInNeighbor(x_center, y_center, max_damage, damage_radius, RoomSide.NORTH);
+      if (nw_corner.y - src_y < damage_radius) {
+        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, RoomSide.NORTH);
       }
 
       // south neighbor
-      if (y_center - se_corner.y < damage_radius) {
-        doSplashDamageInNeighbor(x_center, y_center, max_damage, damage_radius, RoomSide.SOUTH);
+      if (src_y - se_corner.y < damage_radius) {
+        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, RoomSide.SOUTH);
       }
 
       // west neighbor
-      if (nw_corner.x - x_center < damage_radius) {
-        doSplashDamageInNeighbor(x_center, y_center, max_damage, damage_radius, RoomSide.WEST);
+      if (nw_corner.x - src_x < damage_radius) {
+        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, RoomSide.WEST);
       }
 
       // east neighbor
-      if (x_center - se_corner.x < damage_radius) {
-        doSplashDamageInNeighbor(x_center, y_center, max_damage, damage_radius, RoomSide.EAST);
+      if (src_x - se_corner.x < damage_radius) {
+        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, RoomSide.EAST);
       }
     }
   }
 
-  public void doSplashDamageInNeighbor(double x_center, double y_center, int max_damage,
+  public void doSplashDamageInNeighbor(MapObject src_object, int max_damage,
           double damage_radius, RoomSide direction) {
     Room neighbor = getNeighborInDirection(direction);
     if (neighbor != null) {
-      neighbor.doSplashDamage(null, x_center, y_center, max_damage, damage_radius, false);
+      neighbor.doSplashDamage(src_object, max_damage, damage_radius, direction, null);
     }
   }
 
-  public void applySplashDamage(Unit unit, double x_center, double y_center, int max_damage,
-          double damage_radius) {
-    double distance =
-            Math.max(Math.hypot(unit.getX() - x_center, unit.getY() - y_center) - unit.getRadius(), 0.0);
-    if (distance < damage_radius) {
+  public void applySplashDamage(Unit unit, MapObject src_object, int max_damage,
+          double damage_radius, RoomSide which_neighbor) {
+    double distance = Math.max(
+      Math.hypot(unit.getX() - src_object.getX(), unit.getY() - src_object.getY()) - unit.getRadius(), 0.0);
+    if (distance < damage_radius &&
+            (which_neighbor == null || MapUtils.canSeeObjectInNeighborRoom(src_object, unit, which_neighbor))) {
       unit.beDamaged((int) (max_damage * (1 - distance / damage_radius)));
     }
   }

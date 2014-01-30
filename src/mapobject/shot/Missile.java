@@ -22,7 +22,7 @@ public abstract class Missile extends Shot {
   public MapObject handleUnitCollision(Unit hit_unit) {
     is_in_map = false;
     hit_unit.beDamaged(damage);
-    room.doSplashDamage(hit_unit, x_loc, y_loc, damage, SPLASH_DAMAGE_RADIUS);
+    room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, hit_unit);
     return new Explosion(room, x_loc, y_loc,
             Math.min(damage / EXPLOSION_RADIUS_DIVISOR, EXPLOSION_MAX_RADIUS), Math.min(damage /
                     EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));
@@ -31,7 +31,7 @@ public abstract class Missile extends Shot {
   @Override
   public MapObject handleWallCollision() {
     is_in_map = false;
-    room.doSplashDamage(null, x_loc, y_loc, damage, SPLASH_DAMAGE_RADIUS);
+    room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, null);
     return new Explosion(room, x_loc, y_loc,
             Math.min(damage / EXPLOSION_RADIUS_DIVISOR, EXPLOSION_MAX_RADIUS), Math.min(damage /
                     EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));

@@ -41,7 +41,7 @@ public class PyroPilot extends Pilot {
   public static final int CONCUSSION_MISSILE_SHIELD_THRESHOLD = Constants
           .getDamage(ObjectType.ConcussionMissile);
   public static final double CONCUSSION_MISSILE_MIN_DISTANCE2 = 4.0;
-  public static final double CONCUSSION_MISSILE_MAX_DISTANCE2 = 25.0;
+  public static final double CONCUSSION_MISSILE_MAX_DISTANCE2 = 100.0;
 
   private final HashSet<Room> visited;
   private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
@@ -152,7 +152,7 @@ public class PyroPilot extends Pilot {
       for (Unit unit : connection.neighbor.getMechs()) {
         double abs_angle_to_unit = Math.abs(MapUtils.angleTo(object, unit));
         if (abs_angle_to_unit < DIRECTION_EPSILON &&
-                canSeeLocationInNeighborRoom(unit.getX(), unit.getY(), target_room_info.getKey(), connection)) {
+                MapUtils.canSeeObjectInNeighborRoom(object, unit, target_room_info.getKey())) {
           fire_cannon = true;
           if (unit.getShields() > CONCUSSION_MISSILE_SHIELD_THRESHOLD) {
             double distance2 = MapUtils.distance2(object, unit);

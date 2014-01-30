@@ -5,6 +5,11 @@ import java.awt.geom.Point2D;
 
 import mapobject.MapObject;
 import mapobject.MovableObject;
+import structure.Room;
+import structure.RoomConnection;
+
+import common.DescentMapException;
+import common.RoomSide;
 
 public class MapUtils {
   public static final double PI_OVER_TWO = Math.PI / 2;
@@ -175,6 +180,44 @@ public class MapUtils {
     double dx = obj2.getX() - obj1.getX();
     double dy = obj2.getY() - obj1.getY();
     return dx * dx + dy * dy;
+  }
+
+  public static boolean canSeeObjectInNeighborRoom(MapObject src, MapObject dst, RoomSide neighbor_side) {
+    double src_x = src.getX();
+    double src_y = src.getY();
+    double dst_x = dst.getX();
+    double dst_y = dst.getY();
+    Room src_room = src.getRoom();
+    RoomConnection connection = src_room.getConnectionInDirection(neighbor_side);
+    double neighbor_direction = RoomSide.directionToRadians(neighbor_side);
+    double angle_to_location = angleTo(neighbor_direction, dst_x - src_x, dst_y - src_y);
+    double angle_to_connection_min;
+    double angle_to_connection_max;
+    switch (neighbor_side) {
+      case NORTH:
+        double dy = src_room.getNWCorner().y - src_y;
+        angle_to_connection_min = angleTo(neighbor_direction, connection.min - src_x, dy);
+        angle_to_connection_max = angleTo(neighbor_direction, connection.max - src_x, dy);
+        break;
+      case SOUTH:
+        dy = src_room.getSECorner().y - src_y;
+        angle_to_connection_min = angleTo(neighbor_direction, connection.min - src_x, dy);
+        angle_to_connection_max = angleTo(neighbor_direction, connection.max - src_x, dy);
+        break;
+      case WEST:
+        double dx = src_room.getNWCorner().x - src_x;
+        angle_to_connection_min = angleTo(neighbor_direction, dx, connection.min - src_y);
+        angle_to_connection_max = angleTo(neighbor_direction, dx, connection.max - src_y);
+        break;
+      case EAST:
+        dx = src_room.getSECorner().x - src_x;
+        angle_to_connection_min = angleTo(neighbor_direction, dx, connection.min - src_y);
+        angle_to_connection_max = angleTo(neighbor_direction, dx, connection.max - src_y);
+        break;
+      default:
+        throw new DescentMapException("Unexpected RoomSide: " + neighbor_side);
+    }
+    return isAngleBetween(angle_to_location, angle_to_connection_min, angle_to_connection_max);
   }
 
   /**
