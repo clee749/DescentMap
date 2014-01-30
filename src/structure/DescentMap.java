@@ -1,7 +1,5 @@
 package structure;
 
-import inventory.PyroInventory;
-
 import java.util.ArrayList;
 
 import mapobject.MapObject;
@@ -92,7 +90,7 @@ public class DescentMap {
     exterior_room = builder.getExteriorRoom();
   }
 
-  public void spawnPyro(PyroPilot pilot, PyroInventory inventory, boolean is_center_object) {
-    entrance.spawnPyro(pilot, inventory, is_center_object);
+  public void spawnPyro(PyroPilot pilot, boolean is_center_object) {
+    entrance.spawnPyro(pilot, is_center_object);
   }
 }

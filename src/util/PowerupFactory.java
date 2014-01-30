@@ -4,6 +4,7 @@ import mapobject.powerup.ConcussionMissilePowerup;
 import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
 import mapobject.powerup.LaserCannonPowerup;
+import mapobject.powerup.PlasmaCannonPowerup;
 import mapobject.powerup.Powerup;
 import mapobject.powerup.QuadLasers;
 import mapobject.powerup.Shield;
@@ -32,6 +33,8 @@ public class PowerupFactory {
         return new QuadLasers(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case LaserCannonPowerup:
         return new LaserCannonPowerup(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
+      case PlasmaCannonPowerup:
+        return new PlasmaCannonPowerup(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case Shield:
         return new Shield(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       default:

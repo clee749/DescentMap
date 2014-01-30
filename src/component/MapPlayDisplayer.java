@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 
 import mapobject.MapObject;
-import mapobject.unit.pyro.Pyro;
+import mapobject.unit.Pyro;
 import structure.DescentMap;
 import structure.Room;
 import util.MapUtils;

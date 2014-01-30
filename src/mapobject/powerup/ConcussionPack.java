@@ -1,6 +1,6 @@
 package mapobject.powerup;
 
-import mapobject.unit.pyro.Pyro;
+import mapobject.unit.Pyro;
 import structure.Room;
 
 import common.ObjectType;

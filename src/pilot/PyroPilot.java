@@ -13,8 +13,9 @@ import mapobject.powerup.Energy;
 import mapobject.powerup.Powerup;
 import mapobject.powerup.Shield;
 import mapobject.scenery.Entrance;
+import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
-import mapobject.unit.pyro.Pyro;
+import pyro.PyroPrimaryCannon;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
@@ -365,6 +366,8 @@ public class PyroPilot extends Pilot {
         return !pyro.hasQuadLasers();
       case LaserCannonPowerup:
         return pyro.getLaserLevel() < LaserCannon.MAX_LEVEL;
+      case PlasmaCannonPowerup:
+        return pyro.hasPrimaryCannon(PyroPrimaryCannon.PLASMA);
       case ConcussionMissilePowerup:
         return pyro.getNumConcussionMissiles() < Pyro.MAX_CONCUSSION_MISSILES;
       case ConcussionPack:

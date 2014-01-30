@@ -4,7 +4,7 @@ import java.awt.Image;
 
 import mapobject.MapObject;
 import mapobject.MovableObject;
-import mapobject.unit.pyro.Pyro;
+import mapobject.unit.Pyro;
 import pilot.PowerupPilot;
 import structure.Room;
 import util.MapUtils;

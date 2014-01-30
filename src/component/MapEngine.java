@@ -1,12 +1,10 @@
 package component;
 
-import inventory.PyroInventory;
-
 import java.util.LinkedList;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
-import mapobject.unit.pyro.Pyro;
+import mapobject.unit.Pyro;
 import pilot.PyroPilot;
 import structure.DescentMap;
 import structure.Room;
@@ -81,15 +79,15 @@ public class MapEngine {
     return map.getExitRoom().equals(center_object.getRoom());
   }
 
-  public void spawnPyro(PyroPilot pilot, PyroInventory inventory, boolean is_center_object) {
-    map.spawnPyro(pilot, inventory, is_center_object);
+  public void spawnPyro(PyroPilot pilot, boolean is_center_object) {
+    map.spawnPyro(pilot, is_center_object);
   }
 
-  public void injectPyro(PyroInventory inventory, boolean is_center_object) {
-    spawnPyro(new PyroPilot(), inventory, is_center_object);
+  public void injectPyro(boolean is_center_object) {
+    spawnPyro(new PyroPilot(), is_center_object);
   }
 
   public void respawnPyroAfterDeath(Pyro pyro) {
-    spawnPyro((PyroPilot) pyro.getPilot(), null, pyro.equals(center_object));
+    spawnPyro((PyroPilot) pyro.getPilot(), pyro.equals(center_object));
   }
 }

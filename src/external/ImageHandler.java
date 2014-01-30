@@ -162,19 +162,13 @@ public class ImageHandler {
         loadRotatedImages(path, type.name(), pixels_per_cell, SHOT_IMAGE_RADIUS);
       }
     }
+    for (ObjectType type : ObjectType.ROBOTS) {
+      Double radius = Constants.getRadius(type);
+      if (radius != null) {
+        loadRotatedImages(path, type.name(), pixels_per_cell, radius);
+      }
+    }
     loadRotatedImages(path, "Pyro", pixels_per_cell, Constants.getRadius(ObjectType.Pyro));
-    loadRotatedImages(path, "BabySpider", pixels_per_cell, Constants.getRadius(ObjectType.BabySpider));
-    loadRotatedImages(path, "Class1Drone", pixels_per_cell, Constants.getRadius(ObjectType.Class1Drone));
-    loadRotatedImages(path, "Class2Drone", pixels_per_cell, Constants.getRadius(ObjectType.Class2Drone));
-    loadRotatedImages(path, "DefenseRobot", pixels_per_cell, Constants.getRadius(ObjectType.DefenseRobot));
-    loadRotatedImages(path, "LightHulk", pixels_per_cell, Constants.getRadius(ObjectType.LightHulk));
-    loadRotatedImages(path, "MediumHulk", pixels_per_cell, Constants.getRadius(ObjectType.MediumHulk));
-    loadRotatedImages(path, "PlatformLaser", pixels_per_cell, Constants.getRadius(ObjectType.PlatformLaser));
-    loadRotatedImages(path, "PlatformMissile", pixels_per_cell,
-            Constants.getRadius(ObjectType.PlatformMissile));
-    loadRotatedImages(path, "SecondaryLifter", pixels_per_cell,
-            Constants.getRadius(ObjectType.SecondaryLifter));
-    loadRotatedImages(path, "Spider", pixels_per_cell, Constants.getRadius(ObjectType.Spider));
   }
 
   public void loadImages(int pixels_per_cell) {

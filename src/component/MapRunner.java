@@ -96,7 +96,7 @@ public class MapRunner {
       map.finishBuildingMap();
       MapPopulator.populateMap(map);
       engine = new MapEngine(map);
-      engine.injectPyro(null, true);
+      engine.injectPyro(true);
       state = RunnerState.PAUSE_AFTER_BUILD;
       target_sleep_ms = PAUSE_AFTER_BUILD_SLEEP;
     }

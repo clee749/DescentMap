@@ -16,8 +16,8 @@ import mapobject.MapObject;
 import mapobject.powerup.Powerup;
 import mapobject.scenery.Scenery;
 import mapobject.shot.Shot;
+import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
-import mapobject.unit.pyro.Pyro;
 import util.MapUtils;
 
 import common.ObjectType;
@@ -306,8 +306,7 @@ public class Room {
     return created_objects;
   }
 
-  public void doSplashDamage(MapObject src_object, int max_damage, double damage_radius,
-          Unit already_damaged) {
+  public void doSplashDamage(MapObject src_object, int max_damage, double damage_radius, Unit already_damaged) {
     doSplashDamage(src_object, max_damage, damage_radius, null, already_damaged);
   }
 
@@ -350,18 +349,20 @@ public class Room {
     }
   }
 
-  public void doSplashDamageInNeighbor(MapObject src_object, int max_damage,
-          double damage_radius, RoomSide direction) {
+  public void doSplashDamageInNeighbor(MapObject src_object, int max_damage, double damage_radius,
+          RoomSide direction) {
     Room neighbor = getNeighborInDirection(direction);
     if (neighbor != null) {
       neighbor.doSplashDamage(src_object, max_damage, damage_radius, direction, null);
     }
   }
 
-  public void applySplashDamage(Unit unit, MapObject src_object, int max_damage,
-          double damage_radius, RoomSide which_neighbor) {
-    double distance = Math.max(
-      Math.hypot(unit.getX() - src_object.getX(), unit.getY() - src_object.getY()) - unit.getRadius(), 0.0);
+  public void applySplashDamage(Unit unit, MapObject src_object, int max_damage, double damage_radius,
+          RoomSide which_neighbor) {
+    double distance =
+            Math.max(
+                    Math.hypot(unit.getX() - src_object.getX(), unit.getY() - src_object.getY()) -
+                            unit.getRadius(), 0.0);
     if (distance < damage_radius &&
             (which_neighbor == null || MapUtils.canSeeObjectInNeighborRoom(src_object, unit, which_neighbor))) {
       unit.beDamaged((int) (max_damage * (1 - distance / damage_radius)));

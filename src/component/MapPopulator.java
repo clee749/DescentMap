@@ -15,9 +15,10 @@ import common.DescentMapException;
 import common.ObjectType;
 
 public class MapPopulator {
-  public static ObjectType[] ROBOTS_TO_POPULATE = {ObjectType.Class1Drone, ObjectType.Class2Drone,
-          ObjectType.DefenseRobot, ObjectType.LightHulk, ObjectType.MediumHulk, ObjectType.PlatformLaser,
-          ObjectType.PlatformMissile, ObjectType.SecondaryLifter, ObjectType.Spider};
+  public static ObjectType[] ROBOTS_TO_POPULATE =
+          {ObjectType.Class1Drone, ObjectType.Class2Drone, ObjectType.DefenseRobot, ObjectType.HeavyDriller,
+                  ObjectType.LightHulk, ObjectType.MediumHulk, ObjectType.PlatformLaser,
+                  ObjectType.PlatformMissile, ObjectType.SecondaryLifter, ObjectType.Spider};
 
   protected MapPopulator() {
 

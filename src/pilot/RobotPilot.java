@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
-import mapobject.unit.pyro.Pyro;
+import mapobject.unit.Pyro;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;

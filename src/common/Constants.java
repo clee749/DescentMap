@@ -62,6 +62,7 @@ public class Constants {
     speeds.put(ObjectType.DefenseRobot, 0.3);
     speeds.put(ObjectType.PlatformLaser, 0.3);
     speeds.put(ObjectType.Spider, 0.3);
+    speeds.put(ObjectType.HeavyDriller, 0.4);
     speeds.put(ObjectType.LightHulk, 0.4);
     speeds.put(ObjectType.Class1Drone, 0.5);
     speeds.put(ObjectType.Class2Drone, 0.5);
@@ -71,6 +72,7 @@ public class Constants {
     speeds.put(ObjectType.FireballShot, 1.1);
     speeds.put(ObjectType.ConcussionMissile, 2.5);
     speeds.put(ObjectType.LaserShot, 3.0);
+    speeds.put(ObjectType.PlasmaShot, 3.5);
     return speeds;
   }
 
@@ -81,6 +83,7 @@ public class Constants {
     speeds.put(ObjectType.Class1Drone, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.Class2Drone, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.DefenseRobot, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.HeavyDriller, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.LightHulk, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.MediumHulk, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.PlatformLaser, MapUtils.PI_OVER_TWO);
@@ -103,6 +106,7 @@ public class Constants {
     radii.put(ObjectType.PlatformMissile, 0.25);
     radii.put(ObjectType.DefenseRobot, 0.3);
     radii.put(ObjectType.MediumHulk, 0.35);
+    radii.put(ObjectType.HeavyDriller, 0.4);
     radii.put(ObjectType.Spider, 0.4);
     return radii;
   }
@@ -117,6 +121,7 @@ public class Constants {
     offsets.put(ObjectType.SecondaryLifter, 0.4);
     offsets.put(ObjectType.Pyro, 0.525);
     offsets.put(ObjectType.LightHulk, 0.79);
+    offsets.put(ObjectType.HeavyDriller, 0.81);
     offsets.put(ObjectType.MediumHulk, 0.83);
     offsets.put(ObjectType.DefenseRobot, 0.84);
     offsets.put(ObjectType.Class1Drone, 0.86);
@@ -134,6 +139,7 @@ public class Constants {
     shields.put(ObjectType.PlatformLaser, 23);
     shields.put(ObjectType.MediumHulk, 32);
     shields.put(ObjectType.Spider, 35);
+    shields.put(ObjectType.HeavyDriller, 47);
     shields.put(ObjectType.PlatformMissile, 47);
     shields.put(ObjectType.Pyro, 100);
     return shields;
@@ -145,6 +151,7 @@ public class Constants {
     times.put(ObjectType.Class1Drone, 2.0);
     times.put(ObjectType.Class2Drone, 2.0);
     times.put(ObjectType.DefenseRobot, 2.0);
+    times.put(ObjectType.HeavyDriller, 2.0);
     times.put(ObjectType.LightHulk, 2.0);
     times.put(ObjectType.PlatformLaser, 2.0);
     times.put(ObjectType.SecondaryLifter, 2.0);
@@ -162,6 +169,7 @@ public class Constants {
     shots.put(ObjectType.LightHulk, 2);
     shots.put(ObjectType.MediumHulk, 2);
     shots.put(ObjectType.SecondaryLifter, 2);
+    shots.put(ObjectType.HeavyDriller, 3);
     shots.put(ObjectType.PlatformMissile, 3);
     shots.put(ObjectType.Spider, 3);
     shots.put(ObjectType.DefenseRobot, 4);
@@ -175,6 +183,7 @@ public class Constants {
     times.put(ObjectType.Class1Drone, 0.1);
     times.put(ObjectType.Class2Drone, 0.1);
     times.put(ObjectType.DefenseRobot, 0.1);
+    times.put(ObjectType.HeavyDriller, 0.1);
     times.put(ObjectType.LightHulk, 0.1);
     times.put(ObjectType.MediumHulk, 0.1);
     times.put(ObjectType.PlatformLaser, 0.1);
@@ -188,6 +197,7 @@ public class Constants {
     HashMap<ObjectType, Integer> damages = new HashMap<ObjectType, Integer>();
     damages.put(ObjectType.LaserShot, 3);
     damages.put(ObjectType.FireballShot, 6);
+    damages.put(ObjectType.PlasmaShot, 7);
     damages.put(ObjectType.ConcussionMissile, 16);
     return damages;
   }

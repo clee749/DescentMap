@@ -1,6 +1,4 @@
-package mapobject.unit.pyro;
-
-import inventory.PyroInventory;
+package mapobject.unit;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -8,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.util.HashMap;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
@@ -15,11 +14,12 @@ import mapobject.ephemeral.Explosion;
 import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
 import mapobject.powerup.Shield;
-import mapobject.unit.Unit;
 import pilot.Pilot;
 import pilot.PilotAction;
 import pilot.PyroPilot;
 import pilot.TurnDirection;
+import pyro.PyroPrimaryCannon;
+import pyro.PyroSecondaryCannon;
 import structure.Room;
 import util.MapUtils;
 import util.PowerupFactory;
@@ -33,15 +33,28 @@ import component.MapEngine;
 
 import external.ImageHandler;
 
+class PrimaryCannonInfo {
+  public final double reload_time;
+  public final double energy_cost;
+
+  public PrimaryCannonInfo(double reload_time, double energy_cost) {
+    this.reload_time = reload_time;
+    this.energy_cost = energy_cost;
+  }
+}
+
+
 public class Pyro extends Unit {
   public static final double OUTER_CANNON_OFFSET_FRACTION = 0.8;
   public static final double CANNON_FORWARD_OFFSET_FRACTION = 0.2;
   public static final double MISSILE_OFFSET_FRACTION = 0.2;
-  public static final double LASER_RELOAD_TIME = 0.25;
-  public static final double SECONDARY_RELOAD_TIME = 0.5;
+  public static final HashMap<PyroPrimaryCannon, PrimaryCannonInfo> PRIMARY_CANNON_INFOS =
+          getPrimaryCannonInfos();
+  public static final HashMap<PyroSecondaryCannon, Double> SECONDARY_RELOAD_TIMES = getSecondaryReloadTimes();
   public static final int MAX_SHIELDS = 200;
   public static final int MIN_STARTING_ENERGY = 100;
   public static final int MAX_ENERGY = 200;
+  public static final double CANNON_SWITCH_TIME = 1.0;
   public static final int MIN_STARTING_CONCUSSION_MISSILES = 3;
   public static final int MAX_CONCUSSION_MISSILES = 20;
   public static final double DEATH_SPIN_TIME = 5.0;
@@ -56,46 +69,58 @@ public class Pyro extends Unit {
   public static final Color UNSELECTED_WEAPON_COLOR = Color.gray;
   public static final Color WEAPON_AMOUNT_COLOR = Color.red;
 
+  private static HashMap<PyroPrimaryCannon, PrimaryCannonInfo> getPrimaryCannonInfos() {
+    HashMap<PyroPrimaryCannon, PrimaryCannonInfo> infos = new HashMap<PyroPrimaryCannon, PrimaryCannonInfo>();
+    infos.put(PyroPrimaryCannon.LASER, new PrimaryCannonInfo(0.25, 0.5));
+    infos.put(PyroPrimaryCannon.PLASMA, new PrimaryCannonInfo(0.15, 0.5));
+    return infos;
+  }
+
+  private static HashMap<PyroSecondaryCannon, Double> getSecondaryReloadTimes() {
+    HashMap<PyroSecondaryCannon, Double> times = new HashMap<PyroSecondaryCannon, Double>();
+    times.put(PyroSecondaryCannon.CONCUSSION_MISSILE, 0.5);
+    return times;
+  }
+
   private final double outer_cannon_offset;
   private final double cannon_forward_offset;
   private final double missile_offset;
   private double energy;
   private boolean has_quad_lasers;
-  private final double cannon_energy_cost;
-  private final Cannon selected_primary_cannon;
-  protected double secondary_reload_time_left;
-  protected boolean firing_secondary;
-  protected int missile_side;
-  protected Cannon selected_secondary_cannon;
+  private final Cannon[] primary_cannons;
+  private Cannon selected_primary_cannon;
+  private double primary_energy_cost;
+  private final double secondary_reload_time;
+  private double secondary_reload_time_left;
+  private boolean firing_secondary;
+  private int missile_side;
+  private final Cannon selected_secondary_cannon;
   private int num_concussion_missiles;
   private boolean death_spin_started;
   private double death_spin_time_left;
   private double death_spin_direction;
   private double death_spin_delta_direction;
 
-  public Pyro(Pilot pilot, PyroInventory inventory, Room room, double x_loc, double y_loc, double direction) {
+  public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(Constants.getRadius(ObjectType.Pyro), pilot, room, x_loc, y_loc, direction);
     outer_cannon_offset = OUTER_CANNON_OFFSET_FRACTION * radius;
     cannon_forward_offset = CANNON_FORWARD_OFFSET_FRACTION * radius;
     missile_offset = MISSILE_OFFSET_FRACTION * radius;
-    if (inventory != null) {
-      updateFromInventory(inventory);
-    }
-    else {
-      energy = MIN_STARTING_ENERGY;
-      num_concussion_missiles = MIN_STARTING_CONCUSSION_MISSILES;
-    }
-    ((PyroPilot) pilot).startPilot();
-    cannon_energy_cost = 0.5;
-    reload_time = LASER_RELOAD_TIME;
+    energy = MIN_STARTING_ENERGY;
     selected_primary_cannon = new LaserCannon(Constants.getDamage(ObjectType.LaserShot), 1);
+    primary_cannons = new Cannon[PyroPrimaryCannon.values().length];
+    primary_cannons[PyroPrimaryCannon.LASER.ordinal()] = selected_primary_cannon;
+    setPrimaryCannonInfo(PyroPrimaryCannon.LASER);
+    num_concussion_missiles = MIN_STARTING_CONCUSSION_MISSILES;
     missile_side = (int) (Math.random() * 2);
     selected_secondary_cannon =
             new ConcussionMissileCannon(Constants.getDamage(ObjectType.ConcussionMissile));
+    secondary_reload_time = SECONDARY_RELOAD_TIMES.get(PyroSecondaryCannon.CONCUSSION_MISSILE);
+    ((PyroPilot) pilot).startPilot();
   }
 
   public Pyro(Room room, double x_loc, double y_loc, double direction) {
-    this(new PyroPilot(), null, room, x_loc, y_loc, direction);
+    this(new PyroPilot(), room, x_loc, y_loc, direction);
   }
 
   @Override
@@ -111,22 +136,26 @@ public class Pyro extends Unit {
     return has_quad_lasers;
   }
 
+  public LaserCannon getLaserCannon() {
+    return ((LaserCannon) primary_cannons[PyroPrimaryCannon.LASER.ordinal()]);
+  }
+
   public int getLaserLevel() {
-    return ((LaserCannon) selected_primary_cannon).getLevel();
+    return getLaserCannon().getLevel();
+  }
+
+  public boolean hasPrimaryCannon(PyroPrimaryCannon cannon_type) {
+    return primary_cannons[cannon_type.ordinal()] != null;
+  }
+
+  public void setPrimaryCannonInfo(PyroPrimaryCannon primary_cannon_type) {
+    PrimaryCannonInfo cannon_info = PRIMARY_CANNON_INFOS.get(primary_cannon_type);
+    reload_time = cannon_info.reload_time;
+    primary_energy_cost = cannon_info.energy_cost;
   }
 
   public int getNumConcussionMissiles() {
     return num_concussion_missiles;
-  }
-
-  public PyroInventory getInventory() {
-    return new PyroInventory(this);
-  }
-
-  public void updateFromInventory(PyroInventory inventory) {
-    shields = inventory.shields;
-    energy = inventory.energy;
-    num_concussion_missiles = inventory.num_concussion_missiles;
   }
 
   @Override
@@ -153,15 +182,30 @@ public class Pyro extends Unit {
     g.drawString("Energy: " + (int) energy, 10, 20);
     g.setColor(Color.cyan);
     g.drawString("Shield: " + shields, 10, 40);
-    int text_offset = 70;
-    g.setColor(SELECTED_WEAPON_COLOR);
-    g.drawString("Laser Lvl: " + getLaserLevel() + (has_quad_lasers ? " Quad" : ""), 10, text_offset);
-    text_offset += 20;
+    int text_offset =
+            paintCannonInfo(g, PyroPrimaryCannon.LASER, 70, "Laser Lvl: " + getLaserLevel() +
+                    (has_quad_lasers ? " Quad" : ""));
+    text_offset = paintCannonInfo(g, PyroPrimaryCannon.PLASMA, text_offset, "Plasma");
     text_offset += 10;
     if (num_concussion_missiles > 0) {
       paintSecondaryWeaponInfo(g, text_offset, "Concsn Missile: ", num_concussion_missiles);
       text_offset += 20;
     }
+  }
+
+  public int paintCannonInfo(Graphics2D g, PyroPrimaryCannon cannon_type, int text_offset, String cannon_text) {
+    Cannon cannon = primary_cannons[cannon_type.ordinal()];
+    if (cannon != null) {
+      if (cannon.equals(selected_primary_cannon)) {
+        g.setColor(SELECTED_WEAPON_COLOR);
+      }
+      else {
+        g.setColor(UNSELECTED_WEAPON_COLOR);
+      }
+      g.drawString(cannon_text, 10, text_offset);
+      return text_offset + 20;
+    }
+    return text_offset;
   }
 
   public void paintSecondaryWeaponInfo(Graphics2D g, int text_offset, String weapon_text, int num) {
@@ -195,7 +239,7 @@ public class Pyro extends Unit {
 
   public void planToFireSecondary() {
     firing_secondary = true;
-    secondary_reload_time_left = SECONDARY_RELOAD_TIME;
+    secondary_reload_time_left = secondary_reload_time;
   }
 
   public void handleSecondaryReload(double s_elapsed) {
@@ -239,8 +283,7 @@ public class Pyro extends Unit {
         MapObject created_object = handleDeath(s_elapsed);
         if (!is_in_map) {
           room.doSplashDamage(this, Math.max(MAX_DEATH_SPLASH_DAMAGE + shields, MIN_DEATH_SPLASH_DAMAGE),
-                  DEATH_SPLASH_DAMAGE_RADIUS,
-                  this);
+                  DEATH_SPLASH_DAMAGE_RADIUS, this);
           ((PyroPilot) pilot).prepareForRespawn();
           engine.respawnPyroAfterDeath(this);
         }
@@ -257,7 +300,7 @@ public class Pyro extends Unit {
 
   @Override
   public MapObject fireCannon() {
-    if (energy < cannon_energy_cost) {
+    if (energy < primary_energy_cost) {
       return null;
     }
     MultipleObject shots = new MultipleObject();
@@ -275,7 +318,7 @@ public class Pyro extends Unit {
       shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc - abs_offset.x +
               x_forward_abs_offset, y_loc - abs_offset.y + y_forward_abs_offset, direction));
     }
-    energy -= cannon_energy_cost;
+    energy -= primary_energy_cost;
     return shots;
   }
 
@@ -306,8 +349,11 @@ public class Pyro extends Unit {
     if (has_quad_lasers) {
       powerups.addObject(PowerupFactory.newPowerup(ObjectType.QuadLasers, room, x_loc, y_loc));
     }
-    if (((LaserCannon) selected_primary_cannon).getLevel() > 1) {
+    if (getLaserCannon().getLevel() > 1) {
       powerups.addObject(PowerupFactory.newPowerup(ObjectType.LaserCannonPowerup, room, x_loc, y_loc));
+    }
+    if (hasPrimaryCannon(PyroPrimaryCannon.PLASMA)) {
+      powerups.addObject(PowerupFactory.newPowerup(ObjectType.PlasmaCannonPowerup, room, x_loc, y_loc));
     }
     if (num_concussion_missiles >= ConcussionPack.NUM_MISSILES) {
       powerups.addObject(PowerupFactory.newPowerup(ObjectType.ConcussionPack, room, x_loc, y_loc));
@@ -344,11 +390,35 @@ public class Pyro extends Unit {
     return acquireEnergy(Energy.ENERGY_AMOUNT);
   }
 
-  public boolean acquireLaserCannon() {
-    if (((LaserCannon) selected_primary_cannon).incrementLevel()) {
-      return true;
+  public boolean acquireCannon(PyroPrimaryCannon cannon_type) {
+    if (cannon_type.equals(PyroPrimaryCannon.LASER)) {
+      if (getLaserCannon().incrementLevel()) {
+        return true;
+      }
+    }
+    else {
+      int cannon_index = cannon_type.ordinal();
+      if (primary_cannons[cannon_index] == null) {
+        primary_cannons[cannon_index] = PyroPrimaryCannon.createCannon(cannon_type);
+        switchCannon(cannon_type);
+        return true;
+      }
     }
     return acquireEnergy(Energy.ENERGY_AMOUNT);
+  }
+
+  public boolean switchCannon(PyroPrimaryCannon cannon_type) {
+    Cannon new_primary_cannon = primary_cannons[cannon_type.ordinal()];
+    if (new_primary_cannon == null) {
+      return false;
+    }
+    if (new_primary_cannon.equals(selected_primary_cannon)) {
+      return true;
+    }
+    selected_primary_cannon = new_primary_cannon;
+    setPrimaryCannonInfo(cannon_type);
+    reload_time_left = CANNON_SWITCH_TIME;
+    return true;
   }
 
   public boolean acquireConcussionMissiles(int amount) {
