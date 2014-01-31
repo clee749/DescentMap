@@ -45,10 +45,13 @@ class PrimaryCannonInfo {
 
 
 public class Pyro extends Unit {
+  public static final Color BASE_SHIELD_COLOR = Color.cyan;
+
   private static final HashMap<PyroPrimaryCannon, PrimaryCannonInfo> PRIMARY_CANNON_INFOS =
           getPrimaryCannonInfos();
   private static final HashMap<PyroSecondaryCannon, Double> SECONDARY_RELOAD_TIMES =
           getSecondaryReloadTimes();
+  private static final Color[] SHIELD_COLORS = getShieldColors();
 
   private static HashMap<PyroPrimaryCannon, PrimaryCannonInfo> getPrimaryCannonInfos() {
     HashMap<PyroPrimaryCannon, PrimaryCannonInfo> infos = new HashMap<PyroPrimaryCannon, PrimaryCannonInfo>();
@@ -63,9 +66,26 @@ public class Pyro extends Unit {
     return times;
   }
 
+  private static Color[] getShieldColors() {
+    Color[] colors = new Color[NUM_SHIELD_COLORS];
+    float dalpha = MAX_SHIELD_ALPHA / NUM_SHIELD_COLORS;
+    for (int i = 0; i < colors.length; ++i) {
+      colors[i] =
+              new Color(BASE_SHIELD_COLOR.getColorSpace(), BASE_SHIELD_COLOR.getColorComponents(null),
+                      dalpha * (i + 1));
+    }
+    return colors;
+  }
+
   public static final double OUTER_CANNON_OFFSET_FRACTION = 0.8;
   public static final double CANNON_FORWARD_OFFSET_FRACTION = 0.2;
   public static final double MISSILE_OFFSET_FRACTION = 0.2;
+  public static final int NUM_SHIELD_COLORS = 9;
+  public static final float MAX_SHIELD_ALPHA = 0.5f;
+  public static final int MIN_SHIELDS_FOR_PAINT = 10;
+  public static final int SHIELD_COLORS_DIVISOR = 10;
+  public static final double SHIELD_RADIUS = Unit.getRadius(ObjectType.Pyro) * 1.3;
+  public static final double SHIELD_DIAMETER = SHIELD_RADIUS * 2;
   public static final int MAX_SHIELDS = 200;
   public static final int MIN_STARTING_ENERGY = 100;
   public static final int MAX_ENERGY = 200;
@@ -78,8 +98,8 @@ public class Pyro extends Unit {
   public static final double DEATH_SPIN_EXPLOSION_RADIUS = 0.1;
   public static final double DEATH_SPIN_EXPLOSION_TIME = 1.0;
   public static final double DEATH_SPLASH_DAMAGE_RADIUS = 1.0;
-  public static final int MIN_DEATH_SPLASH_DAMAGE = 10;
-  public static final int MAX_DEATH_SPLASH_DAMAGE = 50;
+  public static final int DEATH_SPLASH_DAMAGE = 50;
+  public static final int MAX_DEATH_SPIN_DAMAGE_TAKEN = 50;
   public static final Color SELECTED_WEAPON_COLOR = Color.green;
   public static final Color UNSELECTED_WEAPON_COLOR = Color.gray;
   public static final Color WEAPON_AMOUNT_COLOR = Color.red;
@@ -170,6 +190,7 @@ public class Pyro extends Unit {
   @Override
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
+    paintShield(g, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     super.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     Point target_pixel =
             MapUtils.coordsToPixel(pilot.getTargetX(), pilot.getTargetY(), ref_cell, ref_cell_nw_pixel,
@@ -178,9 +199,21 @@ public class Pyro extends Unit {
     g.drawRect(target_pixel.x - 1, target_pixel.y - 1, 2, 2);
   }
 
+  public void paintShield(Graphics2D g, Point ref_cell, Point ref_cell_nw_pixel, int pixels_per_cell) {
+    if (shields < MIN_SHIELDS_FOR_PAINT) {
+      return;
+    }
+    g.setColor(SHIELD_COLORS[Math.min(shields / SHIELD_COLORS_DIVISOR, SHIELD_COLORS.length) - 1]);
+    Point nw_corner_pixel =
+            MapUtils.coordsToPixelRounded(x_loc - SHIELD_RADIUS, y_loc - SHIELD_RADIUS, ref_cell,
+                    ref_cell_nw_pixel, pixels_per_cell);
+    int shield_pixel_diameter = (int) (SHIELD_DIAMETER * pixels_per_cell);
+    g.fillOval(nw_corner_pixel.x, nw_corner_pixel.y, shield_pixel_diameter, shield_pixel_diameter);
+  }
+
   public void paintInfo(Graphics2D g) {
     g.setColor(Color.yellow);
-    g.drawString("Energy: " + (int) energy, 10, 20);
+    g.drawString("Energy: " + (int) Math.ceil(energy), 10, 20);
     g.setColor(Color.cyan);
     g.drawString("Shield: " + shields, 10, 40);
     int text_offset =
@@ -283,8 +316,7 @@ public class Pyro extends Unit {
       if (death_spin_time_left < 0.0) {
         MapObject created_object = handleDeath(s_elapsed);
         if (!is_in_map) {
-          room.doSplashDamage(this, Math.max(MAX_DEATH_SPLASH_DAMAGE + shields, MIN_DEATH_SPLASH_DAMAGE),
-                  DEATH_SPLASH_DAMAGE_RADIUS, this);
+          room.doSplashDamage(this, DEATH_SPLASH_DAMAGE, DEATH_SPLASH_DAMAGE_RADIUS, this);
           ((PyroPilot) pilot).prepareForRespawn();
           engine.respawnPyroAfterDeath(this);
         }
@@ -294,6 +326,9 @@ public class Pyro extends Unit {
         death_spin_time_left = 0.0;
       }
       death_spin_time_left -= s_elapsed;
+    }
+    if (shields < -MAX_DEATH_SPIN_DAMAGE_TAKEN) {
+      death_spin_time_left = -1.0;
     }
     return new Explosion(room, x_loc + Math.random() * 2 * radius - radius, y_loc + Math.random() * 2 *
             radius - radius, DEATH_SPIN_EXPLOSION_RADIUS, DEATH_SPIN_EXPLOSION_TIME);

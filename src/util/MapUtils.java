@@ -50,6 +50,21 @@ public class MapUtils {
 
   /**
    * 
+   * @param x_coord x-coordinate of the location in a DescentMap
+   * @param y_coord y-coordinate of the location in a DescentMap
+   * @param ref_cell any location
+   * @param ref_cell_nw_pixel the pixel that marks the NW corner of ref_cell
+   * @param pixels_per_cell length of a cell in pixels
+   * @return rounded pixel coordinates where the point should be drawn
+   */
+  public static Point coordsToPixelRounded(double x_coord, double y_coord, Point ref_cell,
+          Point ref_cell_nw_pixel, int pixels_per_cell) {
+    return new Point((int) Math.round(ref_cell_nw_pixel.x - (ref_cell.x - x_coord) * pixels_per_cell),
+            (int) Math.round(ref_cell_nw_pixel.y - (ref_cell.y - y_coord) * pixels_per_cell));
+  }
+
+  /**
+   * 
    * @param src_x x-coordinate of source vector (from origin)
    * @param src_y y-coordinate of source vector
    * @param dst_x x-coordinate of destination vector (from origin)
