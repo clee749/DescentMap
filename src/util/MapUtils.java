@@ -182,6 +182,13 @@ public class MapUtils {
     return dx * dx + dy * dy;
   }
 
+  /**
+   * 
+   * @param src any MapObject
+   * @param dst any MapObject in a neighbor Room from src
+   * @param neighbor_side the RoomSide to get from src's Room to dst's Room
+   * @return true if src can see dst, false otherwise
+   */
   public static boolean canSeeObjectInNeighborRoom(MapObject src, MapObject dst, RoomSide neighbor_side) {
     double src_x = src.getX();
     double src_y = src.getY();

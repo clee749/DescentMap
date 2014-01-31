@@ -21,7 +21,7 @@ enum RunnerState {
 
 public class MapRunner {
   public static final int DEFAULT_MAX_ROOM_SIZE = 10;
-  public static final int DEFAULT_MAX_NUM_ROOMS = 10;
+  public static final int DEFAULT_MAX_NUM_ROOMS = 15;
   public static final int DEFAULT_NUM_LEVELS = 5;
   public static final long BUILD_SLEEP = 100;
   public static final long PAUSE_AFTER_BUILD_SLEEP = 1000;

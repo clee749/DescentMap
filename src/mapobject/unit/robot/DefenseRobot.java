@@ -2,19 +2,20 @@ package mapobject.unit.robot;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
+import mapobject.shot.Shot;
+import mapobject.unit.Unit;
 import structure.Room;
 import util.PowerupFactory;
 import cannon.LaserCannon;
 
-import common.Constants;
 import common.ObjectType;
 
 public class DefenseRobot extends Robot {
   public static final int NUM_LASER_CANNON_POWERUPS_RELEASED = 3;
 
   public DefenseRobot(Room room, double x_loc, double y_loc, double direction) {
-    super(Constants.getRadius(ObjectType.DefenseRobot), new LaserCannon(
-            Constants.getDamage(ObjectType.LaserShot), 4), room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.DefenseRobot), new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 4),
+            room, x_loc, y_loc, direction);
   }
 
   @Override

@@ -1,17 +1,18 @@
 package mapobject.unit.robot;
 
 import mapobject.MapObject;
+import mapobject.shot.Shot;
+import mapobject.unit.Unit;
 import structure.Room;
 import util.PowerupFactory;
 import cannon.FireballCannon;
 
-import common.Constants;
 import common.ObjectType;
 
 public class Class1Drone extends Robot {
   public Class1Drone(Room room, double x_loc, double y_loc, double direction) {
-    super(Constants.getRadius(ObjectType.Class1Drone), new FireballCannon(
-            Constants.getDamage(ObjectType.FireballShot)), room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.Class1Drone),
+            new FireballCannon(Shot.getDamage(ObjectType.FireballShot)), room, x_loc, y_loc, direction);
   }
 
   @Override

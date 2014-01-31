@@ -2,19 +2,20 @@ package mapobject.unit.robot;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
+import mapobject.shot.Shot;
+import mapobject.unit.Unit;
 import structure.Room;
 import util.PowerupFactory;
 import cannon.ConcussionMissileCannon;
 
-import common.Constants;
 import common.ObjectType;
 
 public class MediumHulk extends Robot {
   public static final int MAX_CONCUSSION_MISSILES_RELEASED = 3;
 
   public MediumHulk(Room room, double x_loc, double y_loc, double direction) {
-    super(Constants.getRadius(ObjectType.MediumHulk), new ConcussionMissileCannon(
-            Constants.getDamage(ObjectType.ConcussionMissile)), room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.MediumHulk), new ConcussionMissileCannon(
+            Shot.getDamage(ObjectType.ConcussionMissile)), room, x_loc, y_loc, direction);
   }
 
   @Override

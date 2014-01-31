@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.util.HashMap;
 
 import mapobject.MapObject;
 import mapobject.unit.Unit;
@@ -13,12 +14,67 @@ import structure.Room;
 import util.MapUtils;
 import cannon.Cannon;
 
-import common.Constants;
+import common.ObjectType;
 import component.MapEngine;
 
 import external.ImageHandler;
 
 public abstract class Robot extends Unit {
+  private static final HashMap<ObjectType, Double> RELOAD_TIMES = getReloadTimes();
+  private static final HashMap<ObjectType, Integer> SHOTS_PER_VOLLEYS = getShotsPerVolleys();
+  private static final HashMap<ObjectType, Double> VOLLEY_RELOAD_TIMES = getVolleyReloadTimes();
+
+  private static HashMap<ObjectType, Double> getReloadTimes() {
+    HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
+    times.put(ObjectType.HeavyHulk, 1.0);
+    times.put(ObjectType.BabySpider, 2.0);
+    times.put(ObjectType.Class1Drone, 2.0);
+    times.put(ObjectType.Class2Drone, 2.0);
+    times.put(ObjectType.DefenseRobot, 2.0);
+    times.put(ObjectType.HeavyDriller, 2.0);
+    times.put(ObjectType.LightHulk, 2.0);
+    times.put(ObjectType.PlatformLaser, 2.0);
+    times.put(ObjectType.SecondaryLifter, 2.0);
+    times.put(ObjectType.Spider, 2.0);
+    times.put(ObjectType.MediumHulk, 3.0);
+    times.put(ObjectType.PlatformMissile, 4.0);
+    return times;
+  }
+
+  private static HashMap<ObjectType, Integer> getShotsPerVolleys() {
+    HashMap<ObjectType, Integer> shots = new HashMap<ObjectType, Integer>();
+    shots.put(ObjectType.HeavyHulk, 1);
+    shots.put(ObjectType.BabySpider, 2);
+    shots.put(ObjectType.Class1Drone, 2);
+    shots.put(ObjectType.Class2Drone, 2);
+    shots.put(ObjectType.LightHulk, 2);
+    shots.put(ObjectType.MediumHulk, 2);
+    shots.put(ObjectType.SecondaryLifter, 2);
+    shots.put(ObjectType.HeavyDriller, 3);
+    shots.put(ObjectType.PlatformMissile, 3);
+    shots.put(ObjectType.Spider, 3);
+    shots.put(ObjectType.DefenseRobot, 4);
+    shots.put(ObjectType.PlatformLaser, 4);
+    return shots;
+  }
+
+  private static HashMap<ObjectType, Double> getVolleyReloadTimes() {
+    HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
+    times.put(ObjectType.HeavyHulk, 0.0);
+    times.put(ObjectType.BabySpider, 0.1);
+    times.put(ObjectType.Class1Drone, 0.1);
+    times.put(ObjectType.Class2Drone, 0.1);
+    times.put(ObjectType.DefenseRobot, 0.1);
+    times.put(ObjectType.HeavyDriller, 0.1);
+    times.put(ObjectType.LightHulk, 0.1);
+    times.put(ObjectType.MediumHulk, 0.1);
+    times.put(ObjectType.PlatformLaser, 0.1);
+    times.put(ObjectType.PlatformMissile, 0.1);
+    times.put(ObjectType.SecondaryLifter, 0.1);
+    times.put(ObjectType.Spider, 0.1);
+    return times;
+  }
+
   protected final Cannon cannon;
   protected final int shots_per_volley;
   protected final double volley_reload_time;
@@ -30,9 +86,9 @@ public abstract class Robot extends Unit {
           double direction) {
     super(radius, pilot, room, x_loc, y_loc, direction);
     this.cannon = cannon;
-    shots_per_volley = Constants.getShotsPerVolley(type);
-    reload_time = Constants.getReloadTime(type);
-    volley_reload_time = Constants.getVolleyReloadTime(type);
+    reload_time = RELOAD_TIMES.get(type);
+    shots_per_volley = SHOTS_PER_VOLLEYS.get(type);
+    volley_reload_time = VOLLEY_RELOAD_TIMES.get(type);
     cannon_side = (int) (Math.random() * 2);
   }
 

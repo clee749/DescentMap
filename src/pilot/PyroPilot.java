@@ -13,6 +13,7 @@ import mapobject.powerup.Energy;
 import mapobject.powerup.Powerup;
 import mapobject.powerup.Shield;
 import mapobject.scenery.Entrance;
+import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
 import pyro.PyroPrimaryCannon;
@@ -21,7 +22,6 @@ import structure.RoomConnection;
 import util.MapUtils;
 import cannon.LaserCannon;
 
-import common.Constants;
 import common.DescentMapException;
 import common.ObjectType;
 import common.RoomSide;
@@ -39,8 +39,7 @@ public class PyroPilot extends Pilot {
   public static final double TIME_TURNING_UNTIL_STOP = 5.0;
   public static final double RESPAWN_DELAY = 5.0;
   public static final double SPAWNING_SICKNESS = Entrance.ZUNGGG_TIME - Entrance.TIME_TO_SPAWN;
-  public static final int CONCUSSION_MISSILE_SHIELD_THRESHOLD = Constants
-          .getDamage(ObjectType.ConcussionMissile);
+  public static final int CONCUSSION_MISSILE_SHIELD_THRESHOLD = Shot.getDamage(ObjectType.ConcussionMissile);
   public static final double CONCUSSION_MISSILE_MIN_DISTANCE2 = 4.0;
   public static final double CONCUSSION_MISSILE_MAX_DISTANCE2 = 100.0;
 
@@ -106,10 +105,10 @@ public class PyroPilot extends Pilot {
         break;
       case MOVE_TO_ROOM_CONNECTION:
         findNextRoom();
-        planMoveToRoomConnection(target_room_info.getKey(), object_radius);
+        planMoveToRoomConnection(target_room_info.getKey(), bound_object_radius);
         break;
       case MOVE_TO_NEIGHBOR_ROOM:
-        planMoveToNeighborRoom(target_room_info.getKey(), object_radius);
+        planMoveToNeighborRoom(target_room_info.getKey(), bound_object_radius);
         break;
       case REACT_TO_OBJECT:
         target_object = findNextTargetObject();
@@ -135,11 +134,11 @@ public class PyroPilot extends Pilot {
 
     boolean fire_cannon = false;
     boolean fire_secondary = false;
-    for (Unit unit : current_room.getMechs()) {
-      if (Math.abs(MapUtils.angleTo(object, unit)) < DIRECTION_EPSILON) {
+    for (Unit unit : current_room.getRobots()) {
+      if (Math.abs(MapUtils.angleTo(bound_object, unit)) < DIRECTION_EPSILON) {
         fire_cannon = true;
         if (unit.getShields() > CONCUSSION_MISSILE_SHIELD_THRESHOLD) {
-          double distance2 = MapUtils.distance2(object, unit);
+          double distance2 = MapUtils.distance2(bound_object, unit);
           if (distance2 > CONCUSSION_MISSILE_MIN_DISTANCE2 && distance2 < CONCUSSION_MISSILE_MAX_DISTANCE2) {
             fire_secondary = true;
             break;
@@ -150,13 +149,13 @@ public class PyroPilot extends Pilot {
 
     if (!fire_cannon && state.equals(PyroPilotState.MOVE_TO_ROOM_CONNECTION)) {
       RoomConnection connection = target_room_info.getValue();
-      for (Unit unit : connection.neighbor.getMechs()) {
-        double abs_angle_to_unit = Math.abs(MapUtils.angleTo(object, unit));
+      for (Unit unit : connection.neighbor.getRobots()) {
+        double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, unit));
         if (abs_angle_to_unit < DIRECTION_EPSILON &&
-                MapUtils.canSeeObjectInNeighborRoom(object, unit, target_room_info.getKey())) {
+                MapUtils.canSeeObjectInNeighborRoom(bound_object, unit, target_room_info.getKey())) {
           fire_cannon = true;
           if (unit.getShields() > CONCUSSION_MISSILE_SHIELD_THRESHOLD) {
-            double distance2 = MapUtils.distance2(object, unit);
+            double distance2 = MapUtils.distance2(bound_object, unit);
             if (distance2 > CONCUSSION_MISSILE_MIN_DISTANCE2 && distance2 < CONCUSSION_MISSILE_MAX_DISTANCE2) {
               fire_secondary = true;
               break;
@@ -171,15 +170,17 @@ public class PyroPilot extends Pilot {
         inactive_time_left -= s_elapsed;
         return PilotAction.NO_ACTION;
       case MOVE_TO_ROOM_CONNECTION:
-        return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon,
+        return new PilotAction(MoveDirection.FORWARD, strafe,
+                angleToTurnDirection(MapUtils.angleTo(bound_object.getDirection(),
+                        target_x - bound_object.getX(), target_y - bound_object.getY())), fire_cannon,
                 fire_secondary);
       case MOVE_TO_NEIGHBOR_ROOM:
-        return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())), fire_cannon,
+        return new PilotAction(MoveDirection.FORWARD, strafe,
+                angleToTurnDirection(MapUtils.angleTo(bound_object.getDirection(),
+                        target_x - bound_object.getX(), target_y - bound_object.getY())), fire_cannon,
                 fire_secondary);
       case REACT_TO_OBJECT:
-        TurnDirection turn = angleToTurnDirection(MapUtils.angleTo(object, target_object));
+        TurnDirection turn = angleToTurnDirection(MapUtils.angleTo(bound_object, target_object));
         if (!turn.equals(TurnDirection.NONE) && turn.equals(previous_turn_to_target)) {
           time_turning_to_target += s_elapsed;
         }
@@ -189,8 +190,8 @@ public class PyroPilot extends Pilot {
         }
         return new PilotAction(MoveDirection.FORWARD, strafe, turn, fire_cannon, fire_secondary);
       case TURN_TO_OBJECT:
-        return new PilotAction(MoveDirection.NONE, strafe, angleToTurnDirection(MapUtils.angleTo(object,
-                target_object)), fire_cannon, fire_secondary);
+        return new PilotAction(MoveDirection.NONE, strafe, angleToTurnDirection(MapUtils.angleTo(
+                bound_object, target_object)), fire_cannon, fire_secondary);
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
     }
@@ -204,14 +205,14 @@ public class PyroPilot extends Pilot {
         }
         break;
       case MOVE_TO_ROOM_CONNECTION:
-        if (Math.abs(target_x - object.getX()) < object_radius &&
-                Math.abs(target_y - object.getY()) < object_radius) {
+        if (Math.abs(target_x - bound_object.getX()) < bound_object_radius &&
+                Math.abs(target_y - bound_object.getY()) < bound_object_radius) {
           initState(PyroPilotState.MOVE_TO_NEIGHBOR_ROOM);
         }
         break;
       case MOVE_TO_NEIGHBOR_ROOM:
-        if (Math.abs(target_x - object.getX()) < object_radius &&
-                Math.abs(target_y - object.getY()) < object_radius) {
+        if (Math.abs(target_x - bound_object.getX()) < bound_object_radius &&
+                Math.abs(target_y - bound_object.getY()) < bound_object_radius) {
           updateCurrentRoom(target_room_info.getValue().neighbor);
           initState(PyroPilotState.REACT_TO_OBJECT);
         }
@@ -226,7 +227,7 @@ public class PyroPilot extends Pilot {
         }
         break;
       case TURN_TO_OBJECT:
-        if (MapUtils.angleTo(object, target_object) < DIRECTION_EPSILON) {
+        if (Math.abs(MapUtils.angleTo(bound_object, target_object)) < DIRECTION_EPSILON) {
           // no need to init state because we are still targeting the same object
           state = PyroPilotState.REACT_TO_OBJECT;
         }
@@ -338,7 +339,7 @@ public class PyroPilot extends Pilot {
   }
 
   public MapObject findNextTargetObject() {
-    for (Unit unit : current_room.getMechs()) {
+    for (Unit unit : current_room.getRobots()) {
       if (shouldTargetObject(unit)) {
         return unit;
       }
@@ -352,7 +353,7 @@ public class PyroPilot extends Pilot {
   }
 
   public boolean shouldTargetObject(MapObject other_object) {
-    double abs_angle_to_object = Math.abs(MapUtils.angleTo(object, other_object));
+    double abs_angle_to_object = Math.abs(MapUtils.angleTo(bound_object, other_object));
     return Math.random() < (Math.PI - abs_angle_to_object) / Math.PI;
   }
 
@@ -367,11 +368,13 @@ public class PyroPilot extends Pilot {
       case LaserCannonPowerup:
         return pyro.getLaserLevel() < LaserCannon.MAX_LEVEL;
       case PlasmaCannonPowerup:
-        return pyro.hasPrimaryCannon(PyroPrimaryCannon.PLASMA);
+        return !pyro.hasPrimaryCannon(PyroPrimaryCannon.PLASMA);
       case ConcussionMissilePowerup:
         return pyro.getNumConcussionMissiles() < Pyro.MAX_CONCUSSION_MISSILES;
       case ConcussionPack:
         return pyro.getNumConcussionMissiles() + ConcussionPack.NUM_MISSILES <= Pyro.MAX_CONCUSSION_MISSILES;
+      case HomingMissilePowerup:
+        return false;
       default:
         throw new DescentMapException("Unexpected Powerup: " + powerup);
     }

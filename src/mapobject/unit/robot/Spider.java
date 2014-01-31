@@ -4,13 +4,13 @@ import java.awt.geom.Point2D;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
+import mapobject.unit.Unit;
 import structure.Room;
 import util.MapUtils;
 import util.PowerupFactory;
 import util.RobotFactory;
 import cannon.FireballCannon;
 
-import common.Constants;
 import common.DescentMapException;
 import common.ObjectType;
 
@@ -19,8 +19,8 @@ public class Spider extends Robot {
   public static final int MAX_NUM_CHILDREN = 3;
 
   public Spider(Room room, double x_loc, double y_loc, double direction) {
-    super(Constants.getRadius(ObjectType.Spider), new FireballCannon(SPIDER_CANNON_DAMAGE), room, x_loc,
-            y_loc, direction);
+    super(Unit.getRadius(ObjectType.Spider), new FireballCannon(SPIDER_CANNON_DAMAGE), room, x_loc, y_loc,
+            direction);
     cannon_side = (int) (Math.random() * 3);
   }
 
@@ -71,7 +71,7 @@ public class Spider extends Robot {
     if (num_children < 1) {
       return null;
     }
-    double radius_range = radius - Constants.getRadius(ObjectType.BabySpider);
+    double radius_range = radius - Unit.getRadius(ObjectType.BabySpider);
     double location_range = 2 * radius_range;
     MultipleObject children = new MultipleObject();
     for (int i = 0; i < num_children; ++i) {

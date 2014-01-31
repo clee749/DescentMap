@@ -38,7 +38,8 @@ public class Room {
   private final HashSet<Shot> shots;
   private final HashSet<Powerup> powerups;
   private final HashSet<Pyro> pyros;
-  private final HashSet<Unit> mechs; // all non-Pyro Units
+  // TODO: change this to HashSet<Robot> and add one for ProximityBomb when implemented
+  private final HashSet<Unit> robots;
   private final HashSet<Scenery> sceneries;
   private final HashSet<MapObject> misc_objects;
 
@@ -51,7 +52,7 @@ public class Room {
     shots = new HashSet<Shot>();
     powerups = new HashSet<Powerup>();
     pyros = new HashSet<Pyro>();
-    mechs = new HashSet<Unit>();
+    robots = new HashSet<Unit>();
     sceneries = new HashSet<Scenery>();
     misc_objects = new HashSet<MapObject>();
   }
@@ -105,8 +106,8 @@ public class Room {
     return pyros;
   }
 
-  public HashSet<Unit> getMechs() {
-    return mechs;
+  public HashSet<Unit> getRobots() {
+    return robots;
   }
 
   public HashSet<Scenery> getSceneries() {
@@ -193,7 +194,7 @@ public class Room {
       for (Shot shot : shots) {
         shot.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
-      for (Unit unit : mechs) {
+      for (Unit unit : robots) {
         unit.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
       for (Pyro pyro : pyros) {
@@ -230,7 +231,7 @@ public class Room {
       pyros.add((Pyro) object);
     }
     else if (object instanceof Unit) {
-      mechs.add((Unit) object);
+      robots.add((Unit) object);
     }
     else if (object instanceof Scenery) {
       sceneries.add((Scenery) object);
@@ -251,7 +252,7 @@ public class Room {
       return pyros.remove(child);
     }
     if (child instanceof Unit) {
-      return mechs.remove(child);
+      return robots.remove(child);
     }
     if (child instanceof Scenery) {
       return sceneries.remove(child);
@@ -269,7 +270,7 @@ public class Room {
     for (Pyro pyro : pyros) {
       pyro.planNextAction(s_elapsed);
     }
-    for (Unit unit : mechs) {
+    for (Unit unit : robots) {
       unit.planNextAction(s_elapsed);
     }
     for (Scenery scenery : sceneries) {
@@ -284,7 +285,7 @@ public class Room {
     LinkedList<MapObject> created_objects = doNextStep(engine, s_elapsed, shots);
     created_objects.addAll(doNextStep(engine, s_elapsed, powerups));
     created_objects.addAll(doNextStep(engine, s_elapsed, pyros));
-    created_objects.addAll(doNextStep(engine, s_elapsed, mechs));
+    created_objects.addAll(doNextStep(engine, s_elapsed, robots));
     created_objects.addAll(doNextStep(engine, s_elapsed, sceneries));
     created_objects.addAll(doNextStep(engine, s_elapsed, misc_objects));
     return created_objects;
@@ -317,7 +318,7 @@ public class Room {
         applySplashDamage(pyro, src_object, max_damage, damage_radius, which_neighbor);
       }
     }
-    for (Unit unit : mechs) {
+    for (Unit unit : robots) {
       if (!unit.equals(already_damaged)) {
         applySplashDamage(unit, src_object, max_damage, damage_radius, which_neighbor);
       }

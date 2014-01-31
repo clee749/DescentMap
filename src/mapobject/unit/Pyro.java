@@ -14,6 +14,7 @@ import mapobject.ephemeral.Explosion;
 import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
 import mapobject.powerup.Shield;
+import mapobject.shot.Shot;
 import pilot.Pilot;
 import pilot.PilotAction;
 import pilot.PyroPilot;
@@ -27,7 +28,6 @@ import cannon.Cannon;
 import cannon.ConcussionMissileCannon;
 import cannon.LaserCannon;
 
-import common.Constants;
 import common.ObjectType;
 import component.MapEngine;
 
@@ -45,12 +45,27 @@ class PrimaryCannonInfo {
 
 
 public class Pyro extends Unit {
+  private static final HashMap<PyroPrimaryCannon, PrimaryCannonInfo> PRIMARY_CANNON_INFOS =
+          getPrimaryCannonInfos();
+  private static final HashMap<PyroSecondaryCannon, Double> SECONDARY_RELOAD_TIMES =
+          getSecondaryReloadTimes();
+
+  private static HashMap<PyroPrimaryCannon, PrimaryCannonInfo> getPrimaryCannonInfos() {
+    HashMap<PyroPrimaryCannon, PrimaryCannonInfo> infos = new HashMap<PyroPrimaryCannon, PrimaryCannonInfo>();
+    infos.put(PyroPrimaryCannon.LASER, new PrimaryCannonInfo(0.25, 0.5));
+    infos.put(PyroPrimaryCannon.PLASMA, new PrimaryCannonInfo(0.15, 0.5));
+    return infos;
+  }
+
+  private static HashMap<PyroSecondaryCannon, Double> getSecondaryReloadTimes() {
+    HashMap<PyroSecondaryCannon, Double> times = new HashMap<PyroSecondaryCannon, Double>();
+    times.put(PyroSecondaryCannon.CONCUSSION_MISSILE, 0.5);
+    return times;
+  }
+
   public static final double OUTER_CANNON_OFFSET_FRACTION = 0.8;
   public static final double CANNON_FORWARD_OFFSET_FRACTION = 0.2;
   public static final double MISSILE_OFFSET_FRACTION = 0.2;
-  public static final HashMap<PyroPrimaryCannon, PrimaryCannonInfo> PRIMARY_CANNON_INFOS =
-          getPrimaryCannonInfos();
-  public static final HashMap<PyroSecondaryCannon, Double> SECONDARY_RELOAD_TIMES = getSecondaryReloadTimes();
   public static final int MAX_SHIELDS = 200;
   public static final int MIN_STARTING_ENERGY = 100;
   public static final int MAX_ENERGY = 200;
@@ -68,19 +83,6 @@ public class Pyro extends Unit {
   public static final Color SELECTED_WEAPON_COLOR = Color.green;
   public static final Color UNSELECTED_WEAPON_COLOR = Color.gray;
   public static final Color WEAPON_AMOUNT_COLOR = Color.red;
-
-  private static HashMap<PyroPrimaryCannon, PrimaryCannonInfo> getPrimaryCannonInfos() {
-    HashMap<PyroPrimaryCannon, PrimaryCannonInfo> infos = new HashMap<PyroPrimaryCannon, PrimaryCannonInfo>();
-    infos.put(PyroPrimaryCannon.LASER, new PrimaryCannonInfo(0.25, 0.5));
-    infos.put(PyroPrimaryCannon.PLASMA, new PrimaryCannonInfo(0.15, 0.5));
-    return infos;
-  }
-
-  private static HashMap<PyroSecondaryCannon, Double> getSecondaryReloadTimes() {
-    HashMap<PyroSecondaryCannon, Double> times = new HashMap<PyroSecondaryCannon, Double>();
-    times.put(PyroSecondaryCannon.CONCUSSION_MISSILE, 0.5);
-    return times;
-  }
 
   private final double outer_cannon_offset;
   private final double cannon_forward_offset;
@@ -102,19 +104,18 @@ public class Pyro extends Unit {
   private double death_spin_delta_direction;
 
   public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
-    super(Constants.getRadius(ObjectType.Pyro), pilot, room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.Pyro), pilot, room, x_loc, y_loc, direction);
     outer_cannon_offset = OUTER_CANNON_OFFSET_FRACTION * radius;
     cannon_forward_offset = CANNON_FORWARD_OFFSET_FRACTION * radius;
     missile_offset = MISSILE_OFFSET_FRACTION * radius;
     energy = MIN_STARTING_ENERGY;
-    selected_primary_cannon = new LaserCannon(Constants.getDamage(ObjectType.LaserShot), 1);
+    selected_primary_cannon = new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 1);
     primary_cannons = new Cannon[PyroPrimaryCannon.values().length];
     primary_cannons[PyroPrimaryCannon.LASER.ordinal()] = selected_primary_cannon;
     setPrimaryCannonInfo(PyroPrimaryCannon.LASER);
     num_concussion_missiles = MIN_STARTING_CONCUSSION_MISSILES;
     missile_side = (int) (Math.random() * 2);
-    selected_secondary_cannon =
-            new ConcussionMissileCannon(Constants.getDamage(ObjectType.ConcussionMissile));
+    selected_secondary_cannon = new ConcussionMissileCannon(Shot.getDamage(ObjectType.ConcussionMissile));
     secondary_reload_time = SECONDARY_RELOAD_TIMES.get(PyroSecondaryCannon.CONCUSSION_MISSILE);
     ((PyroPilot) pilot).startPilot();
   }
@@ -427,5 +428,9 @@ public class Pyro extends Unit {
       return true;
     }
     return false;
+  }
+
+  public boolean acquireHomingMissiles(int amount) {
+    return true;
   }
 }

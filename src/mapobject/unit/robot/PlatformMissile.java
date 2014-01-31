@@ -2,19 +2,20 @@ package mapobject.unit.robot;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
+import mapobject.shot.Shot;
+import mapobject.unit.Unit;
 import structure.Room;
 import util.PowerupFactory;
 import cannon.ConcussionMissileCannon;
 
-import common.Constants;
 import common.ObjectType;
 
 public class PlatformMissile extends Robot {
   public static final int MAX_CONCUSSION_MISSILES_RELEASED = 4;
 
   public PlatformMissile(Room room, double x_loc, double y_loc, double direction) {
-    super(Constants.getRadius(ObjectType.PlatformMissile), new ConcussionMissileCannon(
-            Constants.getDamage(ObjectType.ConcussionMissile)), room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.PlatformMissile), new ConcussionMissileCannon(
+            Shot.getDamage(ObjectType.ConcussionMissile)), room, x_loc, y_loc, direction);
   }
 
   @Override

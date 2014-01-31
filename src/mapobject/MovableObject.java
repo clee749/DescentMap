@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.util.HashMap;
 
 import pilot.Pilot;
 import pilot.PilotAction;
@@ -11,14 +12,59 @@ import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
 
-import common.Constants;
 import common.DescentMapException;
+import common.ObjectType;
 import common.RoomSide;
 import component.MapEngine;
 
 import external.ImageHandler;
 
 public abstract class MovableObject extends MapObject {
+  private static final HashMap<ObjectType, Double> MAX_MOVE_SPEEDS = getMaxMoveSpeeds();
+  private static final HashMap<ObjectType, Double> MAX_TURN_SPEEDS = getMaxTurnSpeeds();
+
+  private static HashMap<ObjectType, Double> getMaxMoveSpeeds() {
+    HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
+    speeds.put(ObjectType.HeavyHulk, 0.1);
+    speeds.put(ObjectType.PlatformMissile, 0.1);
+    speeds.put(ObjectType.MediumHulk, 0.2);
+    speeds.put(ObjectType.DefenseRobot, 0.3);
+    speeds.put(ObjectType.PlatformLaser, 0.3);
+    speeds.put(ObjectType.Spider, 0.3);
+    speeds.put(ObjectType.HeavyDriller, 0.4);
+    speeds.put(ObjectType.LightHulk, 0.4);
+    speeds.put(ObjectType.Class1Drone, 0.5);
+    speeds.put(ObjectType.Class2Drone, 0.5);
+    speeds.put(ObjectType.SecondaryLifter, 0.5);
+    speeds.put(ObjectType.BabySpider, 0.6);
+    speeds.put(ObjectType.Pyro, 1.0);
+    speeds.put(ObjectType.FireballShot, 1.1);
+    speeds.put(ObjectType.HomingMissile, 2.5);
+    speeds.put(ObjectType.ConcussionMissile, 2.5);
+    speeds.put(ObjectType.LaserShot, 3.0);
+    speeds.put(ObjectType.PlasmaShot, 3.5);
+    return speeds;
+  }
+
+  private static HashMap<ObjectType, Double> getMaxTurnSpeeds() {
+    HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
+    speeds.put(ObjectType.HeavyHulk, Math.PI / 4);
+    speeds.put(ObjectType.PlatformMissile, Math.PI / 4);
+    speeds.put(ObjectType.Pyro, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.Class1Drone, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.Class2Drone, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.DefenseRobot, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.HeavyDriller, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.LightHulk, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.MediumHulk, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.PlatformLaser, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.Spider, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.BabySpider, Math.PI);
+    speeds.put(ObjectType.SecondaryLifter, Math.PI);
+    speeds.put(ObjectType.HomingMissile, Math.PI);
+    return speeds;
+  }
+
   protected double move_speed;
   protected double turn_speed;
   protected Pilot pilot;
@@ -39,8 +85,8 @@ public abstract class MovableObject extends MapObject {
 
   public MovableObject(double radius, Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(radius, room, x_loc, y_loc);
-    move_speed = Constants.getMaxMoveSpeed(type);
-    Double raw_turn_speed = Constants.getMaxTurnSpeed(type);
+    move_speed = MAX_MOVE_SPEEDS.get(type);
+    Double raw_turn_speed = MAX_TURN_SPEEDS.get(type);
     turn_speed = (raw_turn_speed != null ? raw_turn_speed : 0.0);
     this.pilot = pilot;
     this.direction = direction;

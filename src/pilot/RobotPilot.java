@@ -56,14 +56,14 @@ public class RobotPilot extends Pilot {
         }
         else {
           previous_exploration_room = current_room;
-          planMoveToRoomConnection(target_room_info.getKey(), object_diameter);
+          planMoveToRoomConnection(target_room_info.getKey(), bound_object_diameter);
           planTurnToTarget();
         }
         break;
       case MOVE_TO_ROOM_EXIT:
         break;
       case TURN_INTO_ROOM:
-        planMoveToNeighborRoom(target_room_info.getKey(), object_diameter);
+        planMoveToNeighborRoom(target_room_info.getKey(), bound_object_diameter);
         planTurnToTarget();
         break;
       case MOVE_INTO_ROOM:
@@ -71,7 +71,7 @@ public class RobotPilot extends Pilot {
       case TURN_TO_ROOM_INTERIOR:
         Point2D.Double target_location =
                 MapUtils.randomInternalPoint(current_room.getNWCorner(), current_room.getSECorner(),
-                        object_radius);
+                        bound_object_radius);
         setTargetLocation(target_location.x, target_location.y);
         planTurnToTarget();
         break;
@@ -94,29 +94,29 @@ public class RobotPilot extends Pilot {
       case INACTIVE:
         return new PilotAction(strafe);
       case TURN_TO_ROOM_EXIT:
-        return new PilotAction(strafe, angleToTurnDirection(MapUtils.angleTo(object.getDirection(),
+        return new PilotAction(strafe, angleToTurnDirection(MapUtils.angleTo(bound_object.getDirection(),
                 target_direction)));
       case MOVE_TO_ROOM_EXIT:
         return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
+                bound_object.getDirection(), target_x - bound_object.getX(), target_y - bound_object.getY())));
       case TURN_INTO_ROOM:
-        return new PilotAction(strafe, angleToTurnDirection(MapUtils.angleTo(object.getDirection(),
+        return new PilotAction(strafe, angleToTurnDirection(MapUtils.angleTo(bound_object.getDirection(),
                 target_direction)));
       case MOVE_INTO_ROOM:
         return new PilotAction(MoveDirection.FORWARD, strafe);
       case TURN_TO_ROOM_INTERIOR:
-        return new PilotAction(strafe, angleToTurnDirection(MapUtils.angleTo(object.getDirection(),
+        return new PilotAction(strafe, angleToTurnDirection(MapUtils.angleTo(bound_object.getDirection(),
                 target_direction)));
       case MOVE_TO_ROOM_INTERIOR:
         return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
-                object.getDirection(), target_x - object.getX(), target_y - object.getY())));
+                bound_object.getDirection(), target_x - bound_object.getX(), target_y - bound_object.getY())));
       case REACT_TO_PYRO:
         MoveDirection move =
-                (Math.abs(target_object.getX() - object.getX()) < MIN_DISTANCE_TO_PYRO &&
-                        Math.abs(target_object.getY() - object.getY()) < MIN_DISTANCE_TO_PYRO
+                (Math.abs(target_object.getX() - bound_object.getX()) < MIN_DISTANCE_TO_PYRO &&
+                        Math.abs(target_object.getY() - bound_object.getY()) < MIN_DISTANCE_TO_PYRO
                         ? MoveDirection.BACKWARD
                         : MoveDirection.FORWARD);
-        double angle_to_target = MapUtils.angleTo(object, target_object);
+        double angle_to_target = MapUtils.angleTo(bound_object, target_object);
         double abs_angle_to_target = Math.abs(angle_to_target);
         if (abs_angle_to_target < TARGET_DIRECTION_EPSILON) {
           return new PilotAction(move, strafe, angleToTurnDirection(angle_to_target),
@@ -143,7 +143,7 @@ public class RobotPilot extends Pilot {
       for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
         RoomConnection connection = entry.getValue();
         for (Pyro pyro : connection.neighbor.getPyros()) {
-          if (MapUtils.canSeeObjectInNeighborRoom(object, pyro, entry.getKey())) {
+          if (MapUtils.canSeeObjectInNeighborRoom(bound_object, pyro, entry.getKey())) {
             target_object = pyro;
             target_object_room = connection.neighbor;
             target_object_room_info = entry;
@@ -162,31 +162,31 @@ public class RobotPilot extends Pilot {
         }
         break;
       case TURN_TO_ROOM_EXIT:
-        if (Math.abs(target_direction - object.getDirection()) < DIRECTION_EPSILON) {
+        if (Math.abs(target_direction - bound_object.getDirection()) < DIRECTION_EPSILON) {
           initState(RobotPilotState.MOVE_TO_ROOM_EXIT);
         }
         break;
       case MOVE_TO_ROOM_EXIT:
-        if (Math.abs(target_x - object.getX()) < object_radius &&
-                Math.abs(target_y - object.getY()) < object_radius) {
+        if (Math.abs(target_x - bound_object.getX()) < bound_object_radius &&
+                Math.abs(target_y - bound_object.getY()) < bound_object_radius) {
           initState(RobotPilotState.TURN_INTO_ROOM);
         }
         break;
       case TURN_INTO_ROOM:
-        if (Math.abs(target_direction - object.getDirection()) < DIRECTION_EPSILON) {
+        if (Math.abs(target_direction - bound_object.getDirection()) < DIRECTION_EPSILON) {
           initState(RobotPilotState.MOVE_INTO_ROOM);
         }
         break;
       case MOVE_INTO_ROOM:
         break;
       case TURN_TO_ROOM_INTERIOR:
-        if (Math.abs(target_direction - object.getDirection()) < DIRECTION_EPSILON) {
+        if (Math.abs(target_direction - bound_object.getDirection()) < DIRECTION_EPSILON) {
           initState(RobotPilotState.MOVE_TO_ROOM_INTERIOR);
         }
         break;
       case MOVE_TO_ROOM_INTERIOR:
-        if (Math.abs(target_x - object.getX()) < object_radius &&
-                Math.abs(target_y - object.getY()) < object_radius) {
+        if (Math.abs(target_x - bound_object.getX()) < bound_object_radius &&
+                Math.abs(target_y - bound_object.getY()) < bound_object_radius) {
           if (Math.random() / s_elapsed < STOP_EXPLORE_PROB) {
             initState(RobotPilotState.INACTIVE);
           }
@@ -205,7 +205,8 @@ public class RobotPilot extends Pilot {
           }
         }
         else if (!target_object.getRoom().equals(target_object_room) ||
-                !MapUtils.canSeeObjectInNeighborRoom(object, target_object, target_object_room_info.getKey())) {
+                !MapUtils.canSeeObjectInNeighborRoom(bound_object, target_object,
+                        target_object_room_info.getKey())) {
           initState(RobotPilotState.INACTIVE);
         }
         break;

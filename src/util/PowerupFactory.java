@@ -3,6 +3,7 @@ package util;
 import mapobject.powerup.ConcussionMissilePowerup;
 import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
+import mapobject.powerup.HomingMissilePowerup;
 import mapobject.powerup.LaserCannonPowerup;
 import mapobject.powerup.PlasmaCannonPowerup;
 import mapobject.powerup.Powerup;
@@ -29,6 +30,8 @@ public class PowerupFactory {
         return new ConcussionPack(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case Energy:
         return new Energy(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
+      case HomingMissilePowerup:
+        return new HomingMissilePowerup(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case QuadLasers:
         return new QuadLasers(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case LaserCannonPowerup:

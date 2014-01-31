@@ -1,17 +1,18 @@
 package mapobject.unit.robot;
 
 import mapobject.MapObject;
+import mapobject.shot.Shot;
+import mapobject.unit.Unit;
 import structure.Room;
 import util.PowerupFactory;
 import cannon.LaserCannon;
 
-import common.Constants;
 import common.ObjectType;
 
 public class PlatformLaser extends Robot {
   public PlatformLaser(Room room, double x_loc, double y_loc, double direction) {
-    super(Constants.getRadius(ObjectType.PlatformLaser), new LaserCannon(
-            Constants.getDamage(ObjectType.LaserShot), 3), room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.PlatformLaser), new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 3),
+            room, x_loc, y_loc, direction);
   }
 
   @Override

@@ -23,9 +23,9 @@ import javax.imageio.stream.ImageInputStream;
 import javax.swing.ImageIcon;
 
 import mapobject.powerup.Powerup;
+import mapobject.unit.Unit;
 import util.MapUtils;
 
-import common.Constants;
 import common.ObjectType;
 
 // Robots: http://www.descent2.com/goodies/3dmodels/thinman/descent1
@@ -163,12 +163,12 @@ public class ImageHandler {
       }
     }
     for (ObjectType type : ObjectType.ROBOTS) {
-      Double radius = Constants.getRadius(type);
+      Double radius = Unit.getRadius(type);
       if (radius != null) {
         loadRotatedImages(path, type.name(), pixels_per_cell, radius);
       }
     }
-    loadRotatedImages(path, "Pyro", pixels_per_cell, Constants.getRadius(ObjectType.Pyro));
+    loadRotatedImages(path, "Pyro", pixels_per_cell, Unit.getRadius(ObjectType.Pyro));
   }
 
   public void loadImages(int pixels_per_cell) {

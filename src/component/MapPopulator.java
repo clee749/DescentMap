@@ -5,20 +5,20 @@ import java.awt.geom.Point2D;
 
 import mapobject.scenery.Entrance;
 import mapobject.scenery.Exit;
+import mapobject.unit.Unit;
 import structure.DescentMap;
 import structure.Room;
 import util.MapUtils;
 import util.RobotFactory;
 
-import common.Constants;
 import common.DescentMapException;
 import common.ObjectType;
 
 public class MapPopulator {
-  public static ObjectType[] ROBOTS_TO_POPULATE =
-          {ObjectType.Class1Drone, ObjectType.Class2Drone, ObjectType.DefenseRobot, ObjectType.HeavyDriller,
-                  ObjectType.LightHulk, ObjectType.MediumHulk, ObjectType.PlatformLaser,
-                  ObjectType.PlatformMissile, ObjectType.SecondaryLifter, ObjectType.Spider};
+  public static ObjectType[] ROBOTS_TO_POPULATE = {ObjectType.Class1Drone, ObjectType.Class2Drone,
+          ObjectType.DefenseRobot, ObjectType.HeavyDriller, ObjectType.HeavyHulk, ObjectType.LightHulk,
+          ObjectType.MediumHulk, ObjectType.PlatformLaser, ObjectType.PlatformMissile,
+          ObjectType.SecondaryLifter, ObjectType.Spider};
 
   protected MapPopulator() {
 
@@ -81,7 +81,7 @@ public class MapPopulator {
   public static void placeRobotsInRoom(Room room) {
     int room_area = room.getHeight() * room.getWidth();
     for (ObjectType type : ROBOTS_TO_POPULATE) {
-      if (Constants.getStartingShields(type) < room_area) {
+      if (Unit.getStartingShields(type) < room_area) {
         placeRobotInRoom(room, type);
       }
     }
@@ -89,7 +89,7 @@ public class MapPopulator {
 
   public static void placeRobotInRoom(Room room, ObjectType type) {
     Point2D.Double location =
-            MapUtils.randomInternalPoint(room.getNWCorner(), room.getSECorner(), Constants.getRadius(type));
+            MapUtils.randomInternalPoint(room.getNWCorner(), room.getSECorner(), Unit.getRadius(type));
     room.addChild(RobotFactory.newRobot(type, room, location.x, location.y, Math.random() * MapUtils.TWO_PI));
   }
 }

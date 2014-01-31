@@ -1,10 +1,10 @@
 package pyro;
 
+import mapobject.shot.Shot;
 import cannon.Cannon;
 import cannon.LaserCannon;
 import cannon.PlasmaCannon;
 
-import common.Constants;
 import common.DescentMapException;
 import common.ObjectType;
 
@@ -15,9 +15,9 @@ public enum PyroPrimaryCannon {
   public static Cannon createCannon(PyroPrimaryCannon cannon_type) {
     switch (cannon_type) {
       case LASER:
-        return new LaserCannon(Constants.getDamage(ObjectType.LaserShot), 1);
+        return new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 1);
       case PLASMA:
-        return new PlasmaCannon(Constants.getDamage(ObjectType.PlasmaShot));
+        return new PlasmaCannon(Shot.getDamage(ObjectType.PlasmaShot));
       default:
         throw new DescentMapException("Unexpected PyroPrimaryCannon: " + cannon_type);
     }

@@ -16,9 +16,9 @@ public abstract class Pilot {
   public static final double DIRECTION_EPSILON = Math.PI / 32;
   public static final double SHOT_EVASION_THRESHOLD = Math.PI / 16;
 
-  protected MovableObject object;
-  protected double object_radius;
-  protected double object_diameter;
+  protected MovableObject bound_object;
+  protected double bound_object_radius;
+  protected double bound_object_diameter;
   protected Room current_room;
   protected Entry<RoomSide, RoomConnection> target_room_info;
   protected double target_x;
@@ -29,10 +29,10 @@ public abstract class Pilot {
   protected Entry<RoomSide, RoomConnection> target_object_room_info;
 
   public void bindToObject(MovableObject object) {
-    this.object = object;
+    bound_object = object;
     current_room = object.getRoom();
-    object_radius = object.getRadius();
-    object_diameter = 2 * object_radius;
+    bound_object_radius = object.getRadius();
+    bound_object_diameter = 2 * bound_object_radius;
   }
 
   public double getTargetX() {
@@ -103,17 +103,18 @@ public abstract class Pilot {
   }
 
   public void planTurnToTarget() {
-    setTargetDirection(-MapUtils.absoluteAngleTo(object.getX(), object.getY(), target_x, target_y));
+    setTargetDirection(-MapUtils
+            .absoluteAngleTo(bound_object.getX(), bound_object.getY(), target_x, target_y));
   }
 
   public StrafeDirection reactToShots() {
     for (Shot shot : current_room.getShots()) {
-      if (shot.getSource().equals(object)) {
+      if (shot.getSource().equals(bound_object)) {
         continue;
       }
-      double angle_to_object = MapUtils.angleTo(shot, object);
+      double angle_to_object = MapUtils.angleTo(shot, bound_object);
       if (Math.abs(angle_to_object) < SHOT_EVASION_THRESHOLD) {
-        if (Math.abs(MapUtils.angleTo(shot.getDirection(), object.getDirection())) < MapUtils.PI_OVER_TWO) {
+        if (Math.abs(MapUtils.angleTo(shot.getDirection(), bound_object.getDirection())) < MapUtils.PI_OVER_TWO) {
           angle_to_object *= -1;
         }
         return (angle_to_object < 0 ? StrafeDirection.LEFT : StrafeDirection.RIGHT);

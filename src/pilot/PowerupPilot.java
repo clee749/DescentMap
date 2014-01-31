@@ -21,7 +21,7 @@ public class PowerupPilot extends Pilot {
       return PilotAction.NO_ACTION;
     }
 
-    if (object.getMoveSpeed() <= 0.0) {
+    if (bound_object.getMoveSpeed() <= 0.0) {
       state = PowerupPilotState.INACTIVE;
     }
 

@@ -1,17 +1,18 @@
 package mapobject.unit.robot;
 
 import mapobject.MapObject;
+import mapobject.shot.Shot;
+import mapobject.unit.Unit;
 import structure.Room;
 import util.PowerupFactory;
 import cannon.PlasmaCannon;
 
-import common.Constants;
 import common.ObjectType;
 
 public class HeavyDriller extends Robot {
   public HeavyDriller(Room room, double x_loc, double y_loc, double direction) {
-    super(Constants.getRadius(ObjectType.HeavyDriller), new PlasmaCannon(
-            Constants.getDamage(ObjectType.PlasmaShot)), room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.HeavyDriller), new PlasmaCannon(Shot.getDamage(ObjectType.PlasmaShot)),
+            room, x_loc, y_loc, direction);
   }
 
   @Override

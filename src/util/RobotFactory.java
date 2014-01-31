@@ -5,6 +5,7 @@ import mapobject.unit.robot.Class1Drone;
 import mapobject.unit.robot.Class2Drone;
 import mapobject.unit.robot.DefenseRobot;
 import mapobject.unit.robot.HeavyDriller;
+import mapobject.unit.robot.HeavyHulk;
 import mapobject.unit.robot.LightHulk;
 import mapobject.unit.robot.MediumHulk;
 import mapobject.unit.robot.PlatformLaser;
@@ -34,6 +35,8 @@ public class RobotFactory {
         return new DefenseRobot(room, x_loc, y_loc, direction);
       case HeavyDriller:
         return new HeavyDriller(room, x_loc, y_loc, direction);
+      case HeavyHulk:
+        return new HeavyHulk(room, x_loc, y_loc, direction);
       case LightHulk:
         return new LightHulk(room, x_loc, y_loc, direction);
       case MediumHulk:

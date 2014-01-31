@@ -1,17 +1,18 @@
 package mapobject.unit.robot;
 
 import mapobject.MapObject;
+import mapobject.shot.Shot;
+import mapobject.unit.Unit;
 import structure.Room;
 import util.PowerupFactory;
 import cannon.LaserCannon;
 
-import common.Constants;
 import common.ObjectType;
 
 public class LightHulk extends Robot {
   public LightHulk(Room room, double x_loc, double y_loc, double direction) {
-    super(Constants.getRadius(ObjectType.LightHulk), new LaserCannon(
-            Constants.getDamage(ObjectType.LaserShot), 4), room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.LightHulk), new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 4),
+            room, x_loc, y_loc, direction);
   }
 
   @Override
