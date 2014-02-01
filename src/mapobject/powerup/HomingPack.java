@@ -6,20 +6,20 @@ import structure.Room;
 
 import common.ObjectType;
 
-public class ConcussionPack extends Powerup {
+public class HomingPack extends Powerup {
   public static final int NUM_MISSILES = 4;
 
-  public ConcussionPack(Room room, double x_loc, double y_loc, double direction, double speed) {
+  public HomingPack(Room room, double x_loc, double y_loc, double direction, double speed) {
     super(room, x_loc, y_loc, direction, speed);
   }
 
   @Override
   public ObjectType getType() {
-    return ObjectType.ConcussionPack;
+    return ObjectType.HomingPack;
   }
 
   @Override
   public boolean beAcquired(Pyro pyro) {
-    return pyro.acquireSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE, NUM_MISSILES);
+    return pyro.acquireSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE, NUM_MISSILES);
   }
 }

@@ -1,6 +1,7 @@
 package mapobject.powerup;
 
 import mapobject.unit.Pyro;
+import pyro.PyroSecondaryCannon;
 import structure.Room;
 
 import common.ObjectType;
@@ -17,6 +18,6 @@ public class ConcussionMissilePowerup extends Powerup {
 
   @Override
   public boolean beAcquired(Pyro pyro) {
-    return pyro.acquireConcussionMissiles(1);
+    return pyro.acquireSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE, 1);
   }
 }

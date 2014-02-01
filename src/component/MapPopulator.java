@@ -85,6 +85,9 @@ public class MapPopulator {
         placeRobotInRoom(room, type);
       }
     }
+    if (room_area > 50) {
+      placeRobotInRoom(room, ObjectType.HeavyHulk);
+    }
   }
 
   public static void placeRobotInRoom(Room room, ObjectType type) {

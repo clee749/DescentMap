@@ -1,5 +1,6 @@
 package pilot;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import mapobject.MapObject;
 import mapobject.MovableObject;
 import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
+import mapobject.powerup.HomingPack;
 import mapobject.powerup.Powerup;
 import mapobject.powerup.Shield;
 import mapobject.scenery.Entrance;
@@ -17,6 +19,7 @@ import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
 import pyro.PyroPrimaryCannon;
+import pyro.PyroSecondaryCannon;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
@@ -36,12 +39,20 @@ enum PyroPilotState {
 
 
 public class PyroPilot extends Pilot {
+  private static final Point[] PRIMARY_CANNON_PREFERRED_ENERGIES = getPrimaryCannonPreferredEnergies();
+
+  private static Point[] getPrimaryCannonPreferredEnergies() {
+    Point[] energies = new Point[PyroPrimaryCannon.values().length];
+    energies[PyroPrimaryCannon.LASER.ordinal()] = new Point(0, 100);
+    energies[PyroPrimaryCannon.PLASMA.ordinal()] = new Point(100, 200);
+    return energies;
+  }
+
   public static final double TIME_TURNING_UNTIL_STOP = 5.0;
   public static final double RESPAWN_DELAY = 5.0;
   public static final double SPAWNING_SICKNESS = Entrance.ZUNGGG_TIME - Entrance.TIME_TO_SPAWN;
-  public static final int CONCUSSION_MISSILE_SHIELD_THRESHOLD = Shot.getDamage(ObjectType.ConcussionMissile);
-  public static final double CONCUSSION_MISSILE_MIN_DISTANCE2 = 4.0;
-  public static final double CONCUSSION_MISSILE_MAX_DISTANCE2 = 100.0;
+  public static final int MISSILE_SHIELD_THRESHOLD = Shot.getDamage(ObjectType.ConcussionMissile);
+  public static final double MISSILE_MIN_DISTANCE2 = 4.0;
 
   private final HashSet<Room> visited;
   private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
@@ -106,9 +117,15 @@ public class PyroPilot extends Pilot {
       case MOVE_TO_ROOM_CONNECTION:
         findNextRoom();
         planMoveToRoomConnection(target_room_info.getKey(), bound_object_radius);
+        if (pyro.isCannonReloaded() && pyro.isSecondaryCannonReloaded()) {
+          selectPrimaryCannon();
+        }
         break;
       case MOVE_TO_NEIGHBOR_ROOM:
         planMoveToNeighborRoom(target_room_info.getKey(), bound_object_radius);
+        if (pyro.isCannonReloaded() && pyro.isSecondaryCannonReloaded()) {
+          selectSecondaryCannon();
+        }
         break;
       case REACT_TO_OBJECT:
         target_object = findNextTargetObject();
@@ -137,12 +154,10 @@ public class PyroPilot extends Pilot {
     for (Unit unit : current_room.getRobots()) {
       if (Math.abs(MapUtils.angleTo(bound_object, unit)) < DIRECTION_EPSILON) {
         fire_cannon = true;
-        if (unit.getShields() > CONCUSSION_MISSILE_SHIELD_THRESHOLD) {
-          double distance2 = MapUtils.distance2(bound_object, unit);
-          if (distance2 > CONCUSSION_MISSILE_MIN_DISTANCE2 && distance2 < CONCUSSION_MISSILE_MAX_DISTANCE2) {
-            fire_secondary = true;
-            break;
-          }
+        if (unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
+                MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
+          fire_secondary = true;
+          break;
         }
       }
     }
@@ -154,12 +169,10 @@ public class PyroPilot extends Pilot {
         if (abs_angle_to_unit < DIRECTION_EPSILON &&
                 MapUtils.canSeeObjectInNeighborRoom(bound_object, unit, target_room_info.getKey())) {
           fire_cannon = true;
-          if (unit.getShields() > CONCUSSION_MISSILE_SHIELD_THRESHOLD) {
-            double distance2 = MapUtils.distance2(bound_object, unit);
-            if (distance2 > CONCUSSION_MISSILE_MIN_DISTANCE2 && distance2 < CONCUSSION_MISSILE_MAX_DISTANCE2) {
-              fire_secondary = true;
-              break;
-            }
+          if (unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
+                  MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
+            fire_secondary = true;
+            break;
           }
         }
       }
@@ -370,13 +383,42 @@ public class PyroPilot extends Pilot {
       case PlasmaCannonPowerup:
         return !pyro.hasPrimaryCannon(PyroPrimaryCannon.PLASMA);
       case ConcussionMissilePowerup:
-        return pyro.getNumConcussionMissiles() < Pyro.MAX_CONCUSSION_MISSILES;
+        return pyro.getSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE) < Pyro
+                .getMaxSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE);
       case ConcussionPack:
-        return pyro.getNumConcussionMissiles() + ConcussionPack.NUM_MISSILES <= Pyro.MAX_CONCUSSION_MISSILES;
+        return pyro.getSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE) + ConcussionPack.NUM_MISSILES <= Pyro
+                .getMaxSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE);
       case HomingMissilePowerup:
-        return false;
+        return pyro.getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) < Pyro
+                .getMaxSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE);
+      case HomingPack:
+        return pyro.getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) + HomingPack.NUM_MISSILES <= Pyro
+                .getMaxSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE);
       default:
         throw new DescentMapException("Unexpected Powerup: " + powerup);
+    }
+  }
+
+  public void selectPrimaryCannon() {
+    double energy = pyro.getEnergy();
+    PyroPrimaryCannon selected_primary_cannon_type = pyro.getSelectedPrimaryCannonType();
+    Point preferred_energy = PRIMARY_CANNON_PREFERRED_ENERGIES[selected_primary_cannon_type.ordinal()];
+    if (preferred_energy.x <= energy && energy <= preferred_energy.y) {
+      return;
+    }
+    for (PyroPrimaryCannon cannon_type : PyroPrimaryCannon.values()) {
+      preferred_energy = PRIMARY_CANNON_PREFERRED_ENERGIES[cannon_type.ordinal()];
+      if (preferred_energy.x <= energy && energy <= preferred_energy.y) {
+        pyro.switchPrimaryCannon(cannon_type);
+        break;
+      }
+    }
+  }
+
+  public void selectSecondaryCannon() {
+    if (pyro.getSelectedSecondaryCannonType().equals(PyroSecondaryCannon.CONCUSSION_MISSILE) &&
+            pyro.getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) > 0) {
+      pyro.switchSecondaryCannon(PyroSecondaryCannon.HOMING_MISSILE);
     }
   }
 }

@@ -11,12 +11,12 @@ import common.DescentMapException;
 import common.RoomSide;
 
 public class HomingPilot extends Pilot {
-  public static final double MAX_ANGLE_TO_TARGET = Math.PI / 4;
-
   private final HomingTargetType target_type;
+  private final double max_angle_to_target;
 
-  public HomingPilot(HomingTargetType target_type) {
+  public HomingPilot(HomingTargetType target_type, double max_angle_to_target) {
     this.target_type = target_type;
+    this.max_angle_to_target = max_angle_to_target;
   }
 
   @Override
@@ -32,7 +32,7 @@ public class HomingPilot extends Pilot {
       return PilotAction.MOVE_FORWARD;
     }
     double angle_to_target = MapUtils.angleTo(bound_object, target_object);
-    if (Math.abs(angle_to_target) > MAX_ANGLE_TO_TARGET) {
+    if (Math.abs(angle_to_target) > max_angle_to_target) {
       target_object = null;
     }
     TurnDirection turn = angleToTurnDirection(angle_to_target);
@@ -82,13 +82,13 @@ public class HomingPilot extends Pilot {
       default:
         throw new DescentMapException("Unexpected RoomSide: " + neighbor_side);
     }
-    return Math.abs(angle_to_connection_min) < MAX_ANGLE_TO_TARGET ||
-            Math.abs(angle_to_connection_max) < MAX_ANGLE_TO_TARGET;
+    return Math.abs(angle_to_connection_min) < max_angle_to_target ||
+            Math.abs(angle_to_connection_max) < max_angle_to_target;
   }
 
   public Unit findNewTargetInRoom(Room room, RoomSide neighbor_side) {
     Unit new_target = null;
-    double smallest_angle_to_target = MAX_ANGLE_TO_TARGET;
+    double smallest_angle_to_target = max_angle_to_target;
     switch (target_type) {
       case PYRO:
         for (Pyro pyro : room.getPyros()) {

@@ -140,6 +140,10 @@ public abstract class Unit extends MovableObject {
     return super.doNextAction(engine, s_elapsed);
   }
 
+  public boolean isCannonReloaded() {
+    return reload_time_left < 0.0;
+  }
+
   public void planToFireCannon() {
     firing_cannon = true;
     reload_time_left = reload_time;

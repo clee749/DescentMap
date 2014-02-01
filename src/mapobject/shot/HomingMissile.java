@@ -8,10 +8,12 @@ import structure.Room;
 import common.ObjectType;
 
 public class HomingMissile extends Shot {
+  public static final double MAX_ANGLE_TO_TARGET = Math.PI / 4;
+
   public HomingMissile(MapObject source, int damage, Room room, double x_loc, double y_loc, double direction) {
     super(new HomingPilot(source.getType().equals(ObjectType.Pyro)
             ? HomingTargetType.ROBOT
-            : HomingTargetType.PYRO), source, damage, room, x_loc, y_loc, direction);
+            : HomingTargetType.PYRO, MAX_ANGLE_TO_TARGET), source, damage, room, x_loc, y_loc, direction);
   }
 
   @Override
