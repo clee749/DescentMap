@@ -154,7 +154,9 @@ public class PyroPilot extends Pilot {
     for (Unit unit : current_room.getRobots()) {
       if (Math.abs(MapUtils.angleTo(bound_object, unit)) < DIRECTION_EPSILON) {
         fire_cannon = true;
-        if (unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
+        MapObject last_missile_fired = pyro.getLastMissileFired();
+        if ((last_missile_fired == null || !last_missile_fired.isInMap()) &&
+                unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
                 MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
           fire_secondary = true;
           break;
@@ -169,7 +171,9 @@ public class PyroPilot extends Pilot {
         if (abs_angle_to_unit < DIRECTION_EPSILON &&
                 MapUtils.canSeeObjectInNeighborRoom(bound_object, unit, target_room_info.getKey())) {
           fire_cannon = true;
-          if (unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
+          MapObject last_missile_fired = pyro.getLastMissileFired();
+          if ((last_missile_fired == null || !last_missile_fired.isInMap()) &&
+                  unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
                   MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
             fire_secondary = true;
             break;

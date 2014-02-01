@@ -147,6 +147,7 @@ public class Pyro extends Unit {
   private final int[] secondary_ammo;
   private Cannon selected_secondary_cannon;
   private PyroSecondaryCannon selected_secondary_cannon_type;
+  private MapObject last_missile_fired;
 
   // death spin
   private boolean death_spin_started;
@@ -172,6 +173,7 @@ public class Pyro extends Unit {
     selected_secondary_cannon_type = PyroSecondaryCannon.CONCUSSION_MISSILE;
     secondary_reload_time = SECONDARY_RELOAD_TIMES[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()];
     ((PyroPilot) pilot).startPilot();
+    secondary_ammo[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] = MIN_STARTING_CONCUSSION_MISSILES;
   }
 
   public Pyro(Room room, double x_loc, double y_loc, double direction) {
@@ -229,6 +231,10 @@ public class Pyro extends Unit {
   public void setSecondaryCannonInfo(PyroSecondaryCannon cannon_type) {
     secondary_reload_time = SECONDARY_RELOAD_TIMES[cannon_type.ordinal()];
     selected_secondary_cannon_type = cannon_type;
+  }
+
+  public MapObject getLastMissileFired() {
+    return last_missile_fired;
   }
 
   @Override
@@ -441,6 +447,7 @@ public class Pyro extends Unit {
     if (ammo == 1) {
       handleSecondaryAmmoDepleted();
     }
+    last_missile_fired = shot;
     return shot;
   }
 
