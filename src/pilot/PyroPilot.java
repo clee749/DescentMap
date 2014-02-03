@@ -14,6 +14,7 @@ import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
 import mapobject.powerup.HomingPack;
 import mapobject.powerup.Powerup;
+import mapobject.powerup.ProximityPack;
 import mapobject.powerup.Shield;
 import mapobject.scenery.Entrance;
 import mapobject.shot.Shot;
@@ -413,6 +414,9 @@ public class PyroPilot extends Pilot {
       case HomingPack:
         return pyro.getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) + HomingPack.NUM_MISSILES <= Pyro
                 .getMaxSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE);
+      case ProximityPack:
+        return pyro.getSecondaryAmmo(PyroSecondaryCannon.PROXIMITY_BOMB) + ProximityPack.NUM_BOMBS <= Pyro
+                .getMaxSecondaryAmmo(PyroSecondaryCannon.PROXIMITY_BOMB);
       default:
         throw new DescentMapException("Unexpected Powerup: " + powerup);
     }

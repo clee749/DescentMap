@@ -55,6 +55,7 @@ public class Pyro extends Unit {
   private static final double[] SECONDARY_RELOAD_TIMES = getSecondaryReloadTimes();
   private static final int[] MAX_SECONDARY_AMMOS = getMaxSecondaryAmmos();
   private static final Color[] SHIELD_COLORS = getShieldColors();
+  private static final String[] SECONDARY_AMMO_TEXTS = getSecondaryAmmoTexts();
 
   private static PrimaryCannonInfo[] getPrimaryCannonInfos() {
     PrimaryCannonInfo[] infos = new PrimaryCannonInfo[PyroPrimaryCannon.values().length];
@@ -65,8 +66,9 @@ public class Pyro extends Unit {
 
   private static double[] getSecondaryReloadTimes() {
     double[] times = new double[PyroSecondaryCannon.values().length];
-    times[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()] = 0.5;
-    times[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] = 0.5;
+    times[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()] = 0.6;
+    times[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] = 0.6;
+    times[PyroSecondaryCannon.PROXIMITY_BOMB.ordinal()] = 0.3;
     return times;
   }
 
@@ -74,6 +76,7 @@ public class Pyro extends Unit {
     int[] maxes = new int[PyroSecondaryCannon.values().length];
     maxes[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()] = 20;
     maxes[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] = 10;
+    maxes[PyroSecondaryCannon.PROXIMITY_BOMB.ordinal()] = 10;
     return maxes;
   }
 
@@ -86,6 +89,14 @@ public class Pyro extends Unit {
                       dalpha * (i + 1));
     }
     return colors;
+  }
+
+  private static String[] getSecondaryAmmoTexts() {
+    String[] texts = new String[PyroSecondaryCannon.values().length];
+    texts[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()] = "Concsn Missile: ";
+    texts[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] = "Homing Missile: ";
+    texts[PyroSecondaryCannon.PROXIMITY_BOMB.ordinal()] = "Proxim. Bomb: ";
+    return texts;
   }
 
   // relative Cannon offsets
@@ -112,6 +123,7 @@ public class Pyro extends Unit {
   public static final int MAX_ENERGY = 200;
   public static final int MIN_STARTING_CONCUSSION_MISSILES = 3;
   public static final double CANNON_SWITCH_TIME = 1.0;
+  public static final int PROXIMITY_BOMB_ORDINAL = PyroSecondaryCannon.PROXIMITY_BOMB.ordinal();
 
   // death spin
   public static final double DEATH_SPIN_TIME = 5.0;
@@ -272,12 +284,12 @@ public class Pyro extends Unit {
     int text_offset =
             paintCannonInfo(g, PyroPrimaryCannon.LASER, "Laser Lvl: " + getLaserLevel() +
                     (has_quad_lasers ? " Quad" : ""), 70);
-    text_offset = paintCannonInfo(g, PyroPrimaryCannon.PLASMA, "Plasma", text_offset);
-    text_offset =
-            paintSecondaryWeaponInfo(g, PyroSecondaryCannon.CONCUSSION_MISSILE, "Concsn Missile: ",
-                    text_offset + 10);
-    text_offset =
-            paintSecondaryWeaponInfo(g, PyroSecondaryCannon.HOMING_MISSILE, "Homing Missile: ", text_offset);
+    text_offset = paintCannonInfo(g, PyroPrimaryCannon.PLASMA, "Plasma", text_offset) + 10;
+    for (int i = 0; i < secondary_ammo.length; ++i) {
+      text_offset =
+              paintSecondaryWeaponInfo(g, PyroSecondaryCannon.values()[i], SECONDARY_AMMO_TEXTS[i],
+                      text_offset);
+    }
   }
 
   public int paintCannonInfo(Graphics2D g, PyroPrimaryCannon cannon_type, String cannon_text, int text_offset) {
@@ -535,10 +547,21 @@ public class Pyro extends Unit {
   }
 
   public boolean acquireSecondaryAmmo(PyroSecondaryCannon cannon_type, int amount) {
+    boolean has_any_ammo = false;
+    for (int i = 0; i < secondary_ammo.length; ++i) {
+      if (i != PROXIMITY_BOMB_ORDINAL && secondary_ammo[i] > 0) {
+        has_any_ammo = true;
+        break;
+      }
+    }
+
     int current_ammo = getSecondaryAmmo(cannon_type);
     int max_ammo = getMaxSecondaryAmmo(cannon_type);
     if (current_ammo < max_ammo) {
       secondary_ammo[cannon_type.ordinal()] = Math.min(current_ammo + amount, max_ammo);
+      if (!has_any_ammo) {
+        switchSecondaryCannon(cannon_type);
+      }
       return true;
     }
     return false;
@@ -559,7 +582,7 @@ public class Pyro extends Unit {
 
   public void handleSecondaryAmmoDepleted() {
     for (int i = PyroSecondaryCannon.values().length - 1; i >= 0; --i) {
-      if (secondary_ammo[i] > 0) {
+      if (i != PROXIMITY_BOMB_ORDINAL && secondary_ammo[i] > 0) {
         switchSecondaryCannon(PyroSecondaryCannon.values()[i]);
         break;
       }

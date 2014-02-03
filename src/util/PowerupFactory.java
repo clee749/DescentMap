@@ -8,6 +8,7 @@ import mapobject.powerup.HomingPack;
 import mapobject.powerup.LaserCannonPowerup;
 import mapobject.powerup.PlasmaCannonPowerup;
 import mapobject.powerup.Powerup;
+import mapobject.powerup.ProximityPack;
 import mapobject.powerup.QuadLasers;
 import mapobject.powerup.Shield;
 import structure.Room;
@@ -35,6 +36,8 @@ public class PowerupFactory {
         return new HomingMissilePowerup(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case HomingPack:
         return new HomingPack(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
+      case ProximityPack:
+        return new ProximityPack(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case QuadLasers:
         return new QuadLasers(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case LaserCannonPowerup:
