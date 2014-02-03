@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import mapobject.MapObject;
+import mapobject.ProximityBomb;
 import mapobject.powerup.Powerup;
 import mapobject.scenery.Scenery;
 import mapobject.shot.Shot;
@@ -35,12 +36,12 @@ public class Room {
   private final int width;
   private final int height;
   private final HashMap<RoomSide, RoomConnection> neighbors;
-  private final HashSet<Shot> shots;
-  private final HashSet<Powerup> powerups;
-  private final HashSet<Pyro> pyros;
-  // TODO: change this to HashSet<Robot> and add one for ProximityBomb when implemented
-  private final HashSet<Unit> robots;
   private final HashSet<Scenery> sceneries;
+  private final HashSet<Powerup> powerups;
+  private final HashSet<Shot> shots;
+  private final HashSet<ProximityBomb> bombs;
+  private final HashSet<Unit> robots;
+  private final HashSet<Pyro> pyros;
   private final HashSet<MapObject> misc_objects;
 
   public Room(Point nw_corner, Point se_corner) {
@@ -49,11 +50,12 @@ public class Room {
     width = se_corner.x - nw_corner.x;
     height = se_corner.y - nw_corner.y;
     neighbors = new HashMap<RoomSide, RoomConnection>();
-    shots = new HashSet<Shot>();
-    powerups = new HashSet<Powerup>();
-    pyros = new HashSet<Pyro>();
-    robots = new HashSet<Unit>();
     sceneries = new HashSet<Scenery>();
+    powerups = new HashSet<Powerup>();
+    shots = new HashSet<Shot>();
+    bombs = new HashSet<ProximityBomb>();
+    robots = new HashSet<Unit>();
+    pyros = new HashSet<Pyro>();
     misc_objects = new HashSet<MapObject>();
   }
 
@@ -94,24 +96,28 @@ public class Room {
     return (connection != null ? connection.neighbor : null);
   }
 
-  public HashSet<Shot> getShots() {
-    return shots;
+  public HashSet<Scenery> getSceneries() {
+    return sceneries;
   }
 
   public HashSet<Powerup> getPowerups() {
     return powerups;
   }
 
-  public HashSet<Pyro> getPyros() {
-    return pyros;
+  public HashSet<Shot> getShots() {
+    return shots;
+  }
+
+  public HashSet<ProximityBomb> getBombs() {
+    return bombs;
   }
 
   public HashSet<Unit> getRobots() {
     return robots;
   }
 
-  public HashSet<Scenery> getSceneries() {
-    return sceneries;
+  public HashSet<Pyro> getPyros() {
+    return pyros;
   }
 
   public HashSet<MapObject> getMiscObjects() {
@@ -194,6 +200,9 @@ public class Room {
       for (Shot shot : shots) {
         shot.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
+      for (ProximityBomb bomb : bombs) {
+        bomb.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      }
       for (Unit unit : robots) {
         unit.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
@@ -227,6 +236,9 @@ public class Room {
     else if (object instanceof Powerup) {
       powerups.add((Powerup) object);
     }
+    else if (object.getType().equals(ObjectType.ProximityBomb)) {
+      bombs.add((ProximityBomb) object);
+    }
     else if (object.getType().equals(ObjectType.Pyro)) {
       pyros.add((Pyro) object);
     }
@@ -254,6 +266,9 @@ public class Room {
     if (child instanceof Unit) {
       return robots.remove(child);
     }
+    if (child.getType().equals(ObjectType.ProximityBomb)) {
+      return bombs.remove(child);
+    }
     if (child instanceof Scenery) {
       return sceneries.remove(child);
     }
@@ -261,20 +276,23 @@ public class Room {
   }
 
   public void computeNextStep(double s_elapsed) {
-    for (Shot shot : shots) {
-      shot.planNextAction(s_elapsed);
+    for (Scenery scenery : sceneries) {
+      scenery.planNextAction(s_elapsed);
     }
     for (Powerup powerup : powerups) {
       powerup.planNextAction(s_elapsed);
     }
-    for (Pyro pyro : pyros) {
-      pyro.planNextAction(s_elapsed);
+    for (Shot shot : shots) {
+      shot.planNextAction(s_elapsed);
+    }
+    for (ProximityBomb bomb : bombs) {
+      bomb.planNextAction(s_elapsed);
     }
     for (Unit unit : robots) {
       unit.planNextAction(s_elapsed);
     }
-    for (Scenery scenery : sceneries) {
-      scenery.planNextAction(s_elapsed);
+    for (Pyro pyro : pyros) {
+      pyro.planNextAction(s_elapsed);
     }
     for (MapObject object : misc_objects) {
       object.planNextAction(s_elapsed);
@@ -282,11 +300,12 @@ public class Room {
   }
 
   public LinkedList<MapObject> doNextStep(MapEngine engine, double s_elapsed) {
-    LinkedList<MapObject> created_objects = doNextStep(engine, s_elapsed, shots);
+    LinkedList<MapObject> created_objects = doNextStep(engine, s_elapsed, sceneries);
     created_objects.addAll(doNextStep(engine, s_elapsed, powerups));
-    created_objects.addAll(doNextStep(engine, s_elapsed, pyros));
+    created_objects.addAll(doNextStep(engine, s_elapsed, shots));
+    created_objects.addAll(doNextStep(engine, s_elapsed, bombs));
     created_objects.addAll(doNextStep(engine, s_elapsed, robots));
-    created_objects.addAll(doNextStep(engine, s_elapsed, sceneries));
+    created_objects.addAll(doNextStep(engine, s_elapsed, pyros));
     created_objects.addAll(doNextStep(engine, s_elapsed, misc_objects));
     return created_objects;
   }

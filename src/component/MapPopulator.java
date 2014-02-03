@@ -15,9 +15,11 @@ import common.DescentMapException;
 import common.ObjectType;
 
 public class MapPopulator {
-  public static ObjectType[] ROBOTS_TO_POPULATE = {ObjectType.Class1Drone, ObjectType.Class2Drone,
-          ObjectType.DefenseRobot, ObjectType.HeavyDriller, ObjectType.HeavyHulk, ObjectType.LightHulk,
-          ObjectType.MediumHulk, ObjectType.PlatformLaser, ObjectType.PlatformMissile,
+  public static int ALL_ROBOTS_MIN_ROOM_AREA = 50;
+  public static double ROBOT_PLACEMENT_PROB = 0.5;
+  public static ObjectType[] ROBOTS_TO_POPULATE = {ObjectType.Bomber, ObjectType.Class1Drone,
+          ObjectType.Class2Drone, ObjectType.DefenseRobot, ObjectType.HeavyDriller, ObjectType.HeavyHulk,
+          ObjectType.LightHulk, ObjectType.MediumHulk, ObjectType.PlatformLaser, ObjectType.PlatformMissile,
           ObjectType.SecondaryLifter, ObjectType.Spider};
 
   protected MapPopulator() {
@@ -81,12 +83,10 @@ public class MapPopulator {
   public static void placeRobotsInRoom(Room room) {
     int room_area = room.getHeight() * room.getWidth();
     for (ObjectType type : ROBOTS_TO_POPULATE) {
-      if (Unit.getStartingShields(type) < room_area) {
+      if (Math.random() < ROBOT_PLACEMENT_PROB &&
+              (Unit.getStartingShields(type) < room_area || room_area > ALL_ROBOTS_MIN_ROOM_AREA)) {
         placeRobotInRoom(room, type);
       }
-    }
-    if (room_area > 50) {
-      placeRobotInRoom(room, ObjectType.HeavyHulk);
     }
   }
 

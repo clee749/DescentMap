@@ -30,8 +30,8 @@ public class RobotPilot extends Pilot {
   public static final double START_EXPLORE_PROB = 0.1;
   public static final double STOP_EXPLORE_PROB = 0.1;
 
-  private RobotPilotState state;
-  private Room previous_exploration_room;
+  protected RobotPilotState state;
+  protected Room previous_exploration_room;
 
   public RobotPilot() {
     state = RobotPilotState.INACTIVE;
@@ -78,11 +78,16 @@ public class RobotPilot extends Pilot {
       case MOVE_TO_ROOM_INTERIOR:
         break;
       case REACT_TO_PYRO:
+        initReactToPyroState();
         break;
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
     }
     state = next_state;
+  }
+
+  public void initReactToPyroState() {
+    previous_exploration_room = null;
   }
 
   @Override
@@ -111,21 +116,25 @@ public class RobotPilot extends Pilot {
         return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
                 bound_object.getDirection(), target_x - bound_object.getX(), target_y - bound_object.getY())));
       case REACT_TO_PYRO:
-        MoveDirection move =
-                (Math.abs(target_object.getX() - bound_object.getX()) < MIN_DISTANCE_TO_PYRO &&
-                        Math.abs(target_object.getY() - bound_object.getY()) < MIN_DISTANCE_TO_PYRO
-                        ? MoveDirection.BACKWARD
-                        : MoveDirection.FORWARD);
-        double angle_to_target = MapUtils.angleTo(bound_object, target_object);
-        double abs_angle_to_target = Math.abs(angle_to_target);
-        if (abs_angle_to_target < TARGET_DIRECTION_EPSILON) {
-          return new PilotAction(move, strafe, angleToTurnDirection(angle_to_target),
-                  abs_angle_to_target < DIRECTION_EPSILON);
-        }
-        return new PilotAction(strafe, angleToTurnDirection(angle_to_target));
+        return findReactToPyroAction(strafe);
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
     }
+  }
+
+  public PilotAction findReactToPyroAction(StrafeDirection strafe) {
+    MoveDirection move =
+            (Math.abs(target_object.getX() - bound_object.getX()) < MIN_DISTANCE_TO_PYRO &&
+                    Math.abs(target_object.getY() - bound_object.getY()) < MIN_DISTANCE_TO_PYRO
+                    ? MoveDirection.BACKWARD
+                    : MoveDirection.FORWARD);
+    double angle_to_target = MapUtils.angleTo(bound_object, target_object);
+    double abs_angle_to_target = Math.abs(angle_to_target);
+    if (abs_angle_to_target < TARGET_DIRECTION_EPSILON) {
+      return new PilotAction(move, strafe, angleToTurnDirection(angle_to_target),
+              abs_angle_to_target < DIRECTION_EPSILON);
+    }
+    return new PilotAction(strafe, angleToTurnDirection(angle_to_target));
   }
 
   public void updateState(double s_elapsed) {
@@ -196,22 +205,26 @@ public class RobotPilot extends Pilot {
         }
         break;
       case REACT_TO_PYRO:
-        if (!target_object.isInMap()) {
-          initState(RobotPilotState.INACTIVE);
-        }
-        else if (target_object_room.equals(current_room)) {
-          if (!target_object.getRoom().equals(target_object_room)) {
-            initState(RobotPilotState.INACTIVE);
-          }
-        }
-        else if (!target_object.getRoom().equals(target_object_room) ||
-                !MapUtils.canSeeObjectInNeighborRoom(bound_object, target_object,
-                        target_object_room_info.getKey())) {
-          initState(RobotPilotState.INACTIVE);
-        }
+        updateReactToPyroState(s_elapsed);
         break;
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
+    }
+  }
+
+  public void updateReactToPyroState(double s_elapsed) {
+    if (!target_object.isInMap()) {
+      initState(RobotPilotState.INACTIVE);
+    }
+    else if (target_object_room.equals(current_room)) {
+      if (!target_object.getRoom().equals(target_object_room)) {
+        initState(RobotPilotState.INACTIVE);
+      }
+    }
+    else if (!target_object.getRoom().equals(target_object_room) ||
+            !MapUtils.canSeeObjectInNeighborRoom(bound_object, target_object,
+                    target_object_room_info.getKey())) {
+      initState(RobotPilotState.INACTIVE);
     }
   }
 

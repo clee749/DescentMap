@@ -38,11 +38,13 @@ public abstract class Robot extends Unit {
     times.put(ObjectType.Spider, 2.0);
     times.put(ObjectType.MediumHulk, 3.0);
     times.put(ObjectType.PlatformMissile, 4.0);
+    times.put(ObjectType.Bomber, 5.0);
     return times;
   }
 
   private static HashMap<ObjectType, Integer> getShotsPerVolleys() {
     HashMap<ObjectType, Integer> shots = new HashMap<ObjectType, Integer>();
+    shots.put(ObjectType.Bomber, 1);
     shots.put(ObjectType.HeavyHulk, 1);
     shots.put(ObjectType.BabySpider, 2);
     shots.put(ObjectType.Class1Drone, 2);
@@ -60,6 +62,7 @@ public abstract class Robot extends Unit {
 
   private static HashMap<ObjectType, Double> getVolleyReloadTimes() {
     HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
+    times.put(ObjectType.Bomber, 0.0);
     times.put(ObjectType.HeavyHulk, 0.0);
     times.put(ObjectType.BabySpider, 0.1);
     times.put(ObjectType.Class1Drone, 0.1);
@@ -88,7 +91,7 @@ public abstract class Robot extends Unit {
     this.cannon = cannon;
     reload_time = RELOAD_TIMES.get(type);
     shots_per_volley = SHOTS_PER_VOLLEYS.get(type);
-    volley_reload_time = VOLLEY_RELOAD_TIMES.get(type);
+    volley_reload_time = (shots_per_volley > 1 ? VOLLEY_RELOAD_TIMES.get(type) : 0.0);
     cannon_side = (int) (Math.random() * 2);
   }
 

@@ -36,6 +36,7 @@ public abstract class Unit extends MovableObject {
     HashMap<ObjectType, Double> radii = new HashMap<ObjectType, Double>();
     // 1m == 0.05
     radii.put(ObjectType.BabySpider, 0.12);
+    radii.put(ObjectType.Bomber, 0.15);
     radii.put(ObjectType.Class1Drone, 0.15);
     radii.put(ObjectType.Class2Drone, 0.2);
     radii.put(ObjectType.SecondaryLifter, 0.2);
@@ -54,6 +55,7 @@ public abstract class Unit extends MovableObject {
   private static HashMap<ObjectType, Double> getCannonOffsets() {
     HashMap<ObjectType, Double> offsets = new HashMap<ObjectType, Double>();
     offsets.put(ObjectType.BabySpider, 0.0);
+    offsets.put(ObjectType.Bomber, 0.0);
     offsets.put(ObjectType.Class2Drone, 0.0);
     offsets.put(ObjectType.PlatformLaser, 0.0);
     offsets.put(ObjectType.PlatformMissile, 0.0);
@@ -72,6 +74,7 @@ public abstract class Unit extends MovableObject {
   private static HashMap<ObjectType, Integer> getStartingShields() {
     HashMap<ObjectType, Integer> shields = new HashMap<ObjectType, Integer>();
     shields.put(ObjectType.BabySpider, 8);
+    shields.put(ObjectType.Bomber, 8);
     shields.put(ObjectType.Class1Drone, 8);
     shields.put(ObjectType.Class2Drone, 11);
     shields.put(ObjectType.SecondaryLifter, 20);

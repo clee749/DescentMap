@@ -49,6 +49,7 @@ public abstract class Shot extends MovableObject {
   protected final int damage;
   protected final MapObject source;
   protected final boolean does_splash_damage;
+  protected boolean is_detonated;
 
   public Shot(Pilot pilot, MapObject source, int damage, Room room, double x_loc, double y_loc,
           double direction) {
@@ -72,6 +73,16 @@ public abstract class Shot extends MovableObject {
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
+    if (is_detonated) {
+      is_in_map = false;
+      if (does_splash_damage) {
+        room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, null);
+        return new Explosion(room, x_loc, y_loc, Math.min(damage / EXPLOSION_RADIUS_DIVISOR,
+                EXPLOSION_MAX_RADIUS), Math.min(damage / EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));
+      }
+      return null;
+    }
+
     Unit hit_unit = checkForUnitCollisions();
     if (hit_unit != null) {
       return handleUnitCollision(hit_unit);
@@ -122,5 +133,9 @@ public abstract class Shot extends MovableObject {
               EXPLOSION_MAX_RADIUS), Math.min(damage / EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));
     }
     return null;
+  }
+
+  public void detonate() {
+    is_detonated = true;
   }
 }

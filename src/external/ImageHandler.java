@@ -22,6 +22,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.ImageIcon;
 
+import mapobject.ProximityBomb;
 import mapobject.powerup.Powerup;
 import mapobject.unit.Unit;
 import util.MapUtils;
@@ -169,6 +170,7 @@ public class ImageHandler {
       }
     }
     loadRotatedImages(path, "Pyro", pixels_per_cell, Unit.getRadius(ObjectType.Pyro));
+    loadAnimatedGif(path, "ProximityBomb", pixels_per_cell, ProximityBomb.RADIUS);
   }
 
   public void loadImages(int pixels_per_cell) {

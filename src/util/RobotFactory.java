@@ -1,6 +1,7 @@
 package util;
 
 import mapobject.unit.robot.BabySpider;
+import mapobject.unit.robot.Bomber;
 import mapobject.unit.robot.Class1Drone;
 import mapobject.unit.robot.Class2Drone;
 import mapobject.unit.robot.DefenseRobot;
@@ -27,6 +28,8 @@ public class RobotFactory {
     switch (type) {
       case BabySpider:
         return new BabySpider(room, x_loc, y_loc, direction);
+      case Bomber:
+        return new Bomber(room, x_loc, y_loc, direction);
       case Class1Drone:
         return new Class1Drone(room, x_loc, y_loc, direction);
       case Class2Drone:

@@ -9,6 +9,7 @@ import java.util.Stack;
 
 import mapobject.MapObject;
 import mapobject.MovableObject;
+import mapobject.ProximityBomb;
 import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
 import mapobject.powerup.HomingPack;
@@ -154,11 +155,17 @@ public class PyroPilot extends Pilot {
     for (Unit unit : current_room.getRobots()) {
       if (Math.abs(MapUtils.angleTo(bound_object, unit)) < DIRECTION_EPSILON) {
         fire_cannon = true;
-        MapObject last_missile_fired = pyro.getLastMissileFired();
-        if ((last_missile_fired == null || !last_missile_fired.isInMap()) &&
-                unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
+        if (unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
                 MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
           fire_secondary = true;
+          break;
+        }
+      }
+    }
+    if (!fire_cannon) {
+      for (ProximityBomb bomb : current_room.getBombs()) {
+        if (Math.abs(MapUtils.angleTo(bound_object, bomb)) < DIRECTION_EPSILON) {
+          fire_cannon = true;
           break;
         }
       }
@@ -171,11 +178,19 @@ public class PyroPilot extends Pilot {
         if (abs_angle_to_unit < DIRECTION_EPSILON &&
                 MapUtils.canSeeObjectInNeighborRoom(bound_object, unit, target_room_info.getKey())) {
           fire_cannon = true;
-          MapObject last_missile_fired = pyro.getLastMissileFired();
-          if ((last_missile_fired == null || !last_missile_fired.isInMap()) &&
-                  unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
+          if (unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
                   MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
             fire_secondary = true;
+            break;
+          }
+        }
+      }
+      if (!fire_cannon) {
+        for (ProximityBomb bomb : connection.neighbor.getBombs()) {
+          double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, bomb));
+          if (abs_angle_to_unit < DIRECTION_EPSILON &&
+                  MapUtils.canSeeObjectInNeighborRoom(bound_object, bomb, target_room_info.getKey())) {
+            fire_cannon = true;
             break;
           }
         }
