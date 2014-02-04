@@ -12,8 +12,12 @@ import common.DescentMapException;
 import common.RoomSide;
 
 public class MapUtils {
+  public static final double PI_OVER_FOUR = Math.PI / 4;
   public static final double PI_OVER_TWO = Math.PI / 2;
+  public static final double THREE_PI_OVER_FOUR = 3 * Math.PI / 4;
+  public static final double FIVE_PI_OVER_FOUR = 5 * Math.PI / 4;
   public static final double THREE_PI_OVER_TWO = 3 * Math.PI / 2;
+  public static final double SEVEN_PI_OVER_FOUR = 7 * Math.PI / 4;
   public static final double TWO_PI = 2 * Math.PI;
 
   protected MapUtils() {

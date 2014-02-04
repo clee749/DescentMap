@@ -4,11 +4,12 @@ import mapobject.MapObject;
 import pilot.HomingPilot;
 import pilot.HomingTargetType;
 import structure.Room;
+import util.MapUtils;
 
 import common.ObjectType;
 
 public class HomingMissile extends Shot {
-  public static final double MAX_ANGLE_TO_TARGET = Math.PI / 4;
+  public static final double MAX_ANGLE_TO_TARGET = MapUtils.PI_OVER_FOUR;
 
   public HomingMissile(MapObject source, int damage, Room room, double x_loc, double y_loc, double direction) {
     super(new HomingPilot(source.getType().equals(ObjectType.Pyro)

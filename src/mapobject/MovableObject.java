@@ -49,8 +49,8 @@ public abstract class MovableObject extends MapObject {
 
   private static HashMap<ObjectType, Double> getMaxTurnSpeeds() {
     HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
-    speeds.put(ObjectType.HeavyHulk, Math.PI / 4);
-    speeds.put(ObjectType.PlatformMissile, Math.PI / 4);
+    speeds.put(ObjectType.HeavyHulk, MapUtils.PI_OVER_FOUR);
+    speeds.put(ObjectType.PlatformMissile, MapUtils.PI_OVER_FOUR);
     speeds.put(ObjectType.Pyro, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.Bomber, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.Class1Drone, MapUtils.PI_OVER_TWO);

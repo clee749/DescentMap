@@ -10,6 +10,7 @@ import structure.Room;
 
 import common.DescentMapException;
 import common.ObjectType;
+import common.RoomSide;
 import component.MapEngine;
 
 enum EntranceState {
@@ -35,15 +36,15 @@ public class Entrance extends Scenery {
   public static final double TIME_TO_SPAWN = 0.25;
   public static final double ZUNGGG_TIME = 1.0;
 
-  private final LinkedList<SpawningPyro> spawn_queue;
   private final double spawn_direction;
+  private final LinkedList<SpawningPyro> spawn_queue;
   private EntranceState state;
   private double state_time_left;
 
-  public Entrance(Room room, double x_loc, double y_loc) {
+  public Entrance(Room room, double x_loc, double y_loc, RoomSide spawn_direction) {
     super(room, x_loc, y_loc);
+    this.spawn_direction = RoomSide.directionToRadians(spawn_direction);
     spawn_queue = new LinkedList<SpawningPyro>();
-    spawn_direction = 0.0;
     state = EntranceState.INACTIVE;
   }
 

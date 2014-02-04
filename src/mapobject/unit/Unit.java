@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import mapobject.MapObject;
 import mapobject.MovableObject;
+import mapobject.MultipleObject;
 import mapobject.ephemeral.Explosion;
 import pilot.Pilot;
 import pilot.PilotAction;
@@ -90,12 +91,16 @@ public abstract class Unit extends MovableObject {
     return shields;
   }
 
+  public static final double DAMAGED_EXPLOSION_RADIUS = 0.1;
+  public static final double DAMAGED_EXPLOSION_TIME = 1.0;
+  public static final double MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS = 0.5;
   public static final double EXPLOSION_RADIUS_MULTIPLIER = 1.1;
   public static final double EXPLOSION_MIN_TIME = 0.5;
   public static final double EXPLOSION_MAX_TIME = EXPLOSION_MIN_TIME * 2;
   public static final double EXPLOSION_TIME_DIVISOR = 3.0;
 
   protected final double cannon_offset;
+  protected final int half_shields;
   protected double reload_time;
   protected double reload_time_left;
   protected boolean firing_cannon;
@@ -107,6 +112,7 @@ public abstract class Unit extends MovableObject {
     super(radius, pilot, room, x_loc, y_loc, direction);
     cannon_offset = CANNON_OFFSETS.get(type) * radius;
     shields = STARTING_SHIELDS.get(type);
+    half_shields = shields / 2;
   }
 
   public int getShields() {
@@ -140,7 +146,15 @@ public abstract class Unit extends MovableObject {
     if (shields < 0) {
       return handleDeath(s_elapsed);
     }
-    return super.doNextAction(engine, s_elapsed);
+    MultipleObject created_objects = new MultipleObject();
+    int less_half_shields = half_shields - shields;
+    if (less_half_shields > 0 &&
+            Math.random() * MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS < less_half_shields / (half_shields + 1.0) *
+                    s_elapsed) {
+      created_objects.addObject(createDamagedExplosion());
+    }
+    created_objects.addObject(super.doNextAction(engine, s_elapsed));
+    return created_objects;
   }
 
   public boolean isCannonReloaded() {
@@ -158,6 +172,11 @@ public abstract class Unit extends MovableObject {
 
   public void beDamaged(int amount) {
     shields -= amount;
+  }
+
+  public Explosion createDamagedExplosion() {
+    return new Explosion(room, x_loc + Math.random() * 2 * radius - radius, y_loc + Math.random() * 2 *
+            radius - radius, DAMAGED_EXPLOSION_RADIUS, DAMAGED_EXPLOSION_TIME);
   }
 
   public MapObject handleDeath(double s_elapsed) {

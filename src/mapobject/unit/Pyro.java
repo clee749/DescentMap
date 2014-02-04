@@ -9,10 +9,10 @@ import java.awt.geom.Point2D;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
-import mapobject.ephemeral.Explosion;
 import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
 import mapobject.powerup.HomingPack;
+import mapobject.powerup.ProximityPack;
 import mapobject.powerup.Shield;
 import mapobject.shot.Shot;
 import pilot.Pilot;
@@ -129,8 +129,6 @@ public class Pyro extends Unit {
   public static final double DEATH_SPIN_TIME = 5.0;
   public static final double DEATH_SPIN_MOVE_SPEED_DIVISOR = 2.0;
   public static final double DEATH_SPIN_TURN_SPEED_MULTIPLIER = 1.5;
-  public static final double DEATH_SPIN_EXPLOSION_RADIUS = 0.1;
-  public static final double DEATH_SPIN_EXPLOSION_TIME = 1.0;
 
   // death
   public static final double DEATH_SPLASH_DAMAGE_RADIUS = 1.0;
@@ -406,8 +404,7 @@ public class Pyro extends Unit {
     if (shields < -MAX_DEATH_SPIN_DAMAGE_TAKEN) {
       death_spin_time_left = -1.0;
     }
-    return new Explosion(room, x_loc + Math.random() * 2 * radius - radius, y_loc + Math.random() * 2 *
-            radius - radius, DEATH_SPIN_EXPLOSION_RADIUS, DEATH_SPIN_EXPLOSION_TIME);
+    return createDamagedExplosion();
   }
 
   @Override
@@ -488,6 +485,9 @@ public class Pyro extends Unit {
     }
     if (getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) > 0) {
       powerups.addObject(PowerupFactory.newPowerup(ObjectType.HomingMissilePowerup, room, x_loc, y_loc));
+    }
+    if (getSecondaryAmmo(PyroSecondaryCannon.PROXIMITY_BOMB) >= ProximityPack.NUM_BOMBS) {
+      powerups.addObject(PowerupFactory.newPowerup(ObjectType.ProximityPack, room, x_loc, y_loc));
     }
     return powerups;
   }

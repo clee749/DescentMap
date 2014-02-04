@@ -1,5 +1,7 @@
 package pilot;
 
+import java.util.Map.Entry;
+
 import mapobject.MovableObject;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
@@ -26,14 +28,24 @@ public class HomingPilot extends Pilot {
   }
 
   @Override
+  public void updateCurrentRoom(Room room) {
+    super.updateCurrentRoom(room);
+    updateTarget();
+  }
+
+  @Override
   public PilotAction findNextAction(double s_elapsed) {
-    if (target_object == null || !target_object.isInMap()) {
+    if (target_object == null || !target_object.isInMap() ||
+            !target_object.getRoom().equals(target_object_room)) {
       updateTarget();
       return PilotAction.MOVE_FORWARD;
     }
     double angle_to_target = MapUtils.angleTo(bound_object, target_object);
-    if (Math.abs(angle_to_target) > max_angle_to_target) {
-      target_object = null;
+    if (Math.abs(angle_to_target) > max_angle_to_target ||
+            (!target_object_room.equals(current_room) && !MapUtils.canSeeObjectInNeighborRoom(bound_object,
+                    target_object, target_object_room_info.getKey()))) {
+      updateTarget();
+      return PilotAction.MOVE_FORWARD;
     }
     TurnDirection turn = angleToTurnDirection(angle_to_target);
     return new PilotAction(MoveDirection.FORWARD, turn);
@@ -41,13 +53,18 @@ public class HomingPilot extends Pilot {
 
   public void updateTarget() {
     target_object = findNewTargetInRoom(current_room, null);
-    if (target_object == null) {
-      for (RoomSide direction : RoomSide.values()) {
-        RoomConnection connection = current_room.getConnectionInDirection(direction);
-        if (connection != null && canSeeIntoRoom(direction, connection)) {
-          target_object = findNewTargetInRoom(connection.neighbor, direction);
-          break;
-        }
+    if (target_object != null) {
+      target_object_room = current_room;
+      return;
+    }
+    for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
+      RoomSide direction = entry.getKey();
+      RoomConnection connection = entry.getValue();
+      if (canSeeIntoRoom(direction, connection)) {
+        target_object = findNewTargetInRoom(connection.neighbor, direction);
+        target_object_room = connection.neighbor;
+        target_object_room_info = entry;
+        break;
       }
     }
   }

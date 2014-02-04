@@ -13,6 +13,7 @@ import util.RobotFactory;
 
 import common.DescentMapException;
 import common.ObjectType;
+import common.RoomSide;
 
 public class MapPopulator {
   public static int ALL_ROBOTS_MIN_ROOM_AREA = 50;
@@ -41,11 +42,11 @@ public class MapPopulator {
 
   public static void placeEntrance(DescentMap map) {
     Room entrance_room = map.getEntranceRoom();
-    map.getEntranceSide();
     Point nw_corner = entrance_room.getNWCorner();
     Point se_corner = entrance_room.getSECorner();
     Entrance entrance =
-            new Entrance(entrance_room, (nw_corner.x + se_corner.x) / 2.0, (nw_corner.y + se_corner.y) / 2.0);
+            new Entrance(entrance_room, (nw_corner.x + se_corner.x) / 2.0, (nw_corner.y + se_corner.y) / 2.0,
+                    RoomSide.opposite(map.getEntranceSide()));
     entrance_room.addChild(entrance);
     map.setEntrance(entrance);
     map.setCenterObject(entrance);
