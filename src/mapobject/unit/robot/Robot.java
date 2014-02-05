@@ -22,7 +22,6 @@ import external.ImageHandler;
 public abstract class Robot extends Unit {
   private static final HashMap<ObjectType, Double> RELOAD_TIMES = getReloadTimes();
   private static final HashMap<ObjectType, Integer> SHOTS_PER_VOLLEYS = getShotsPerVolleys();
-  private static final HashMap<ObjectType, Double> VOLLEY_RELOAD_TIMES = getVolleyReloadTimes();
 
   private static HashMap<ObjectType, Double> getReloadTimes() {
     HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
@@ -60,27 +59,10 @@ public abstract class Robot extends Unit {
     return shots;
   }
 
-  private static HashMap<ObjectType, Double> getVolleyReloadTimes() {
-    HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
-    times.put(ObjectType.Bomber, 0.0);
-    times.put(ObjectType.HeavyHulk, 0.0);
-    times.put(ObjectType.BabySpider, 0.1);
-    times.put(ObjectType.Class1Drone, 0.1);
-    times.put(ObjectType.Class2Drone, 0.1);
-    times.put(ObjectType.DefenseRobot, 0.1);
-    times.put(ObjectType.HeavyDriller, 0.1);
-    times.put(ObjectType.LightHulk, 0.1);
-    times.put(ObjectType.MediumHulk, 0.1);
-    times.put(ObjectType.PlatformLaser, 0.1);
-    times.put(ObjectType.PlatformMissile, 0.1);
-    times.put(ObjectType.SecondaryLifter, 0.1);
-    times.put(ObjectType.Spider, 0.1);
-    return times;
-  }
+  public static final double VOLLEY_RELOAD_TIME = 0.1;
 
   protected final Cannon cannon;
   protected final int shots_per_volley;
-  protected final double volley_reload_time;
   protected double shots_left_in_volley;
   protected double volley_reload_time_left;
   protected int cannon_side;
@@ -91,7 +73,6 @@ public abstract class Robot extends Unit {
     this.cannon = cannon;
     reload_time = RELOAD_TIMES.get(type);
     shots_per_volley = SHOTS_PER_VOLLEYS.get(type);
-    volley_reload_time = (shots_per_volley > 1 ? VOLLEY_RELOAD_TIMES.get(type) : 0.0);
     cannon_side = (int) (Math.random() * 2);
   }
 
@@ -131,7 +112,7 @@ public abstract class Robot extends Unit {
           firing_cannon = false;
         }
         else {
-          volley_reload_time_left = volley_reload_time;
+          volley_reload_time_left = VOLLEY_RELOAD_TIME;
         }
         return fireCannon();
       }

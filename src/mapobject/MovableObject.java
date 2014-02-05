@@ -224,9 +224,11 @@ public abstract class MovableObject extends MapObject {
           // we need to wait to actually update room because we use it in the checks below
           next_room = connection.neighbor;
         }
+        // make sure we do not go through the relevant walls in the neighbor Room
+        handleHittingNeighborWall(RoomSide.NORTH, connection);
       }
       else {
-        // hit the wall
+        // hit the wall, only passing in the connection if we are actually within it
         handleHittingWall(RoomSide.NORTH);
         location_accepted = false;
       }
@@ -240,6 +242,7 @@ public abstract class MovableObject extends MapObject {
         if (y_loc > se_corner.y) {
           next_room = connection.neighbor;
         }
+        handleHittingNeighborWall(RoomSide.SOUTH, connection);
       }
       else {
         handleHittingWall(RoomSide.SOUTH);
@@ -255,6 +258,7 @@ public abstract class MovableObject extends MapObject {
         if (x_loc < nw_corner.x) {
           next_room = connection.neighbor;
         }
+        handleHittingNeighborWall(RoomSide.WEST, connection);
       }
       else {
         handleHittingWall(RoomSide.WEST);
@@ -270,6 +274,7 @@ public abstract class MovableObject extends MapObject {
         if (x_loc > se_corner.x) {
           next_room = connection.neighbor;
         }
+        handleHittingNeighborWall(RoomSide.EAST, connection);
       }
       else {
         handleHittingWall(RoomSide.EAST);
@@ -300,6 +305,19 @@ public abstract class MovableObject extends MapObject {
         break;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + wall_side);
+    }
+  }
+
+  public void handleHittingNeighborWall(RoomSide wall_side, RoomConnection connection_to_neighbor) {
+    if (wall_side.equals(RoomSide.NORTH) || wall_side.equals(RoomSide.SOUTH)) {
+      x_loc =
+              Math.min(Math.max(x_loc, connection_to_neighbor.min + radius), connection_to_neighbor.max -
+                      radius);
+    }
+    else {
+      y_loc =
+              Math.min(Math.max(y_loc, connection_to_neighbor.min + radius), connection_to_neighbor.max -
+                      radius);
     }
   }
 }

@@ -1,7 +1,6 @@
 package mapobject.shot;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 import mapobject.MapObject;
 import mapobject.MovableObject;
@@ -21,7 +20,6 @@ public abstract class Shot extends MovableObject {
   }
 
   private static final HashMap<ObjectType, Integer> DAMAGES = getDamages();
-  private static final HashSet<ObjectType> SPLASH_DAMAGERS = getSplashDamagers();
 
   private static HashMap<ObjectType, Integer> getDamages() {
     HashMap<ObjectType, Integer> damages = new HashMap<ObjectType, Integer>();
@@ -33,13 +31,6 @@ public abstract class Shot extends MovableObject {
     return damages;
   }
 
-  private static HashSet<ObjectType> getSplashDamagers() {
-    HashSet<ObjectType> damagers = new HashSet<ObjectType>();
-    damagers.add(ObjectType.ConcussionMissile);
-    damagers.add(ObjectType.HomingMissile);
-    return damagers;
-  }
-
   public static final double EXPLOSION_RADIUS_DIVISOR = 30.0;
   public static final double EXPLOSION_TIME_DIVISOR = 3.0;
   public static final double EXPLOSION_MAX_RADIUS = 0.2;
@@ -48,7 +39,6 @@ public abstract class Shot extends MovableObject {
 
   protected final int damage;
   protected final MapObject source;
-  protected final boolean does_splash_damage;
   protected boolean is_detonated;
 
   public Shot(Pilot pilot, MapObject source, int damage, Room room, double x_loc, double y_loc,
@@ -56,7 +46,6 @@ public abstract class Shot extends MovableObject {
     super(0.0, pilot, room, x_loc, y_loc, direction);
     this.source = source;
     this.damage = damage;
-    does_splash_damage = SPLASH_DAMAGERS.contains(type);
   }
 
   public Shot(MapObject source, int damage, Room room, double x_loc, double y_loc, double direction) {
@@ -75,11 +64,6 @@ public abstract class Shot extends MovableObject {
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     if (is_detonated) {
       is_in_map = false;
-      if (does_splash_damage) {
-        room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, null);
-        return new Explosion(room, x_loc, y_loc, Math.min(damage / EXPLOSION_RADIUS_DIVISOR,
-                EXPLOSION_MAX_RADIUS), Math.min(damage / EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));
-      }
       return null;
     }
 
@@ -117,9 +101,6 @@ public abstract class Shot extends MovableObject {
   public MapObject handleUnitCollision(Unit hit_unit) {
     is_in_map = false;
     hit_unit.beDamaged(damage);
-    if (does_splash_damage) {
-      room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, hit_unit);
-    }
     return new Explosion(room, x_loc, y_loc,
             Math.min(damage / EXPLOSION_RADIUS_DIVISOR, EXPLOSION_MAX_RADIUS), Math.min(damage /
                     EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));
@@ -127,11 +108,6 @@ public abstract class Shot extends MovableObject {
 
   public MapObject handleWallCollision() {
     is_in_map = false;
-    if (does_splash_damage) {
-      room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, null);
-      return new Explosion(room, x_loc, y_loc, Math.min(damage / EXPLOSION_RADIUS_DIVISOR,
-              EXPLOSION_MAX_RADIUS), Math.min(damage / EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));
-    }
     return null;
   }
 

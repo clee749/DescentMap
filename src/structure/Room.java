@@ -29,7 +29,7 @@ import external.ImageHandler;
 
 public class Room {
   public static final Color WALL_COLOR = Color.lightGray;
-  public static final Stroke WALL_STROKE = new BasicStroke(2);
+  public static final Stroke WALL_STROKE = new BasicStroke(3);
 
   private final Point nw_corner;
   private final Point se_corner;

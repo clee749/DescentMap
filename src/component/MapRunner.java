@@ -138,7 +138,7 @@ public class MapRunner {
     frame.setVisible(true);
 
     for (int level = 1; level <= DEFAULT_NUM_LEVELS; ++level) {
-      System.out.println("Level " + level);
+      System.out.print(String.format("Mine MN%04d: ", (int) Math.pow(level, 3)));
       MapRunner runner = new MapRunner(panel);
       panel.setMap(runner.getMap());
       do {
@@ -147,7 +147,7 @@ public class MapRunner {
         }
         runner.sleepAfterStep();
       } while (!runner.getState().equals(RunnerState.COMPLETE));
-      System.out.println("DONE");
+      System.out.println("Level complete!");
     }
   }
 }
