@@ -145,7 +145,7 @@ public class ImageHandler {
 
   private HashMap<String, ArrayList<Image>> images;
 
-  public void loadImages(String path, int pixels_per_cell) {
+  public void loadImages(String path, int pixels_per_cell) throws IOException {
     images = new HashMap<String, ArrayList<Image>>();
     for (ObjectType type : ObjectType.POWERUPS) {
       loadAnimatedGif(path, type.name(), pixels_per_cell, Powerup.RADIUS);
@@ -173,51 +173,51 @@ public class ImageHandler {
     loadAnimatedGif(path, "ProximityBomb", pixels_per_cell, ProximityBomb.RADIUS);
   }
 
-  public void loadImages(int pixels_per_cell) {
+  public void loadImages(int pixels_per_cell) throws IOException {
     loadImages(DEFAULT_PATH, pixels_per_cell);
   }
 
-  public boolean loadAnimatedGif(String path, String name, int pixels_per_cell, double radius) {
-    InputStream is = ImageHandler.class.getResourceAsStream(path + "/" + name + ".gif");
-    if (is != null) {
-      try {
-        ImageInputStream stream = ImageIO.createImageInputStream(is);
-        if (stream != null) {
-          ArrayList<Image> list = new ArrayList<Image>();
-          Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
-          if (!readers.hasNext()) {
-            throw new RuntimeException("no image reader found");
-          }
-          ImageReader reader = readers.next();
-          reader.setInput(stream);
-          int n = reader.getNumImages(true);
-          for (int i = 0; i < n; i++) {
-            Image current = reader.read(i);
-            if (radius > 0) {
-              current = scaleImage(current, pixels_per_cell, radius);
-            }
-            list.add(current);
-          }
-          stream.close();
-          images.put(name, list);
-          return true;
-        }
-      }
-      catch (IOException e) {
-
-      }
+  public void loadAnimatedGif(String path, String name, int pixels_per_cell, double radius)
+          throws IOException {
+    String filename = path + "/" + name + ".gif";
+    InputStream is = getClass().getResourceAsStream(filename);
+    if (is == null) {
+      throw new RuntimeException("No resource with this name was found: " + filename);
     }
-    return false;
+    ImageInputStream iis = ImageIO.createImageInputStream(is);
+    if (iis == null) {
+      throw new RuntimeException("No suitable ImageInputStreamSpi exists");
+    }
+    ArrayList<Image> list = new ArrayList<Image>();
+    Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+    if (!readers.hasNext()) {
+      throw new RuntimeException("No ImageReader found");
+    }
+    ImageReader reader = readers.next();
+    reader.setInput(iis);
+    int n = reader.getNumImages(true);
+    for (int i = 0; i < n; i++) {
+      Image current = reader.read(i);
+      if (radius > 0) {
+        current = scaleImage(current, pixels_per_cell, radius);
+      }
+      list.add(current);
+    }
+    images.put(name, list);
+    iis.close();
+    is.close();
   }
 
-  public boolean loadRotatedImages(String path, String name, int pixels_per_cell, double radius) {
-    Image image = null;
-    try {
-      image = ImageIO.read(getClass().getResourceAsStream(path + "/" + name + ".gif"));
+  public void loadRotatedImages(String path, String name, int pixels_per_cell, double radius)
+          throws IOException {
+    String filename = path + "/" + name + ".gif";
+    InputStream is = getClass().getResourceAsStream(filename);
+    if (is == null) {
+      throw new RuntimeException("No resource with this name was found: " + filename);
     }
-    catch (IOException e) {
-      e.printStackTrace();
-      return false;
+    Image image = ImageIO.read(is);
+    if (image == null) {
+      throw new RuntimeException("No registered ImageReader claims to be able to read the resulting stream");
     }
     image = scaleImage(image, pixels_per_cell, radius);
     ArrayList<Image> list = new ArrayList<Image>();
@@ -226,7 +226,7 @@ public class ImageHandler {
       list.add(ImageUtils.rotateImage(image, i * ImageHandler.RADIANS_PER_IMAGE));
     }
     images.put(name, list);
-    return true;
+    is.close();
   }
 
   public Image scaleImage(Image image, int pixels_per_cell, double radius) {

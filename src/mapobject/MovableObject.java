@@ -149,7 +149,10 @@ public abstract class MovableObject extends MapObject {
     previous_x_loc = x_loc;
     previous_y_loc = y_loc;
     computeNextLocation(s_elapsed);
-    return boundInsideAndUpdateRoom(engine);
+    double uncorrected_x_loc = x_loc;
+    double uncorrected_y_loc = y_loc;
+    boundInsideAndUpdateRoom(engine);
+    return uncorrected_x_loc == x_loc && uncorrected_y_loc == y_loc;
   }
 
   public void computeNextLocation(double s_elapsed) {
@@ -203,10 +206,9 @@ public abstract class MovableObject extends MapObject {
     }
   }
 
-  public boolean boundInsideAndUpdateRoom(MapEngine engine) {
+  public void boundInsideAndUpdateRoom(MapEngine engine) {
     Point nw_corner = room.getNWCorner();
     Point se_corner = room.getSECorner();
-    boolean location_accepted = true;
     Room next_room = null;
 
     // north wall
@@ -228,9 +230,8 @@ public abstract class MovableObject extends MapObject {
         handleHittingNeighborWall(RoomSide.NORTH, connection);
       }
       else {
-        // hit the wall, only passing in the connection if we are actually within it
+        // hit the wall
         handleHittingWall(RoomSide.NORTH);
-        location_accepted = false;
       }
     }
 
@@ -246,7 +247,6 @@ public abstract class MovableObject extends MapObject {
       }
       else {
         handleHittingWall(RoomSide.SOUTH);
-        location_accepted = false;
       }
     }
 
@@ -262,7 +262,6 @@ public abstract class MovableObject extends MapObject {
       }
       else {
         handleHittingWall(RoomSide.WEST);
-        location_accepted = false;
       }
     }
 
@@ -278,15 +277,12 @@ public abstract class MovableObject extends MapObject {
       }
       else {
         handleHittingWall(RoomSide.EAST);
-        location_accepted = false;
       }
     }
 
     if (next_room != null) {
       updateRoom(engine, room, next_room);
     }
-
-    return location_accepted;
   }
 
   public void handleHittingWall(RoomSide wall_side) {

@@ -3,6 +3,7 @@ package component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.io.IOException;
 
 import mapobject.MapObject;
 import mapobject.unit.Pyro;
@@ -36,7 +37,12 @@ public class MapPlayDisplayer {
     num_rows = (int) ((double) dims.height / pixels_per_cell) + 2;
 
     images = new ImageHandler();
-    images.loadImages(pixels_per_cell);
+    try {
+      images.loadImages(pixels_per_cell);
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public void paintMap(Graphics2D g) {
