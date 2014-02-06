@@ -436,22 +436,34 @@ public class Pyro extends Unit {
     if (ammo < 1) {
       return null;
     }
-    --secondary_ammo[selected_secondary_cannon_type.ordinal()];
-    ++missile_side;
-    Point2D.Double abs_offset = MapUtils.perpendicularVector(missile_offset, direction);
     MapObject shot;
-    if (missile_side % 2 == 0) {
-      shot =
-              selected_secondary_cannon.fireCannon(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y,
-                      direction);
+    if (selected_secondary_cannon_type.equals(PyroSecondaryCannon.CONCUSSION_MISSILE) ||
+            selected_secondary_cannon_type.equals(PyroSecondaryCannon.HOMING_MISSILE)) {
+      shot = fireSecondaryWithOffset();
     }
-    shot =
-            selected_secondary_cannon.fireCannon(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y,
-                    direction);
+    else {
+      shot = fireSecondaryWithoutOffset();
+    }
+    --secondary_ammo[selected_secondary_cannon_type.ordinal()];
     if (ammo == 1) {
       handleSecondaryAmmoDepleted();
     }
     return shot;
+  }
+
+  public MapObject fireSecondaryWithOffset() {
+    ++missile_side;
+    Point2D.Double abs_offset = MapUtils.perpendicularVector(missile_offset, direction);
+    if (missile_side % 2 == 0) {
+      return selected_secondary_cannon.fireCannon(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y,
+              direction);
+    }
+    return selected_secondary_cannon.fireCannon(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y,
+            direction);
+  }
+
+  public MapObject fireSecondaryWithoutOffset() {
+    return selected_secondary_cannon.fireCannon(this, room, x_loc, y_loc, direction);
   }
 
   @Override

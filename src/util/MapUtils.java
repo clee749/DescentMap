@@ -204,19 +204,18 @@ public class MapUtils {
   /**
    * 
    * @param src any MapObject
-   * @param dst any MapObject in a neighbor Room from src
-   * @param neighbor_side the RoomSide to get from src's Room to dst's Room
-   * @return true if src can see dst, false otherwise
+   * @param neighbor_side the RoomSide of src's neighbor Room
+   * @return the angles from src in the direction returned by
+   *         RoomSide.directionToRadians(neighbor_side) to the corners between the Rooms in the
+   *         format (min angle, max angle), use RoomSide.directionToRadians(neighbor_side) on other
+   *         angles before comparing
    */
-  public static boolean canSeeObjectInNeighborRoom(MapObject src, MapObject dst, RoomSide neighbor_side) {
+  public static Point2D.Double anglesToNeighborConnectionPoints(MapObject src, RoomSide neighbor_side) {
     double src_x = src.getX();
     double src_y = src.getY();
-    double dst_x = dst.getX();
-    double dst_y = dst.getY();
     Room src_room = src.getRoom();
     RoomConnection connection = src_room.getConnectionInDirection(neighbor_side);
     double neighbor_direction = RoomSide.directionToRadians(neighbor_side);
-    double angle_to_location = angleTo(neighbor_direction, dst_x - src_x, dst_y - src_y);
     double angle_to_connection_min;
     double angle_to_connection_max;
     switch (neighbor_side) {
@@ -243,7 +242,37 @@ public class MapUtils {
       default:
         throw new DescentMapException("Unexpected RoomSide: " + neighbor_side);
     }
-    return isAngleBetween(angle_to_location, angle_to_connection_min, angle_to_connection_max);
+    return new Point2D.Double(Math.min(angle_to_connection_min, angle_to_connection_max), Math.max(
+            angle_to_connection_min, angle_to_connection_max));
+  }
+
+  /**
+   * 
+   * @param src any MapObject
+   * @param dst any MapObject in a neighbor Room from src
+   * @param neighbor_side the RoomSide to get from src's Room to dst's Room
+   * @param angles_to_connection the result of calling
+   *        MapUtils.anglesToNeighborConnectionPoints(src, neighbor_side)
+   * @return true if src can see dst, false otherwise
+   */
+  public static boolean canSeeObjectInNeighborRoom(MapObject src, MapObject dst, RoomSide neighbor_side,
+          Point2D.Double angles_to_connection) {
+    double angle_to_location =
+            angleTo(RoomSide.directionToRadians(neighbor_side), dst.getX() - src.getX(),
+                    dst.getY() - src.getY());
+    return angles_to_connection.x < angle_to_location && angle_to_location < angles_to_connection.y;
+  }
+
+  /**
+   * 
+   * @param src any MapObject
+   * @param dst any MapObject in a neighbor Room from src
+   * @param neighbor_side the RoomSide to get from src's Room to dst's Room
+   * @return true if src can see dst, false otherwise
+   */
+  public static boolean canSeeObjectInNeighborRoom(MapObject src, MapObject dst, RoomSide neighbor_side) {
+    return canSeeObjectInNeighborRoom(src, dst, neighbor_side,
+            anglesToNeighborConnectionPoints(src, neighbor_side));
   }
 
   /**

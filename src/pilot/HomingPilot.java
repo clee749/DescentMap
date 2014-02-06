@@ -1,5 +1,6 @@
 package pilot;
 
+import java.awt.geom.Point2D;
 import java.util.Map.Entry;
 
 import mapobject.MovableObject;
@@ -52,78 +53,80 @@ public class HomingPilot extends Pilot {
   }
 
   public void updateTarget() {
-    target_object = findNewTargetInRoom(current_room, null);
+    target_object = findNewTargetInCurrentRoom();
     if (target_object != null) {
       target_object_room = current_room;
       return;
     }
+    double src_direction = bound_object.getDirection();
     for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
-      RoomSide direction = entry.getKey();
+      RoomSide neighbor_side = entry.getKey();
       RoomConnection connection = entry.getValue();
-      if (canSeeIntoRoom(direction, connection)) {
-        target_object = findNewTargetInRoom(connection.neighbor, direction);
-        target_object_room = connection.neighbor;
-        target_object_room_info = entry;
-        break;
+      double direction_to_neighbor = RoomSide.directionToRadians(neighbor_side);
+      double angle_from_neighbor_to_self = MapUtils.angleTo(direction_to_neighbor, src_direction);
+      Point2D.Double angles_to_connection =
+              MapUtils.anglesToNeighborConnectionPoints(bound_object, neighbor_side);
+      if (angles_to_connection.x - max_angle_to_target < angle_from_neighbor_to_self &&
+              angle_from_neighbor_to_self < angles_to_connection.y + max_angle_to_target) {
+        target_object = findNewTargetInNeighborRoom(neighbor_side, angles_to_connection);
+        if (target_object != null) {
+          target_object_room = connection.neighbor;
+          target_object_room_info = entry;
+          break;
+        }
       }
     }
   }
 
-  public boolean canSeeIntoRoom(RoomSide neighbor_side, RoomConnection connection) {
-    double src_x = bound_object.getX();
-    double src_y = bound_object.getY();
-    double src_direction = bound_object.getDirection();
-    double angle_to_connection_min;
-    double angle_to_connection_max;
-    switch (neighbor_side) {
-      case NORTH:
-        double dy = current_room.getNWCorner().y - src_y;
-        angle_to_connection_min = MapUtils.angleTo(src_direction, connection.min - src_x, dy);
-        angle_to_connection_max = MapUtils.angleTo(src_direction, connection.max - src_x, dy);
-        break;
-      case SOUTH:
-        dy = current_room.getSECorner().y - src_y;
-        angle_to_connection_min = MapUtils.angleTo(src_direction, connection.min - src_x, dy);
-        angle_to_connection_max = MapUtils.angleTo(src_direction, connection.max - src_x, dy);
-        break;
-      case WEST:
-        double dx = current_room.getNWCorner().x - src_x;
-        angle_to_connection_min = MapUtils.angleTo(src_direction, dx, connection.min - src_y);
-        angle_to_connection_max = MapUtils.angleTo(src_direction, dx, connection.max - src_y);
-        break;
-      case EAST:
-        dx = current_room.getSECorner().x - src_x;
-        angle_to_connection_min = MapUtils.angleTo(src_direction, dx, connection.min - src_y);
-        angle_to_connection_max = MapUtils.angleTo(src_direction, dx, connection.max - src_y);
-        break;
-      default:
-        throw new DescentMapException("Unexpected RoomSide: " + neighbor_side);
-    }
-    return Math.abs(angle_to_connection_min) < max_angle_to_target ||
-            Math.abs(angle_to_connection_max) < max_angle_to_target;
-  }
-
-  public Unit findNewTargetInRoom(Room room, RoomSide neighbor_side) {
+  public Unit findNewTargetInCurrentRoom() {
     Unit new_target = null;
     double smallest_angle_to_target = max_angle_to_target;
     switch (target_type) {
       case PYRO:
-        for (Pyro pyro : room.getPyros()) {
+        for (Pyro pyro : current_room.getPyros()) {
           double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, pyro));
-          if (abs_angle_to_target < smallest_angle_to_target &&
-                  (neighbor_side == null || MapUtils.canSeeObjectInNeighborRoom(bound_object, pyro,
-                          neighbor_side))) {
+          if (abs_angle_to_target < smallest_angle_to_target) {
             new_target = pyro;
             smallest_angle_to_target = abs_angle_to_target;
           }
         }
         break;
       case ROBOT:
-        for (Unit unit : room.getRobots()) {
+        for (Unit unit : current_room.getRobots()) {
+          double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, unit));
+          if (abs_angle_to_target < smallest_angle_to_target) {
+            new_target = unit;
+            smallest_angle_to_target = abs_angle_to_target;
+          }
+        }
+        break;
+      default:
+        throw new DescentMapException("Unexpected HomingTargetType: " + target_type);
+    }
+    return new_target;
+  }
+
+  public Unit findNewTargetInNeighborRoom(RoomSide neighbor_side, Point2D.Double angles_to_connection) {
+    Unit new_target = null;
+    double smallest_angle_to_target = max_angle_to_target;
+    switch (target_type) {
+      case PYRO:
+        for (Pyro pyro : current_room.getNeighborInDirection(neighbor_side).getPyros()) {
+          double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, pyro));
+          if (abs_angle_to_target < smallest_angle_to_target &&
+                  (neighbor_side == null || MapUtils.canSeeObjectInNeighborRoom(bound_object, pyro,
+                          neighbor_side, angles_to_connection))) {
+            new_target = pyro;
+            smallest_angle_to_target = abs_angle_to_target;
+          }
+        }
+        break;
+      case ROBOT:
+        for (Unit unit : current_room.getNeighborInDirection(neighbor_side).getRobots()) {
           double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, unit));
           if (abs_angle_to_target < smallest_angle_to_target &&
                   (neighbor_side == null || MapUtils.canSeeObjectInNeighborRoom(bound_object, unit,
-                          neighbor_side))) {
+                          neighbor_side, angles_to_connection))) {
             new_target = unit;
             smallest_angle_to_target = abs_angle_to_target;
           }

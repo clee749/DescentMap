@@ -1,6 +1,7 @@
 package pilot;
 
 import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -153,6 +154,8 @@ public class PyroPilot extends Pilot {
 
     boolean fire_cannon = false;
     boolean fire_secondary = false;
+
+    // find targets in current_room
     for (Unit unit : current_room.getRobots()) {
       if (Math.abs(MapUtils.angleTo(bound_object, unit)) < DIRECTION_EPSILON) {
         fire_cannon = true;
@@ -172,28 +175,47 @@ public class PyroPilot extends Pilot {
       }
     }
 
-    if (!fire_cannon && state.equals(PyroPilotState.MOVE_TO_ROOM_CONNECTION)) {
-      RoomConnection connection = target_room_info.getValue();
-      for (Unit unit : connection.neighbor.getRobots()) {
-        double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, unit));
-        if (abs_angle_to_unit < DIRECTION_EPSILON &&
-                MapUtils.canSeeObjectInNeighborRoom(bound_object, unit, target_room_info.getKey())) {
-          fire_cannon = true;
-          if (unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
-                  MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
-            fire_secondary = true;
-            break;
+    // find targets in a neighbor Room
+    if (!fire_cannon) {
+      double src_x = bound_object.getX();
+      double src_y = bound_object.getY();
+      double src_direction = bound_object.getDirection();
+      for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
+        RoomSide neighbor_side = entry.getKey();
+        RoomConnection connection = entry.getValue();
+        double direction_to_neighbor = RoomSide.directionToRadians(neighbor_side);
+        double angle_from_neighbor_to_self = MapUtils.angleTo(direction_to_neighbor, src_direction);
+        Point2D.Double angles_to_connection =
+                MapUtils.anglesToNeighborConnectionPoints(bound_object, neighbor_side);
+        if (angles_to_connection.x < angle_from_neighbor_to_self &&
+                angle_from_neighbor_to_self < angles_to_connection.y) {
+          for (Unit unit : connection.neighbor.getRobots()) {
+            double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, unit));
+            double neighbor_angle_to_unit =
+                    MapUtils.angleTo(direction_to_neighbor, unit.getX() - src_x, unit.getY() - src_y);
+            if (abs_angle_to_unit < DIRECTION_EPSILON && angles_to_connection.x < neighbor_angle_to_unit &&
+                    neighbor_angle_to_unit < angles_to_connection.y) {
+              fire_cannon = true;
+              if (unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
+                      MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
+                fire_secondary = true;
+                break;
+              }
+            }
           }
-        }
-      }
-      if (!fire_cannon) {
-        for (ProximityBomb bomb : connection.neighbor.getBombs()) {
-          double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, bomb));
-          if (abs_angle_to_unit < DIRECTION_EPSILON &&
-                  MapUtils.canSeeObjectInNeighborRoom(bound_object, bomb, target_room_info.getKey())) {
-            fire_cannon = true;
-            break;
+          if (!fire_cannon) {
+            for (ProximityBomb bomb : connection.neighbor.getBombs()) {
+              double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, bomb));
+              double neighbor_angle_to_bomb =
+                      MapUtils.angleTo(direction_to_neighbor, bomb.getX() - src_x, bomb.getY() - src_y);
+              if (abs_angle_to_unit < DIRECTION_EPSILON && angles_to_connection.x < neighbor_angle_to_bomb &&
+                      neighbor_angle_to_bomb < angles_to_connection.y) {
+                fire_cannon = true;
+                break;
+              }
+            }
           }
+          break;
         }
       }
     }

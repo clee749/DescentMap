@@ -85,7 +85,7 @@ public class MapPopulator {
     int room_area = room.getHeight() * room.getWidth();
     for (ObjectType type : ROBOTS_TO_POPULATE) {
       if (Math.random() < ROBOT_PLACEMENT_PROB &&
-              (Unit.getStartingShields(type) < room_area || room_area > ALL_ROBOTS_MIN_ROOM_AREA)) {
+              (Unit.getStartingShields(type) <= room_area || room_area > ALL_ROBOTS_MIN_ROOM_AREA)) {
         placeRobotInRoom(room, type);
       }
     }
