@@ -55,15 +55,14 @@ public class Entrance extends Scenery {
 
   @Override
   public void planNextAction(double s_elapsed) {
-
+    for (SpawningPyro spawning_pyro : spawn_queue) {
+      spawning_pyro.pilot.handleRespawnDelay(s_elapsed);
+    }
+    state_time_left -= s_elapsed;
   }
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
-    for (SpawningPyro spawning_pyro : spawn_queue) {
-      spawning_pyro.pilot.handleRespawnDelay(s_elapsed);
-    }
-
     switch (state) {
       case INACTIVE:
         if (!spawn_queue.isEmpty() && spawn_queue.peek().pilot.isReadyToRespawn()) {
@@ -95,8 +94,6 @@ public class Entrance extends Scenery {
       default:
         throw new DescentMapException("Unexpected EntranceState: " + state);
     }
-
-    state_time_left -= s_elapsed;
     return null;
   }
 

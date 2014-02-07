@@ -58,17 +58,17 @@ public class MapPlayDisplayer {
     Point nw_corner = new Point(min_x, min_y);
     Point se_corner = new Point(min_x + num_cols, min_y + num_rows);
     for (Room room : map.getAllRooms()) {
-      paintRoomIfOnScreen(g, room, nw_corner, se_corner, center_cell, center_cell_nw_pixel);
+      if (MapUtils.rectanglesIntersect(nw_corner, se_corner, room.getNWCorner(), room.getSECorner())) {
+        room.paintSceneries(g, images, center_cell, center_cell_nw_pixel, pixels_per_cell);
+      }
+    }
+    for (Room room : map.getAllRooms()) {
+      if (MapUtils.rectanglesIntersect(nw_corner, se_corner, room.getNWCorner(), room.getSECorner())) {
+        room.paint(g, images, center_cell, center_cell_nw_pixel, pixels_per_cell);
+      }
     }
     if (center_object.getType().equals(ObjectType.Pyro) && center_object.isInMap()) {
       ((Pyro) center_object).paintInfo(g);
-    }
-  }
-
-  public void paintRoomIfOnScreen(Graphics2D g, Room room, Point nw_corner, Point se_corner,
-          Point center_cell, Point center_cell_nw_pixel) {
-    if (MapUtils.rectanglesIntersect(nw_corner, se_corner, room.getNWCorner(), room.getSECorner())) {
-      room.paint(g, images, center_cell, center_cell_nw_pixel, pixels_per_cell);
     }
   }
 }

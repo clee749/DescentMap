@@ -121,6 +121,7 @@ public class Pyro extends Unit {
   public static final int MAX_SHIELDS = 200;
   public static final int MIN_STARTING_ENERGY = 100;
   public static final int MAX_ENERGY = 200;
+  public static final double ENERGY_RECHARGE_COOLDOWN = 0.04;
   public static final int MIN_STARTING_CONCUSSION_MISSILES = 3;
   public static final double CANNON_SWITCH_TIME = 1.0;
   public static final int PROXIMITY_BOMB_ORDINAL = PyroSecondaryCannon.PROXIMITY_BOMB.ordinal();
@@ -135,12 +136,16 @@ public class Pyro extends Unit {
   public static final int DEATH_SPLASH_DAMAGE = 50;
   public static final int MAX_DEATH_SPIN_DAMAGE_TAKEN = 50;
 
+  // sounds
+  public static final double ENERGY_RECHARGE_SOUND_COOLDOWN = 0.25;
+
   // absolute Cannon offsets
   private final double outer_cannon_offset;
   private final double cannon_forward_offset;
   private final double missile_offset;
 
   // primary Cannon info
+  private double energy_recharge_cooldown_left;
   private double energy;
   private boolean has_quad_lasers;
   private final Cannon[] primary_cannons;
@@ -334,24 +339,14 @@ public class Pyro extends Unit {
     if (next_action.fire_cannon && reload_time_left < 0.0) {
       planToFireCannon();
     }
-    else {
-      handleCannonReload(s_elapsed);
-    }
     if (next_action.fire_secondary && secondary_reload_time_left < 0.0) {
       planToFireSecondary();
-    }
-    else {
-      handleSecondaryReload(s_elapsed);
     }
   }
 
   public void planToFireSecondary() {
     firing_secondary = true;
     secondary_reload_time_left = secondary_reload_time;
-  }
-
-  public void handleSecondaryReload(double s_elapsed) {
-    secondary_reload_time_left -= s_elapsed;
   }
 
   @Override
@@ -405,6 +400,13 @@ public class Pyro extends Unit {
       death_spin_time_left = -1.0;
     }
     return createDamagedExplosion();
+  }
+
+  @Override
+  public void handleCooldowns(double s_elapsed) {
+    super.handleCooldowns(s_elapsed);
+    secondary_reload_time_left -= s_elapsed;
+    energy_recharge_cooldown_left -= s_elapsed;
   }
 
   @Override
@@ -598,6 +600,13 @@ public class Pyro extends Unit {
         switchSecondaryCannon(PyroSecondaryCannon.values()[i]);
         break;
       }
+    }
+  }
+
+  public void rechargeEnergy() {
+    if (energy_recharge_cooldown_left < 0.0 && energy < 100.0) {
+      energy = Math.min(energy + 1.0, MIN_STARTING_ENERGY);
+      energy_recharge_cooldown_left = ENERGY_RECHARGE_COOLDOWN;
     }
   }
 }

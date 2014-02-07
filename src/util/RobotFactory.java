@@ -56,4 +56,11 @@ public class RobotFactory {
         throw new DescentMapException("Unexpected Robot type: " + type);
     }
   }
+
+  public static Robot newRobot(ObjectType type, Room room, double x_loc, double y_loc, double direction,
+          double inactive_time) {
+    Robot robot = newRobot(type, room, x_loc, y_loc, direction);
+    robot.tempDisable(inactive_time);
+    return robot;
+  }
 }

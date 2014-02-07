@@ -134,6 +134,7 @@ public abstract class Unit extends MovableObject {
   @Override
   public void planNextAction(double s_elapsed) {
     if (!is_exploded) {
+      handleCooldowns(s_elapsed);
       super.planNextAction(s_elapsed);
     }
     else {
@@ -161,13 +162,13 @@ public abstract class Unit extends MovableObject {
     return reload_time_left < 0.0;
   }
 
+  public void handleCooldowns(double s_elapsed) {
+    reload_time_left -= s_elapsed;
+  }
+
   public void planToFireCannon() {
     firing_cannon = true;
     reload_time_left = reload_time;
-  }
-
-  public void handleCannonReload(double s_elapsed) {
-    reload_time_left -= s_elapsed;
   }
 
   public void beDamaged(int amount) {

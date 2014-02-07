@@ -129,6 +129,13 @@ public class Room {
     return "(" + nw_corner + ", " + se_corner + ")";
   }
 
+  public void paintSceneries(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
+          int pixels_per_cell) {
+    for (Scenery scenery : sceneries) {
+      scenery.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+    }
+  }
+
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
     paint(g, images, WALL_COLOR, WALL_STROKE, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
@@ -191,9 +198,6 @@ public class Room {
 
     // children
     if (images != null) {
-      for (Scenery scenery : sceneries) {
-        scenery.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
-      }
       for (Powerup powerup : powerups) {
         powerup.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }

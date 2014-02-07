@@ -43,6 +43,9 @@ public class MapPanel extends JPanel implements ComponentListener, MapDisplayer 
   public void paint(Graphics g) {
     g.setColor(BACKGROUND_COLOR);
     g.fillRect(0, 0, getWidth(), getHeight());
+    if (display_mode == null) {
+      return;
+    }
     switch (display_mode) {
       case CONSTRUCTION:
         construction_displayer.paintMap((Graphics2D) g, getSize());

@@ -60,12 +60,14 @@ public abstract class Robot extends Unit {
   }
 
   public static final double VOLLEY_RELOAD_TIME = 0.1;
+  public static final double DISABLE_TIME_PER_DAMAGE = 0.03;
 
   protected final Cannon cannon;
   protected final int shots_per_volley;
   protected double shots_left_in_volley;
   protected double volley_reload_time_left;
   protected int cannon_side;
+  protected double inactive_time_left;
 
   public Robot(double radius, Pilot pilot, Cannon cannon, Room room, double x_loc, double y_loc,
           double direction) {
@@ -93,12 +95,12 @@ public abstract class Robot extends Unit {
 
   @Override
   public void planNextAction(double s_elapsed) {
-    super.planNextAction(s_elapsed);
-    if (next_action.fire_cannon && !firing_cannon && reload_time_left < 0.0) {
-      planToFireCannon();
-    }
-    else {
-      handleCannonReload(s_elapsed);
+    inactive_time_left -= s_elapsed;
+    if (inactive_time_left < 0.0) {
+      super.planNextAction(s_elapsed);
+      if (next_action.fire_cannon && !firing_cannon && reload_time_left < 0.0) {
+        planToFireCannon();
+      }
     }
   }
 
@@ -116,11 +118,14 @@ public abstract class Robot extends Unit {
         }
         return fireCannon();
       }
-      else {
-        handleCannonVolleyReload(s_elapsed);
-      }
     }
     return object_created;
+  }
+
+  @Override
+  public void handleCooldowns(double s_elapsed) {
+    super.handleCooldowns(s_elapsed);
+    volley_reload_time_left -= s_elapsed;
   }
 
   @Override
@@ -140,7 +145,13 @@ public abstract class Robot extends Unit {
     return cannon.fireCannon(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y, direction);
   }
 
-  public void handleCannonVolleyReload(double s_elapsed) {
-    volley_reload_time_left -= s_elapsed;
+  public void tempDisable(double inactive_time) {
+    inactive_time_left = Math.max(inactive_time_left, inactive_time);
+  }
+
+  @Override
+  public void beDamaged(int amount) {
+    super.beDamaged(amount);
+    tempDisable(amount * DISABLE_TIME_PER_DAMAGE);
   }
 }
