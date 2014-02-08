@@ -115,10 +115,10 @@ public abstract class MovableObject extends MapObject {
     this.pilot = pilot;
   }
 
-  public void updateRoom(MapEngine engine, Room previous_room, Room next_room) {
+  public void updateRoom(MapEngine engine, Room next_room) {
+    engine.changeRooms(this, room, next_room);
     room = next_room;
     pilot.updateCurrentRoom(next_room);
-    engine.changeRooms(this, previous_room, next_room);
   }
 
   public Image getImage(ImageHandler images) {
@@ -283,7 +283,7 @@ public abstract class MovableObject extends MapObject {
     }
 
     if (next_room != null) {
-      updateRoom(engine, room, next_room);
+      updateRoom(engine, next_room);
     }
   }
 

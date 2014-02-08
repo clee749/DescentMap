@@ -64,7 +64,7 @@ public class RobotPilot extends Pilot {
         break;
       case TURN_INTO_ROOM:
         planMoveToNeighborRoom(target_room_info.getKey(), bound_object_diameter);
-        planTurnToTarget();
+        planTurnIntoRoom(target_room_info.getKey());
         break;
       case MOVE_INTO_ROOM:
         break;
@@ -182,6 +182,7 @@ public class RobotPilot extends Pilot {
         }
         break;
       case TURN_INTO_ROOM:
+        // TODO: we get stuck in this state when restarting exploration after hitting a dead end
         if (Math.abs(target_direction - bound_object.getDirection()) < DIRECTION_EPSILON) {
           initState(RobotPilotState.MOVE_INTO_ROOM);
         }
