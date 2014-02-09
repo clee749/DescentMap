@@ -171,7 +171,8 @@ public class RobotPilot extends Pilot {
         }
         break;
       case TURN_TO_ROOM_EXIT:
-        if (Math.abs(target_direction - bound_object.getDirection()) < DIRECTION_EPSILON) {
+        double difference = Math.abs(target_direction - bound_object.getDirection());
+        if (difference < DIRECTION_EPSILON || MapUtils.TWO_PI - difference < DIRECTION_EPSILON) {
           initState(RobotPilotState.MOVE_TO_ROOM_EXIT);
         }
         break;
@@ -182,15 +183,16 @@ public class RobotPilot extends Pilot {
         }
         break;
       case TURN_INTO_ROOM:
-        // TODO: we get stuck in this state when restarting exploration after hitting a dead end
-        if (Math.abs(target_direction - bound_object.getDirection()) < DIRECTION_EPSILON) {
+        difference = Math.abs(target_direction - bound_object.getDirection());
+        if (difference < DIRECTION_EPSILON || MapUtils.TWO_PI - difference < DIRECTION_EPSILON) {
           initState(RobotPilotState.MOVE_INTO_ROOM);
         }
         break;
       case MOVE_INTO_ROOM:
         break;
       case TURN_TO_ROOM_INTERIOR:
-        if (Math.abs(target_direction - bound_object.getDirection()) < DIRECTION_EPSILON) {
+        difference = Math.abs(target_direction - bound_object.getDirection());
+        if (difference < DIRECTION_EPSILON || MapUtils.TWO_PI - difference < DIRECTION_EPSILON) {
           initState(RobotPilotState.MOVE_TO_ROOM_INTERIOR);
         }
         break;

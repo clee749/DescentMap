@@ -124,8 +124,7 @@ public abstract class Pilot {
   }
 
   public TurnDirection angleToTurnDirection(double angle) {
-    double abs_angle = Math.abs(angle);
-    if (abs_angle < Pilot.DIRECTION_EPSILON) {
+    if (Math.abs(angle) < Pilot.DIRECTION_EPSILON) {
       return TurnDirection.NONE;
     }
     return (angle < 0 ? TurnDirection.COUNTER_CLOCKWISE : TurnDirection.CLOCKWISE);
