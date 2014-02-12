@@ -1,5 +1,6 @@
 package util;
 
+import mapobject.powerup.Cloak;
 import mapobject.powerup.ConcussionMissilePowerup;
 import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
@@ -25,6 +26,8 @@ public class PowerupFactory {
 
   public static Powerup newPowerup(ObjectType type, Room room, double x_loc, double y_loc) {
     switch (type) {
+      case Cloak:
+        return new Cloak(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case ConcussionMissilePowerup:
         return new ConcussionMissilePowerup(room, x_loc, y_loc, randomPowerupDirection(),
                 randomPowerupSpeed());

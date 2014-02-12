@@ -3,6 +3,7 @@ package pilot;
 import java.awt.geom.Point2D;
 import java.util.Map.Entry;
 
+import mapobject.MapObject;
 import mapobject.MovableObject;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
@@ -11,14 +12,24 @@ import structure.RoomConnection;
 import util.MapUtils;
 
 import common.DescentMapException;
+import common.ObjectType;
 import common.RoomSide;
+
+enum HomingTargetType {
+  PYRO,
+  ROBOT;
+}
+
 
 public class HomingPilot extends Pilot {
   private final HomingTargetType target_type;
   private final double max_angle_to_target;
+  private Unit target_unit;
+  private Room target_unit_room;
+  private Entry<RoomSide, RoomConnection> target_unit_room_info;
 
-  public HomingPilot(HomingTargetType target_type, double max_angle_to_target) {
-    this.target_type = target_type;
+  public HomingPilot(MapObject source, double max_angle_to_target) {
+    target_type = (source.getType().equals(ObjectType.Pyro) ? HomingTargetType.ROBOT : HomingTargetType.PYRO);
     this.max_angle_to_target = max_angle_to_target;
   }
 
@@ -36,15 +47,15 @@ public class HomingPilot extends Pilot {
 
   @Override
   public PilotAction findNextAction(double s_elapsed) {
-    if (target_object == null || !target_object.isInMap() ||
-            !target_object.getRoom().equals(target_object_room)) {
+    if (target_unit == null || !target_unit.isInMap() || target_unit.isCloaked() ||
+            !target_unit.getRoom().equals(target_unit_room)) {
       updateTarget();
       return PilotAction.MOVE_FORWARD;
     }
-    double angle_to_target = MapUtils.angleTo(bound_object, target_object);
+    double angle_to_target = MapUtils.angleTo(bound_object, target_unit);
     if (Math.abs(angle_to_target) > max_angle_to_target ||
-            (!target_object_room.equals(current_room) && !MapUtils.canSeeObjectInNeighborRoom(bound_object,
-                    target_object, target_object_room_info.getKey()))) {
+            (!target_unit_room.equals(current_room) && !MapUtils.canSeeObjectInNeighborRoom(bound_object,
+                    target_unit, target_unit_room_info.getKey()))) {
       updateTarget();
       return PilotAction.MOVE_FORWARD;
     }
@@ -53,9 +64,9 @@ public class HomingPilot extends Pilot {
   }
 
   public void updateTarget() {
-    target_object = findNewTargetInCurrentRoom();
-    if (target_object != null) {
-      target_object_room = current_room;
+    target_unit = findNewTargetInCurrentRoom();
+    if (target_unit != null) {
+      target_unit_room = current_room;
       return;
     }
     double src_direction = bound_object.getDirection();
@@ -68,10 +79,10 @@ public class HomingPilot extends Pilot {
               MapUtils.anglesToNeighborConnectionPoints(bound_object, neighbor_side);
       if (angles_to_connection.x - max_angle_to_target < angle_from_neighbor_to_self &&
               angle_from_neighbor_to_self < angles_to_connection.y + max_angle_to_target) {
-        target_object = findNewTargetInNeighborRoom(neighbor_side, angles_to_connection);
-        if (target_object != null) {
-          target_object_room = connection.neighbor;
-          target_object_room_info = entry;
+        target_unit = findNewTargetInNeighborRoom(neighbor_side, angles_to_connection);
+        if (target_unit != null) {
+          target_unit_room = connection.neighbor;
+          target_unit_room_info = entry;
           break;
         }
       }
@@ -84,6 +95,9 @@ public class HomingPilot extends Pilot {
     switch (target_type) {
       case PYRO:
         for (Pyro pyro : current_room.getPyros()) {
+          if (pyro.isCloaked()) {
+            continue;
+          }
           double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, pyro));
           if (abs_angle_to_target < smallest_angle_to_target) {
             new_target = pyro;
@@ -93,6 +107,9 @@ public class HomingPilot extends Pilot {
         break;
       case ROBOT:
         for (Unit unit : current_room.getRobots()) {
+          if (unit.isCloaked()) {
+            continue;
+          }
           double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, unit));
           if (abs_angle_to_target < smallest_angle_to_target) {
             new_target = unit;
@@ -112,6 +129,9 @@ public class HomingPilot extends Pilot {
     switch (target_type) {
       case PYRO:
         for (Pyro pyro : current_room.getNeighborInDirection(neighbor_side).getPyros()) {
+          if (pyro.isCloaked()) {
+            continue;
+          }
           double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, pyro));
           if (abs_angle_to_target < smallest_angle_to_target &&
                   (neighbor_side == null || MapUtils.canSeeObjectInNeighborRoom(bound_object, pyro,
@@ -123,6 +143,9 @@ public class HomingPilot extends Pilot {
         break;
       case ROBOT:
         for (Unit unit : current_room.getNeighborInDirection(neighbor_side).getRobots()) {
+          if (unit.isCloaked()) {
+            continue;
+          }
           double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, unit));
           if (abs_angle_to_target < smallest_angle_to_target &&
                   (neighbor_side == null || MapUtils.canSeeObjectInNeighborRoom(bound_object, unit,

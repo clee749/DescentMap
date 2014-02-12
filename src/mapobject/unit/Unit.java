@@ -1,9 +1,5 @@
 package mapobject.unit;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
 import java.util.HashMap;
 
 import mapobject.MapObject;
@@ -13,12 +9,9 @@ import mapobject.ephemeral.Explosion;
 import pilot.Pilot;
 import pilot.PilotAction;
 import structure.Room;
-import util.MapUtils;
 
 import common.ObjectType;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 public abstract class Unit extends MovableObject {
   public static Double getRadius(ObjectType type) {
@@ -48,6 +41,7 @@ public abstract class Unit extends MovableObject {
     radii.put(ObjectType.DefenseRobot, 0.3);
     radii.put(ObjectType.HeavyHulk, 0.35);
     radii.put(ObjectType.MediumHulk, 0.35);
+    radii.put(ObjectType.MediumHulkCloaked, 0.35);
     radii.put(ObjectType.HeavyDriller, 0.4);
     radii.put(ObjectType.Spider, 0.4);
     return radii;
@@ -67,6 +61,7 @@ public abstract class Unit extends MovableObject {
     offsets.put(ObjectType.HeavyDriller, 0.81);
     offsets.put(ObjectType.HeavyHulk, 0.83);
     offsets.put(ObjectType.MediumHulk, 0.83);
+    offsets.put(ObjectType.MediumHulkCloaked, 0.83);
     offsets.put(ObjectType.DefenseRobot, 0.84);
     offsets.put(ObjectType.Class1Drone, 0.86);
     return offsets;
@@ -83,6 +78,7 @@ public abstract class Unit extends MovableObject {
     shields.put(ObjectType.LightHulk, 23);
     shields.put(ObjectType.PlatformLaser, 23);
     shields.put(ObjectType.MediumHulk, 32);
+    shields.put(ObjectType.MediumHulkCloaked, 32);
     shields.put(ObjectType.Spider, 35);
     shields.put(ObjectType.HeavyDriller, 47);
     shields.put(ObjectType.PlatformMissile, 47);
@@ -94,6 +90,7 @@ public abstract class Unit extends MovableObject {
   public static final double DAMAGED_EXPLOSION_RADIUS = 0.1;
   public static final double DAMAGED_EXPLOSION_TIME = 1.0;
   public static final double MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS = 0.5;
+  public static final double VISIBLE_TIME_AFTER_REVEAL = 1.0;
   public static final double EXPLOSION_RADIUS_MULTIPLIER = 1.1;
   public static final double EXPLOSION_MIN_TIME = 0.5;
   public static final double EXPLOSION_MAX_TIME = EXPLOSION_MIN_TIME * 2;
@@ -105,6 +102,9 @@ public abstract class Unit extends MovableObject {
   protected double reload_time_left;
   protected boolean firing_cannon;
   protected int shields;
+  protected boolean is_cloaked;
+  protected boolean is_visible;
+  protected double visible_time_left;
   protected boolean is_exploded;
   protected double exploding_time_left;
 
@@ -113,22 +113,19 @@ public abstract class Unit extends MovableObject {
     cannon_offset = CANNON_OFFSETS.get(type) * radius;
     shields = STARTING_SHIELDS.get(type);
     half_shields = shields / 2;
+    is_visible = true;
   }
 
   public int getShields() {
     return shields;
   }
 
-  @Override
-  public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
-          int pixels_per_cell) {
-    Point center_pixel = MapUtils.coordsToPixel(x_loc, y_loc, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
-    Image image = getImage(images);
-    Point nw_corner_pixel =
-            new Point(center_pixel.x - image.getWidth(null) / 2, center_pixel.y - image.getHeight(null) / 2);
-    g.drawImage(image, nw_corner_pixel.x, nw_corner_pixel.y, null);
-    g.setColor(Color.cyan);
-    g.drawString(String.valueOf(shields), nw_corner_pixel.x, nw_corner_pixel.y);
+  public boolean isCloaked() {
+    return is_cloaked;
+  }
+
+  public boolean isVisible() {
+    return is_visible;
   }
 
   @Override
@@ -144,6 +141,9 @@ public abstract class Unit extends MovableObject {
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
+    if (is_cloaked && is_visible && visible_time_left < 0.0) {
+      is_visible = false;
+    }
     if (shields < 0) {
       return handleDeath(s_elapsed);
     }
@@ -164,6 +164,7 @@ public abstract class Unit extends MovableObject {
 
   public void handleCooldowns(double s_elapsed) {
     reload_time_left -= s_elapsed;
+    visible_time_left -= s_elapsed;
   }
 
   public void planToFireCannon() {
@@ -173,11 +174,19 @@ public abstract class Unit extends MovableObject {
 
   public void beDamaged(int amount) {
     shields -= amount;
+    revealIfCloaked();
   }
 
   public Explosion createDamagedExplosion() {
     return new Explosion(room, x_loc + Math.random() * 2 * radius - radius, y_loc + Math.random() * 2 *
             radius - radius, DAMAGED_EXPLOSION_RADIUS, DAMAGED_EXPLOSION_TIME);
+  }
+
+  public void revealIfCloaked() {
+    if (is_cloaked) {
+      is_visible = true;
+      visible_time_left = VISIBLE_TIME_AFTER_REVEAL;
+    }
   }
 
   public MapObject handleDeath(double s_elapsed) {
@@ -194,8 +203,6 @@ public abstract class Unit extends MovableObject {
     exploding_time_left -= s_elapsed;
     return null;
   }
-
-  public abstract MapObject fireCannon();
 
   public abstract MapObject releasePowerups();
 }

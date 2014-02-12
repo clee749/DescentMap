@@ -12,6 +12,10 @@ public class BomberPilot extends RobotPilot {
   @Override
   public void initReactToPyroState() {
     super.initReactToPyroState();
+    findRandomTargetLocation();
+  }
+
+  public void findRandomTargetLocation() {
     Point2D.Double target_location =
             MapUtils.randomInternalPoint(current_room.getNWCorner(), current_room.getSECorner(),
                     bound_object_radius);
@@ -27,15 +31,31 @@ public class BomberPilot extends RobotPilot {
   }
 
   @Override
+  public PilotAction findReactToCloakedPyroAction(StrafeDirection strafe) {
+    return findReactToPyroAction(strafe);
+  }
+
+  @Override
   public void updateReactToPyroState(double s_elapsed) {
     if ((Math.abs(target_x - bound_object.getX()) < bound_object_radius && Math.abs(target_y -
             bound_object.getY()) < bound_object_radius) ||
             reaction_target_time_left < 0.0) {
-      initState(RobotPilotState.REACT_TO_PYRO);
+      findRandomTargetLocation();
+      return;
     }
-    else {
-      super.updateReactToPyroState(s_elapsed);
+    super.updateReactToPyroState(s_elapsed);
+    reaction_target_time_left -= s_elapsed;
+  }
+
+  @Override
+  public void updateReactToCloakedPyroState(double s_elapsed) {
+    if ((Math.abs(target_x - bound_object.getX()) < bound_object_radius && Math.abs(target_y -
+            bound_object.getY()) < bound_object_radius) ||
+            reaction_target_time_left < 0.0) {
+      findRandomTargetLocation();
+      return;
     }
+    super.updateReactToCloakedPyroState(s_elapsed);
     reaction_target_time_left -= s_elapsed;
   }
 }

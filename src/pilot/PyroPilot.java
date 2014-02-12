@@ -37,11 +37,18 @@ enum PyroPilotState {
   MOVE_TO_ROOM_CONNECTION,
   MOVE_TO_NEIGHBOR_ROOM,
   REACT_TO_OBJECT,
-  TURN_TO_OBJECT;
+  TURN_TO_OBJECT,
+  REACT_TO_CLOAKED_ROBOT;
 }
 
 
-public class PyroPilot extends Pilot {
+enum PyroTargetType {
+  UNIT,
+  POWERUP;
+}
+
+
+public class PyroPilot extends UnitPilot {
   private static final Point[] PRIMARY_CANNON_PREFERRED_ENERGIES = getPrimaryCannonPreferredEnergies();
 
   private static Point[] getPrimaryCannonPreferredEnergies() {
@@ -61,6 +68,9 @@ public class PyroPilot extends Pilot {
   private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
   private PyroPilotState state;
   private Pyro pyro;
+  private MapObject target_object;
+  private PyroTargetType target_type;
+  private Powerup target_powerup;
   private double time_turning_to_target;
   private TurnDirection previous_turn_to_target;
   private double respawn_delay_left;
@@ -107,10 +117,12 @@ public class PyroPilot extends Pilot {
   public void updateCurrentRoom(Room room) {
     super.updateCurrentRoom(room);
     visitRoom(room);
-    if (target_room_info != null && !room.equals(target_room_info.getValue().neighbor)) {
-      current_path.clear();
+    if (pyro.getShields() >= 0) {
+      if (target_room_info != null && !room.equals(target_room_info.getValue().neighbor)) {
+        current_path.clear();
+      }
+      initState(PyroPilotState.REACT_TO_OBJECT);
     }
-    initState(PyroPilotState.REACT_TO_OBJECT);
   }
 
   public void initState(PyroPilotState next_state) {
@@ -136,9 +148,23 @@ public class PyroPilot extends Pilot {
           initState(PyroPilotState.MOVE_TO_ROOM_CONNECTION);
           return;
         }
+        if (target_object instanceof Unit) {
+          target_unit = (Unit) target_object;
+          target_type = PyroTargetType.UNIT;
+          if (target_unit.isCloaked()) {
+            initState(PyroPilotState.REACT_TO_CLOAKED_ROBOT);
+            return;
+          }
+        }
+        else if (target_object instanceof Powerup) {
+          target_powerup = (Powerup) target_object;
+          target_type = PyroTargetType.POWERUP;
+        }
         previous_turn_to_target = TurnDirection.NONE;
         break;
       case TURN_TO_OBJECT:
+        break;
+      case REACT_TO_CLOAKED_ROBOT:
         break;
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
@@ -157,9 +183,14 @@ public class PyroPilot extends Pilot {
 
     // find targets in current_room
     for (Unit unit : current_room.getRobots()) {
+      if (!unit.isVisible()) {
+        continue;
+      }
       if (Math.abs(MapUtils.angleTo(bound_object, unit)) < DIRECTION_EPSILON) {
         fire_cannon = true;
-        if (unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
+        if ((!unit.isCloaked() || pyro.getSelectedSecondaryCannonType().equals(
+                PyroSecondaryCannon.CONCUSSION_MISSILE)) &&
+                unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
                 MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
           fire_secondary = true;
           break;
@@ -190,13 +221,18 @@ public class PyroPilot extends Pilot {
         if (angles_to_connection.x < angle_from_neighbor_to_self &&
                 angle_from_neighbor_to_self < angles_to_connection.y) {
           for (Unit unit : connection.neighbor.getRobots()) {
+            if (!unit.isVisible()) {
+              continue;
+            }
             double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, unit));
             double neighbor_angle_to_unit =
                     MapUtils.angleTo(direction_to_neighbor, unit.getX() - src_x, unit.getY() - src_y);
             if (abs_angle_to_unit < DIRECTION_EPSILON && angles_to_connection.x < neighbor_angle_to_unit &&
                     neighbor_angle_to_unit < angles_to_connection.y) {
               fire_cannon = true;
-              if (unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
+              if ((!unit.isCloaked() || pyro.getSelectedSecondaryCannonType().equals(
+                      PyroSecondaryCannon.CONCUSSION_MISSILE)) &&
+                      unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
                       MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
                 fire_secondary = true;
                 break;
@@ -247,6 +283,19 @@ public class PyroPilot extends Pilot {
       case TURN_TO_OBJECT:
         return new PilotAction(MoveDirection.NONE, strafe, angleToTurnDirection(MapUtils.angleTo(
                 bound_object, target_object)), fire_cannon, fire_secondary);
+      case REACT_TO_CLOAKED_ROBOT:
+        if (target_unit.isVisible()) {
+          target_x = target_unit.getX();
+          target_y = target_unit.getY();
+        }
+        double angle_to_target =
+                MapUtils.angleTo(bound_object.getDirection(), target_x - bound_object.getX(), target_y -
+                        bound_object.getY());
+        if (!fire_cannon && !target_unit.isVisible() && Math.abs(angle_to_target) < DIRECTION_EPSILON) {
+          fire_cannon = true;
+        }
+        return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(angle_to_target),
+                fire_cannon, fire_secondary);
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
     }
@@ -274,7 +323,7 @@ public class PyroPilot extends Pilot {
         break;
       case REACT_TO_OBJECT:
         if (!target_object.isInMap() || !target_object.getRoom().equals(current_room) ||
-                ((target_object instanceof Powerup) && !shouldCollectPowerup((Powerup) target_object))) {
+                ((target_type.equals(PyroTargetType.POWERUP)) && !shouldCollectPowerup(target_powerup))) {
           initState(PyroPilotState.REACT_TO_OBJECT);
         }
         else if (time_turning_to_target > TIME_TURNING_UNTIL_STOP) {
@@ -285,6 +334,12 @@ public class PyroPilot extends Pilot {
         if (Math.abs(MapUtils.angleTo(bound_object, target_object)) < DIRECTION_EPSILON) {
           // no need to init state because we are still targeting the same object
           state = PyroPilotState.REACT_TO_OBJECT;
+        }
+        break;
+      case REACT_TO_CLOAKED_ROBOT:
+        if (!target_object.isInMap() ||
+                (target_unit.isVisible() && !target_object.getRoom().equals(current_room))) {
+          initState(PyroPilotState.REACT_TO_OBJECT);
         }
         break;
       default:
@@ -394,9 +449,11 @@ public class PyroPilot extends Pilot {
   }
 
   public MapObject findNextTargetObject() {
-    for (Unit unit : current_room.getRobots()) {
-      if (shouldTargetObject(unit)) {
-        return unit;
+    if (!pyro.isCloaked()) {
+      for (Unit unit : current_room.getRobots()) {
+        if (unit.isVisible() && shouldTargetObject(unit)) {
+          return unit;
+        }
       }
     }
     for (Powerup powerup : current_room.getPowerups()) {
@@ -418,6 +475,8 @@ public class PyroPilot extends Pilot {
         return pyro.getShields() + Shield.SHIELD_AMOUNT <= Pyro.MAX_SHIELDS;
       case Energy:
         return pyro.getEnergy() + Energy.ENERGY_AMOUNT <= Pyro.MAX_ENERGY;
+      case Cloak:
+        return !pyro.isCloaked();
       case QuadLasers:
         return !pyro.hasQuadLasers();
       case LaserCannonPowerup:

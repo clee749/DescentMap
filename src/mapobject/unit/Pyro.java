@@ -13,12 +13,12 @@ import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
 import mapobject.powerup.HomingPack;
 import mapobject.powerup.ProximityPack;
-import mapobject.powerup.Shield;
 import mapobject.shot.Shot;
 import pilot.Pilot;
 import pilot.PilotAction;
 import pilot.PyroPilot;
 import pilot.TurnDirection;
+import pilot.UnitPilot;
 import pyro.PyroPrimaryCannon;
 import pyro.PyroSecondaryCannon;
 import structure.Room;
@@ -169,6 +169,9 @@ public class Pyro extends Unit {
   private double death_spin_direction;
   private double death_spin_delta_direction;
 
+  // misc
+  private double cloak_time_left;
+
   public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(Unit.getRadius(ObjectType.Pyro), pilot, room, x_loc, y_loc, direction);
     outer_cannon_offset = OUTER_CANNON_OFFSET_FRACTION * radius;
@@ -258,11 +261,21 @@ public class Pyro extends Unit {
   @Override
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
-    paintShield(g, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
-    super.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+    if (!is_cloaked) {
+      Point center_pixel = MapUtils.coordsToPixel(x_loc, y_loc, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      Image image = getImage(images);
+      Point nw_corner_pixel =
+              new Point(center_pixel.x - image.getWidth(null) / 2, center_pixel.y - image.getHeight(null) / 2);
+      g.drawImage(image, nw_corner_pixel.x, nw_corner_pixel.y, null);
+      paintShield(g, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+    }
+    else {
+      g.setColor(Color.magenta);
+      g.drawString(String.valueOf((int) cloak_time_left), 100, 20);
+    }
     Point target_pixel =
-            MapUtils.coordsToPixel(pilot.getTargetX(), pilot.getTargetY(), ref_cell, ref_cell_nw_pixel,
-                    pixels_per_cell);
+            MapUtils.coordsToPixel(((UnitPilot) pilot).getTargetX(), ((UnitPilot) pilot).getTargetY(),
+                    ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     g.setColor(Color.yellow);
     g.drawRect(target_pixel.x - 1, target_pixel.y - 1, 2, 2);
   }
@@ -332,6 +345,7 @@ public class Pyro extends Unit {
   @Override
   public void planNextAction(double s_elapsed) {
     if (shields < 0) {
+      handleCooldowns(s_elapsed);
       next_action = PilotAction.MOVE_FORWARD;
       return;
     }
@@ -351,6 +365,10 @@ public class Pyro extends Unit {
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
+    if (cloak_time_left < 0.0) {
+      is_cloaked = false;
+      is_visible = true;
+    }
     if (shields < 0) {
       return doNextDeathSpinAction(engine, s_elapsed);
     }
@@ -407,13 +425,14 @@ public class Pyro extends Unit {
     super.handleCooldowns(s_elapsed);
     secondary_reload_time_left -= s_elapsed;
     energy_recharge_cooldown_left -= s_elapsed;
+    cloak_time_left -= s_elapsed;
   }
 
-  @Override
   public MapObject fireCannon() {
     if (energy < primary_energy_cost) {
       return null;
     }
+    revealIfCloaked();
     MultipleObject shots = new MultipleObject();
     Point2D.Double abs_offset = MapUtils.perpendicularVector(cannon_offset, direction);
     shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc + abs_offset.x,
@@ -438,6 +457,7 @@ public class Pyro extends Unit {
     if (ammo < 1) {
       return null;
     }
+    revealIfCloaked();
     MapObject shot;
     if (selected_secondary_cannon_type.equals(PyroSecondaryCannon.CONCUSSION_MISSILE) ||
             selected_secondary_cannon_type.equals(PyroSecondaryCannon.HOMING_MISSILE)) {
@@ -472,10 +492,11 @@ public class Pyro extends Unit {
   public MapObject releasePowerups() {
     MultipleObject powerups = new MultipleObject();
     powerups.addObject(PowerupFactory.newPowerup(ObjectType.Shield, room, x_loc, y_loc));
-    shields -= Shield.SHIELD_AMOUNT;
     if (energy >= Energy.ENERGY_AMOUNT) {
       powerups.addObject(PowerupFactory.newPowerup(ObjectType.Energy, room, x_loc, y_loc));
-      energy -= Energy.ENERGY_AMOUNT;
+    }
+    if (is_cloaked) {
+      powerups.addObject(PowerupFactory.newPowerup(ObjectType.Cloak, room, x_loc, y_loc));
     }
     if (has_quad_lasers) {
       powerups.addObject(PowerupFactory.newPowerup(ObjectType.QuadLasers, room, x_loc, y_loc));
@@ -517,6 +538,17 @@ public class Pyro extends Unit {
   public boolean acquireEnergy(int amount) {
     if (energy < MAX_ENERGY) {
       energy = Math.min(energy + amount, MAX_ENERGY);
+      return true;
+    }
+    return false;
+  }
+
+  public boolean acquireCloak(double time) {
+    if (!is_cloaked) {
+      is_cloaked = true;
+      is_visible = false;
+      cloak_time_left = time;
+      visible_time_left = 0.0;
       return true;
     }
     return false;

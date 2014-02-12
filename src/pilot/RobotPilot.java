@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import mapobject.powerup.Cloak;
 import mapobject.unit.Pyro;
 import structure.Room;
 import structure.RoomConnection;
@@ -20,11 +21,12 @@ enum RobotPilotState {
   MOVE_INTO_ROOM,
   TURN_TO_ROOM_INTERIOR,
   MOVE_TO_ROOM_INTERIOR,
-  REACT_TO_PYRO;
+  REACT_TO_PYRO,
+  REACT_TO_CLOAKED_PYRO;
 }
 
 
-public class RobotPilot extends Pilot {
+public class RobotPilot extends UnitPilot {
   public static final double TARGET_DIRECTION_EPSILON = MapUtils.PI_OVER_TWO;
   public static final double MIN_DISTANCE_TO_PYRO = 1.0;
   public static final double START_EXPLORE_PROB = 0.1;
@@ -32,6 +34,7 @@ public class RobotPilot extends Pilot {
 
   protected RobotPilotState state;
   protected Room previous_exploration_room;
+  protected double react_to_cloaked_pyro_time_left;
 
   public RobotPilot() {
     state = RobotPilotState.INACTIVE;
@@ -64,7 +67,7 @@ public class RobotPilot extends Pilot {
         break;
       case TURN_INTO_ROOM:
         planMoveToNeighborRoom(target_room_info.getKey(), bound_object_diameter);
-        planTurnIntoRoom(target_room_info.getKey());
+        planTurnToTarget();
         break;
       case MOVE_INTO_ROOM:
         break;
@@ -80,6 +83,9 @@ public class RobotPilot extends Pilot {
       case REACT_TO_PYRO:
         initReactToPyroState();
         break;
+      case REACT_TO_CLOAKED_PYRO:
+        initReactToCloakedPyroState();
+        break;
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
     }
@@ -88,6 +94,13 @@ public class RobotPilot extends Pilot {
 
   public void initReactToPyroState() {
     previous_exploration_room = null;
+  }
+
+  public void initReactToCloakedPyroState() {
+    previous_exploration_room = null;
+    target_x = target_unit.getX();
+    target_y = target_unit.getY();
+    react_to_cloaked_pyro_time_left = Cloak.CLOAK_TIME;
   }
 
   @Override
@@ -117,6 +130,9 @@ public class RobotPilot extends Pilot {
                 bound_object.getDirection(), target_x - bound_object.getX(), target_y - bound_object.getY())));
       case REACT_TO_PYRO:
         return findReactToPyroAction(strafe);
+      case REACT_TO_CLOAKED_PYRO:
+        react_to_cloaked_pyro_time_left -= s_elapsed;
+        return findReactToCloakedPyroAction(strafe);
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
     }
@@ -124,14 +140,26 @@ public class RobotPilot extends Pilot {
 
   public PilotAction findReactToPyroAction(StrafeDirection strafe) {
     MoveDirection move =
-            (Math.abs(target_object.getX() - bound_object.getX()) < MIN_DISTANCE_TO_PYRO &&
-                    Math.abs(target_object.getY() - bound_object.getY()) < MIN_DISTANCE_TO_PYRO
+            (Math.abs(target_unit.getX() - bound_object.getX()) < MIN_DISTANCE_TO_PYRO &&
+                    Math.abs(target_unit.getY() - bound_object.getY()) < MIN_DISTANCE_TO_PYRO
                     ? MoveDirection.BACKWARD
                     : MoveDirection.FORWARD);
-    double angle_to_target = MapUtils.angleTo(bound_object, target_object);
+    double angle_to_target = MapUtils.angleTo(bound_object, target_unit);
     double abs_angle_to_target = Math.abs(angle_to_target);
     if (abs_angle_to_target < TARGET_DIRECTION_EPSILON) {
       return new PilotAction(move, strafe, angleToTurnDirection(angle_to_target),
+              abs_angle_to_target < DIRECTION_EPSILON);
+    }
+    return new PilotAction(strafe, angleToTurnDirection(angle_to_target));
+  }
+
+  public PilotAction findReactToCloakedPyroAction(StrafeDirection strafe) {
+    double dx = target_x - bound_object.getX();
+    double dy = target_y - bound_object.getY();
+    double angle_to_target = MapUtils.angleTo(bound_object.getDirection(), dx, dy);
+    double abs_angle_to_target = Math.abs(angle_to_target);
+    if (abs_angle_to_target < TARGET_DIRECTION_EPSILON) {
+      return new PilotAction(strafe, angleToTurnDirection(angle_to_target),
               abs_angle_to_target < DIRECTION_EPSILON);
     }
     return new PilotAction(strafe, angleToTurnDirection(angle_to_target));
@@ -142,21 +170,25 @@ public class RobotPilot extends Pilot {
     if (!state.equals(RobotPilotState.REACT_TO_PYRO)) {
       // look for a Pyro in the same Room
       for (Pyro pyro : current_room.getPyros()) {
-        target_object = pyro;
-        target_object_room = pyro.getRoom();
-        initState(RobotPilotState.REACT_TO_PYRO);
-        return;
+        if (pyro.isVisible()) {
+          target_unit = pyro;
+          target_object_room = pyro.getRoom();
+          initState(pyro.isCloaked() ? RobotPilotState.REACT_TO_CLOAKED_PYRO : RobotPilotState.REACT_TO_PYRO);
+          return;
+        }
       }
 
       // look for a visible Pyro in a neighbor Room
       for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
         RoomConnection connection = entry.getValue();
         for (Pyro pyro : connection.neighbor.getPyros()) {
-          if (MapUtils.canSeeObjectInNeighborRoom(bound_object, pyro, entry.getKey())) {
-            target_object = pyro;
+          if (pyro.isVisible() && MapUtils.canSeeObjectInNeighborRoom(bound_object, pyro, entry.getKey())) {
+            target_unit = pyro;
             target_object_room = connection.neighbor;
             target_object_room_info = entry;
-            initState(RobotPilotState.REACT_TO_PYRO);
+            initState(pyro.isCloaked()
+                    ? RobotPilotState.REACT_TO_CLOAKED_PYRO
+                    : RobotPilotState.REACT_TO_PYRO);
             return;
           }
         }
@@ -210,24 +242,66 @@ public class RobotPilot extends Pilot {
       case REACT_TO_PYRO:
         updateReactToPyroState(s_elapsed);
         break;
+      case REACT_TO_CLOAKED_PYRO:
+        if (react_to_cloaked_pyro_time_left < 0.0) {
+          initState(RobotPilotState.INACTIVE);
+          return;
+        }
+        updateReactToCloakedPyroState(s_elapsed);
+        break;
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
     }
   }
 
   public void updateReactToPyroState(double s_elapsed) {
-    if (!target_object.isInMap()) {
+    if (!target_unit.isInMap()) {
       initState(RobotPilotState.INACTIVE);
     }
     else if (target_object_room.equals(current_room)) {
-      if (!target_object.getRoom().equals(target_object_room)) {
+      if (!target_unit.getRoom().equals(target_object_room)) {
         initState(RobotPilotState.INACTIVE);
       }
+      else if (target_unit.isCloaked()) {
+        initState(RobotPilotState.REACT_TO_CLOAKED_PYRO);
+      }
     }
-    else if (!target_object.getRoom().equals(target_object_room) ||
-            !MapUtils.canSeeObjectInNeighborRoom(bound_object, target_object,
-                    target_object_room_info.getKey())) {
+    else {
+      if (!target_unit.getRoom().equals(target_object_room) ||
+              !MapUtils.canSeeObjectInNeighborRoom(bound_object, target_unit,
+                      target_object_room_info.getKey())) {
+        initState(RobotPilotState.INACTIVE);
+      }
+      else if (target_unit.isCloaked()) {
+        initState(RobotPilotState.REACT_TO_CLOAKED_PYRO);
+      }
+    }
+  }
+
+  public void updateReactToCloakedPyroState(double s_elapsed) {
+    if (!target_unit.isVisible()) {
+      return;
+    }
+    if (!target_unit.isInMap()) {
       initState(RobotPilotState.INACTIVE);
+    }
+    else if (target_object_room.equals(current_room)) {
+      if (target_unit.getRoom().equals(target_object_room)) {
+        if (!target_unit.isCloaked()) {
+          initState(RobotPilotState.REACT_TO_PYRO);
+          return;
+        }
+        target_x = target_unit.getX();
+        target_y = target_unit.getY();
+      }
+    }
+    else if (MapUtils.canSeeObjectInNeighborRoom(bound_object, target_unit, target_object_room_info.getKey())) {
+      if (!target_unit.isCloaked()) {
+        initState(RobotPilotState.REACT_TO_PYRO);
+        return;
+      }
+      target_x = target_unit.getX();
+      target_y = target_unit.getY();
     }
   }
 

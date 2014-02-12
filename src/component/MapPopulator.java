@@ -33,10 +33,11 @@ public class MapPopulator {
   // robots
   public static final int ALL_ROBOTS_MIN_ROOM_AREA = 50;
   public static final double ROBOT_PLACEMENT_PROB = 0.5;
-  public static final ObjectType[] ROBOTS_TO_POPULATE = {ObjectType.Bomber, ObjectType.Class1Drone,
-          ObjectType.Class2Drone, ObjectType.DefenseRobot, ObjectType.HeavyDriller, ObjectType.HeavyHulk,
-          ObjectType.LightHulk, ObjectType.MediumHulk, ObjectType.PlatformLaser, ObjectType.PlatformMissile,
-          ObjectType.SecondaryLifter, ObjectType.Spider};
+  public static final ObjectType[] ROBOTS_TO_POPULATE =
+          {ObjectType.Bomber, ObjectType.Class1Drone, ObjectType.Class2Drone, ObjectType.DefenseRobot,
+                  ObjectType.HeavyDriller, ObjectType.HeavyHulk, ObjectType.LightHulk, ObjectType.MediumHulk,
+                  ObjectType.MediumHulkCloaked, ObjectType.PlatformLaser, ObjectType.PlatformMissile,
+                  ObjectType.SecondaryLifter, ObjectType.Spider};
 
   protected MapPopulator() {
 

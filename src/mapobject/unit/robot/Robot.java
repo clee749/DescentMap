@@ -2,6 +2,7 @@ package mapobject.unit.robot;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import mapobject.MapObject;
 import mapobject.unit.Unit;
 import pilot.Pilot;
 import pilot.RobotPilot;
+import pilot.UnitPilot;
 import structure.Room;
 import util.MapUtils;
 import cannon.Cannon;
@@ -36,6 +38,7 @@ public abstract class Robot extends Unit {
     times.put(ObjectType.SecondaryLifter, 2.0);
     times.put(ObjectType.Spider, 2.0);
     times.put(ObjectType.MediumHulk, 3.0);
+    times.put(ObjectType.MediumHulkCloaked, 3.0);
     times.put(ObjectType.PlatformMissile, 4.0);
     times.put(ObjectType.Bomber, 5.0);
     return times;
@@ -50,6 +53,7 @@ public abstract class Robot extends Unit {
     shots.put(ObjectType.Class2Drone, 2);
     shots.put(ObjectType.LightHulk, 2);
     shots.put(ObjectType.MediumHulk, 2);
+    shots.put(ObjectType.MediumHulkCloaked, 2);
     shots.put(ObjectType.SecondaryLifter, 2);
     shots.put(ObjectType.HeavyDriller, 3);
     shots.put(ObjectType.PlatformMissile, 3);
@@ -85,10 +89,18 @@ public abstract class Robot extends Unit {
   @Override
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
-    super.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+    Point center_pixel = MapUtils.coordsToPixel(x_loc, y_loc, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+    Image image = getImage(images);
+    Point nw_corner_pixel =
+            new Point(center_pixel.x - image.getWidth(null) / 2, center_pixel.y - image.getHeight(null) / 2);
+    if (is_visible) {
+      g.drawImage(image, nw_corner_pixel.x, nw_corner_pixel.y, null);
+      g.setColor(Color.cyan);
+      g.drawString(String.valueOf(shields), nw_corner_pixel.x, nw_corner_pixel.y);
+    }
     Point target_pixel =
-            MapUtils.coordsToPixel(pilot.getTargetX(), pilot.getTargetY(), ref_cell, ref_cell_nw_pixel,
-                    pixels_per_cell);
+            MapUtils.coordsToPixel(((UnitPilot) pilot).getTargetX(), ((UnitPilot) pilot).getTargetY(),
+                    ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     g.setColor(Color.orange);
     g.drawRect(target_pixel.x - 1, target_pixel.y - 1, 2, 2);
   }
@@ -136,22 +148,22 @@ public abstract class Robot extends Unit {
   }
 
   @Override
-  public MapObject fireCannon() {
-    ++cannon_side;
-    Point2D.Double abs_offset = MapUtils.perpendicularVector(cannon_offset, direction);
-    if (cannon_side % 2 == 0) {
-      return cannon.fireCannon(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y, direction);
-    }
-    return cannon.fireCannon(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y, direction);
+  public void beDamaged(int amount) {
+    super.beDamaged(amount);
+    tempDisable(amount * DISABLE_TIME_PER_DAMAGE);
   }
 
   public void tempDisable(double inactive_time) {
     inactive_time_left = Math.max(inactive_time_left, inactive_time);
   }
 
-  @Override
-  public void beDamaged(int amount) {
-    super.beDamaged(amount);
-    tempDisable(amount * DISABLE_TIME_PER_DAMAGE);
+  public MapObject fireCannon() {
+    revealIfCloaked();
+    ++cannon_side;
+    Point2D.Double abs_offset = MapUtils.perpendicularVector(cannon_offset, direction);
+    if (cannon_side % 2 == 0) {
+      return cannon.fireCannon(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y, direction);
+    }
+    return cannon.fireCannon(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y, direction);
   }
 }

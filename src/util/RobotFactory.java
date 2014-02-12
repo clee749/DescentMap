@@ -9,6 +9,7 @@ import mapobject.unit.robot.HeavyDriller;
 import mapobject.unit.robot.HeavyHulk;
 import mapobject.unit.robot.LightHulk;
 import mapobject.unit.robot.MediumHulk;
+import mapobject.unit.robot.MediumHulkCloaked;
 import mapobject.unit.robot.PlatformLaser;
 import mapobject.unit.robot.PlatformMissile;
 import mapobject.unit.robot.Robot;
@@ -44,6 +45,8 @@ public class RobotFactory {
         return new LightHulk(room, x_loc, y_loc, direction);
       case MediumHulk:
         return new MediumHulk(room, x_loc, y_loc, direction);
+      case MediumHulkCloaked:
+        return new MediumHulkCloaked(room, x_loc, y_loc, direction);
       case PlatformLaser:
         return new PlatformLaser(room, x_loc, y_loc, direction);
       case PlatformMissile:

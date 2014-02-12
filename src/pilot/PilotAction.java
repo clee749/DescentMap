@@ -42,6 +42,10 @@ public class PilotAction {
     this(move, StrafeDirection.NONE, turn, fire_cannon, false);
   }
 
+  public PilotAction(StrafeDirection strafe, TurnDirection turn, boolean fire_cannon) {
+    this(MoveDirection.NONE, strafe, turn, fire_cannon, false);
+  }
+
   public PilotAction(MoveDirection move, StrafeDirection strafe, TurnDirection turn, boolean fire_cannon) {
     this(move, strafe, turn, fire_cannon, false);
   }
