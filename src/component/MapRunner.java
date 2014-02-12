@@ -130,13 +130,13 @@ public class MapRunner {
     JFrame frame = new JFrame();
     MapPanel panel = new MapPanel();
     Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-    frame.setSize(screen.width, screen.height - 50);
-    frame.setTitle("MAP");
-    frame.add(panel);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setMinimumSize(new Dimension(100, 100));
+    frame.setSize(screen.width, screen.height - 50);
+    frame.setTitle("MAP");
     frame.setVisible(true);
-    panel.handleComponentResized();
+    frame.add(panel);
+    frame.addComponentListener(panel);
 
     for (int level = 1; level <= DEFAULT_NUM_LEVELS; ++level) {
       System.out.print(String.format("Mine MN%04d: ", (int) Math.pow(level, 3)));

@@ -26,9 +26,9 @@ public class MapPanel extends JPanel implements ComponentListener, MapDisplayer 
   public static final int SIGHT_RADIUS = 3;
 
   private final ImageHandler images;
-  private DisplayMode display_mode;
   private final MapConstructionDisplayer construction_displayer;
   private final MapPlayDisplayer play_displayer;
+  private DisplayMode display_mode;
 
   public MapPanel() {
     images = new ImageHandler();
