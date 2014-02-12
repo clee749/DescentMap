@@ -146,6 +146,7 @@ public class ImageHandler {
   private HashMap<String, ArrayList<Image>> images;
 
   public void loadImages(String path, int pixels_per_cell) throws IOException {
+    System.out.print("Loading images...");
     images = new HashMap<String, ArrayList<Image>>();
     for (ObjectType type : ObjectType.POWERUPS) {
       loadAnimatedGif(path, type.name(), pixels_per_cell, Powerup.RADIUS);
@@ -171,6 +172,7 @@ public class ImageHandler {
     }
     loadRotatedImages(path, "Pyro", pixels_per_cell, Unit.getRadius(ObjectType.Pyro));
     loadAnimatedGif(path, "ProximityBomb", pixels_per_cell, ProximityBomb.RADIUS);
+    System.out.println("Done!");
   }
 
   public void loadImages(int pixels_per_cell) throws IOException {

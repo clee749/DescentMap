@@ -136,6 +136,7 @@ public class MapRunner {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setMinimumSize(new Dimension(100, 100));
     frame.setVisible(true);
+    panel.handleComponentResized();
 
     for (int level = 1; level <= DEFAULT_NUM_LEVELS; ++level) {
       System.out.print(String.format("Mine MN%04d: ", (int) Math.pow(level, 3)));

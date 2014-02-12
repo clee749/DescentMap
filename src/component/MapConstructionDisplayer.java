@@ -10,12 +10,12 @@ import structure.Room;
 public class MapConstructionDisplayer {
   public static final int MIN_SIGHT_DIAMETER = 10;
 
-  private final DescentMap map;
+  private DescentMap map;
   private int pixels_per_cell;
   private Point ref_cell;
   private Point ref_cell_nw_pixel;
 
-  public MapConstructionDisplayer(DescentMap map) {
+  public void setMap(DescentMap map) {
     this.map = map;
   }
 

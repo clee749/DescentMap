@@ -5,12 +5,15 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.io.IOException;
 
 import javax.swing.JPanel;
 
 import structure.DescentMap;
 
 import common.DescentMapException;
+
+import external.ImageHandler;
 
 enum DisplayMode {
   CONSTRUCTION,
@@ -22,15 +25,22 @@ public class MapPanel extends JPanel implements ComponentListener, MapDisplayer 
   public static final Color BACKGROUND_COLOR = Color.black;
   public static final int SIGHT_RADIUS = 3;
 
+  private final ImageHandler images;
   private DisplayMode display_mode;
-  private MapConstructionDisplayer construction_displayer;
-  private MapPlayDisplayer play_displayer;
+  private final MapConstructionDisplayer construction_displayer;
+  private final MapPlayDisplayer play_displayer;
+
+  public MapPanel() {
+    images = new ImageHandler();
+    construction_displayer = new MapConstructionDisplayer();
+    play_displayer = new MapPlayDisplayer(images, SIGHT_RADIUS);
+  }
 
   @Override
   public void setMap(DescentMap map) {
     display_mode = DisplayMode.CONSTRUCTION;
-    construction_displayer = new MapConstructionDisplayer(map);
-    play_displayer = new MapPlayDisplayer(map, SIGHT_RADIUS);
+    construction_displayer.setMap(map);
+    play_displayer.setMap(map);
     play_displayer.setSizes(getSize());
   }
 
@@ -60,6 +70,12 @@ public class MapPanel extends JPanel implements ComponentListener, MapDisplayer 
 
   public void handleComponentResized() {
     play_displayer.setSizes(getSize());
+    try {
+      images.loadImages(play_displayer.getPixelsPerCell());
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
