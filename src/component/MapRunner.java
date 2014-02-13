@@ -31,20 +31,16 @@ public class MapRunner {
   public static final long PAUSE_AFTER_PLAY_SLEEP = 1000;
 
   private final MapDisplayer displayer;
-  private final DescentMap map;
+  private DescentMap map;
   private MapEngine engine;
   private RunnerState state;
   private long target_sleep_ms;
   private long last_update_time;
   private int num_build_steps;
+  private boolean is_paused;
 
   public MapRunner(MapDisplayer displayer) {
     this.displayer = displayer;
-    map = new DescentMap(DEFAULT_MAX_ROOM_SIZE);
-    state = RunnerState.BUILD_MAP;
-    target_sleep_ms = BUILD_SLEEP;
-    last_update_time = 0L;
-    num_build_steps = 0;
   }
 
   public DescentMap getMap() {
@@ -55,11 +51,26 @@ public class MapRunner {
     return state;
   }
 
+  public void setPaused(boolean is_paused) {
+    this.is_paused = is_paused;
+  }
+
+  public void newLevel() {
+    map = new DescentMap(DEFAULT_MAX_ROOM_SIZE);
+    state = RunnerState.BUILD_MAP;
+    target_sleep_ms = BUILD_SLEEP;
+    last_update_time = 0L;
+    num_build_steps = 0;
+  }
+
   public void sleepAfterStep() throws InterruptedException {
     Thread.sleep(target_sleep_ms);
   }
 
   public boolean doNextStep() {
+    if (is_paused) {
+      return false;
+    }
     long ms_elapsed = System.currentTimeMillis() - last_update_time;
     if (ms_elapsed < target_sleep_ms) {
       return false;
@@ -129,6 +140,8 @@ public class MapRunner {
   public static void main(String[] args) throws InterruptedException {
     JFrame frame = new JFrame();
     MapPanel panel = new MapPanel();
+    MapRunner runner = new MapRunner(panel);
+    panel.setRunner(runner);
     Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setMinimumSize(new Dimension(100, 100));
@@ -140,8 +153,8 @@ public class MapRunner {
 
     for (int level = 1; level <= DEFAULT_NUM_LEVELS; ++level) {
       System.out.print(String.format("Mine MN%04d: ", (int) Math.pow(level, 3)));
-      MapRunner runner = new MapRunner(panel);
-      panel.setMap(runner.getMap());
+      runner.newLevel();
+      panel.setNewMap(runner.getMap());
       do {
         if (runner.doNextStep()) {
           panel.repaint();

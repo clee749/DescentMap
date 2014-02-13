@@ -5,7 +5,9 @@ import java.awt.Graphics;
 import structure.DescentMap;
 
 public interface MapDisplayer {
-  public void setMap(DescentMap map);
+  public void setRunner(MapRunner runner);
+
+  public void setNewMap(DescentMap map);
 
   public void finishBuildingMap();
 

@@ -28,6 +28,7 @@ public class MapPanel extends JPanel implements ComponentListener, MapDisplayer 
   private final ImageHandler images;
   private final MapConstructionDisplayer construction_displayer;
   private final MapPlayDisplayer play_displayer;
+  private MapRunner runner;
   private DisplayMode display_mode;
 
   public MapPanel() {
@@ -37,11 +38,16 @@ public class MapPanel extends JPanel implements ComponentListener, MapDisplayer 
   }
 
   @Override
-  public void setMap(DescentMap map) {
+  public void setRunner(MapRunner runner) {
+    this.runner = runner;
+  }
+
+  @Override
+  public void setNewMap(DescentMap map) {
     display_mode = DisplayMode.CONSTRUCTION;
+    map = runner.getMap();
     construction_displayer.setMap(map);
     play_displayer.setMap(map);
-    play_displayer.setSizes(getSize());
   }
 
   @Override
@@ -69,13 +75,19 @@ public class MapPanel extends JPanel implements ComponentListener, MapDisplayer 
   }
 
   public void handleComponentResized() {
+    runner.setPaused(true);
+    int old_pixels_per_cell = play_displayer.getPixelsPerCell();
     play_displayer.setSizes(getSize());
-    try {
-      images.loadImages(play_displayer.getPixelsPerCell());
+    int new_pixels_per_cell = play_displayer.getPixelsPerCell();
+    if (new_pixels_per_cell != old_pixels_per_cell) {
+      try {
+        images.loadImages(play_displayer.getPixelsPerCell());
+      }
+      catch (IOException e) {
+        e.printStackTrace();
+      }
     }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
+    runner.setPaused(false);
   }
 
   @Override
