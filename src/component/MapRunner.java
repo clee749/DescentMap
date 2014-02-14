@@ -2,9 +2,11 @@ package component;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.util.LinkedList;
 
 import javax.swing.JFrame;
 
+import mapobject.unit.Pyro;
 import structure.DescentMap;
 
 import common.DescentMapException;
@@ -20,9 +22,10 @@ enum RunnerState {
 
 
 public class MapRunner {
-  public static final int DEFAULT_MAX_ROOM_SIZE = 10;
-  public static final int DEFAULT_MAX_NUM_ROOMS = 10;
-  public static final int DEFAULT_NUM_LEVELS = 5;
+  public static final int MAX_ROOM_SIZE = 10;
+  public static final int MAX_NUM_ROOMS = 10;
+  public static final int NUM_LEVELS = 5;
+  public static final int NUM_PYROS = 1;
   public static final long BUILD_SLEEP = 100;
   public static final long PAUSE_AFTER_BUILD_SLEEP = 1000;
   public static final long PAUSE_BEFORE_PLAY_SLEEP = 1000;
@@ -31,6 +34,7 @@ public class MapRunner {
   public static final long PAUSE_AFTER_PLAY_SLEEP = 1000;
 
   private final MapDisplayer displayer;
+  private final LinkedList<Pyro> pyros;
   private DescentMap map;
   private MapEngine engine;
   private RunnerState state;
@@ -41,6 +45,8 @@ public class MapRunner {
 
   public MapRunner(MapDisplayer displayer) {
     this.displayer = displayer;
+    displayer.setRunner(this);
+    pyros = new LinkedList<Pyro>();
   }
 
   public DescentMap getMap() {
@@ -56,7 +62,8 @@ public class MapRunner {
   }
 
   public void newLevel() {
-    map = new DescentMap(DEFAULT_MAX_ROOM_SIZE);
+    map = new DescentMap(MAX_ROOM_SIZE);
+    displayer.setNewMap(map);
     state = RunnerState.BUILD_MAP;
     target_sleep_ms = BUILD_SLEEP;
     last_update_time = 0L;
@@ -99,7 +106,7 @@ public class MapRunner {
   }
 
   public void doBuildStep() {
-    if (num_build_steps < DEFAULT_MAX_NUM_ROOMS) {
+    if (num_build_steps < MAX_NUM_ROOMS) {
       map.addRoom();
       ++num_build_steps;
     }
@@ -107,7 +114,16 @@ public class MapRunner {
       map.finishBuildingMap();
       MapPopulator.populateMap(map);
       engine = new MapEngine(map);
-      engine.injectPyro(true);
+      if (pyros.isEmpty()) {
+        for (int count = 0; count < NUM_PYROS; ++count) {
+          engine.spawnPyro(count == 0 ? true : false);
+        }
+      }
+      else {
+        for (int count = 0; count < pyros.size(); ++count) {
+          engine.spawnPyro(pyros.get(count), (count == 0 ? true : false));
+        }
+      }
       state = RunnerState.PAUSE_AFTER_BUILD;
       target_sleep_ms = PAUSE_AFTER_BUILD_SLEEP;
     }
@@ -135,13 +151,17 @@ public class MapRunner {
 
   public void doPauseAfterPlayStep() {
     state = RunnerState.COMPLETE;
+    if (pyros.isEmpty()) {
+      for (Pyro pyro : engine.getCreatedPyros()) {
+        pyros.add(pyro);
+      }
+    }
   }
 
   public static void main(String[] args) throws InterruptedException {
     JFrame frame = new JFrame();
     MapPanel panel = new MapPanel();
     MapRunner runner = new MapRunner(panel);
-    panel.setRunner(runner);
     Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setMinimumSize(new Dimension(100, 100));
@@ -151,10 +171,9 @@ public class MapRunner {
     frame.add(panel);
     frame.addComponentListener(panel);
 
-    for (int level = 1; level <= DEFAULT_NUM_LEVELS; ++level) {
+    for (int level = 1; level <= NUM_LEVELS; ++level) {
       System.out.print(String.format("Mine MN%04d: ", (int) Math.pow(level, 3)));
       runner.newLevel();
-      panel.setNewMap(runner.getMap());
       do {
         if (runner.doNextStep()) {
           panel.repaint();

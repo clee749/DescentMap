@@ -148,7 +148,7 @@ public class Pyro extends Unit {
   private double energy_recharge_cooldown_left;
   private double energy;
   private boolean has_quad_lasers;
-  private final Cannon[] primary_cannons;
+  private Cannon[] primary_cannons;
   private Cannon selected_primary_cannon;
   private PyroPrimaryCannon selected_primary_cannon_type;
   private double primary_energy_cost;
@@ -159,7 +159,7 @@ public class Pyro extends Unit {
   private boolean firing_secondary;
   private int missile_side;
   private final Cannon[] secondary_cannons;
-  private final int[] secondary_ammo;
+  private int[] secondary_ammo;
   private Cannon selected_secondary_cannon;
   private PyroSecondaryCannon selected_secondary_cannon_type;
 
@@ -170,6 +170,8 @@ public class Pyro extends Unit {
   private double death_spin_delta_direction;
 
   // misc
+  private final int starting_shields;
+  private final double max_move_speed;
   private double cloak_time_left;
 
   public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
@@ -177,24 +179,65 @@ public class Pyro extends Unit {
     outer_cannon_offset = OUTER_CANNON_OFFSET_FRACTION * radius;
     cannon_forward_offset = CANNON_FORWARD_OFFSET_FRACTION * radius;
     missile_offset = MISSILE_OFFSET_FRACTION * radius;
+    secondary_cannons = PyroSecondaryCannon.createCannons();
+    starting_shields = shields;
+    max_move_speed = move_speed;
+    spawnNew();
+  }
+
+  public Pyro(Room room, double x_loc, double y_loc, double direction) {
+    this(new PyroPilot(), room, x_loc, y_loc, direction);
+  }
+
+  public void spawnNew() {
+    is_in_map = true;
+    move_speed = max_move_speed;
+    shields = starting_shields;
     energy = MIN_STARTING_ENERGY;
-    selected_primary_cannon = new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 1);
     primary_cannons = new Cannon[PyroPrimaryCannon.values().length];
+    selected_primary_cannon = new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 1);
     primary_cannons[PyroPrimaryCannon.LASER.ordinal()] = selected_primary_cannon;
     setPrimaryCannonInfo(PyroPrimaryCannon.LASER);
     missile_side = (int) (Math.random() * 2);
-    secondary_cannons = PyroSecondaryCannon.createCannons();
     secondary_ammo = new int[PyroSecondaryCannon.values().length];
     secondary_ammo[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()] = MIN_STARTING_CONCUSSION_MISSILES;
     selected_secondary_cannon = new ConcussionMissileCannon(Shot.getDamage(ObjectType.ConcussionMissile));
     selected_secondary_cannon_type = PyroSecondaryCannon.CONCUSSION_MISSILE;
     secondary_reload_time = SECONDARY_RELOAD_TIMES[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()];
-    ((PyroPilot) pilot).startPilot();
+    has_quad_lasers = false;
+    death_spin_started = false;
     secondary_ammo[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] = MIN_STARTING_CONCUSSION_MISSILES;
   }
 
-  public Pyro(Room room, double x_loc, double y_loc, double direction) {
-    this(new PyroPilot(), room, x_loc, y_loc, direction);
+  public void spawn(Room room, double x_loc, double y_loc, double direction) {
+    this.room = room;
+    this.x_loc = x_loc;
+    this.y_loc = y_loc;
+    this.direction = direction;
+    is_visible = true;
+    reload_time_left = 0.0;
+    firing_cannon = false;
+    is_cloaked = false;
+    is_exploded = false;
+    energy_recharge_cooldown_left = 0.0;
+    secondary_reload_time_left = 0.0;
+    firing_secondary = false;
+    if (death_spin_started) {
+      spawnNew();
+    }
+    else {
+      shields = Math.max(shields, starting_shields);
+      energy = Math.max(energy, MIN_STARTING_ENERGY);
+      secondary_ammo[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()] =
+              Math.max(secondary_ammo[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()],
+                      MIN_STARTING_CONCUSSION_MISSILES);
+      ((PyroPilot) pilot).newLevel();
+      secondary_ammo[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] =
+              Math.max(secondary_ammo[PyroSecondaryCannon.HOMING_MISSILE.ordinal()],
+                      MIN_STARTING_CONCUSSION_MISSILES);
+    }
+    pilot.updateCurrentRoom(room);
+    ((PyroPilot) pilot).startPilot();
   }
 
   @Override
@@ -248,6 +291,14 @@ public class Pyro extends Unit {
   public void setSecondaryCannonInfo(PyroSecondaryCannon cannon_type) {
     secondary_reload_time = SECONDARY_RELOAD_TIMES[cannon_type.ordinal()];
     selected_secondary_cannon_type = cannon_type;
+  }
+
+  public boolean isReadyToRespawn() {
+    return ((PyroPilot) pilot).isReadyToRespawn();
+  }
+
+  public void handleRespawnDelay(double s_elapsed) {
+    ((PyroPilot) pilot).handleRespawnDelay(s_elapsed);
   }
 
   @Override

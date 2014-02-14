@@ -90,6 +90,7 @@ public class PyroPilot extends UnitPilot {
 
   public void startPilot() {
     visitRoom(current_room);
+    current_path.clear();
     inactive_time_left = SPAWNING_SICKNESS;
     initState(PyroPilotState.INACTIVE);
   }
@@ -99,6 +100,10 @@ public class PyroPilot extends UnitPilot {
     current_path.clear();
     respawn_delay_left = RESPAWN_DELAY;
     initState(PyroPilotState.INACTIVE);
+  }
+
+  public void newLevel() {
+    visited.clear();
   }
 
   public void handleRespawnDelay(double s_elapsed) {

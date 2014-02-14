@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import mapobject.MapObject;
 import mapobject.scenery.Entrance;
-import pilot.PyroPilot;
+import mapobject.unit.Pyro;
 
 import common.RoomSide;
 import component.MapBuilder;
@@ -90,7 +90,7 @@ public class DescentMap {
     exterior_room = builder.getExteriorRoom();
   }
 
-  public void spawnPyro(PyroPilot pilot, boolean is_center_object) {
-    entrance.spawnPyro(pilot, is_center_object);
+  public void spawnPyro(Pyro pyro, boolean is_center_object) {
+    entrance.spawnPyro(pyro, is_center_object);
   }
 }

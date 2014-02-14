@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import mapobject.MapObject;
 import mapobject.MultipleObject;
 import mapobject.unit.Pyro;
-import pilot.PyroPilot;
 import structure.DescentMap;
 import structure.Room;
 
@@ -26,12 +25,22 @@ class RoomChange {
 
 public class MapEngine {
   private final DescentMap map;
+  private final LinkedList<Pyro> created_pyros;
   private final LinkedList<RoomChange> room_changes;
   private MapObject center_object;
 
   public MapEngine(DescentMap map) {
     this.map = map;
+    created_pyros = new LinkedList<Pyro>();
     room_changes = new LinkedList<RoomChange>();
+  }
+
+  public LinkedList<Pyro> getCreatedPyros() {
+    return created_pyros;
+  }
+
+  public void addCreatedPyro(Pyro pyro) {
+    created_pyros.add(pyro);
   }
 
   public void setCenterObject(MapObject center_object) {
@@ -79,15 +88,15 @@ public class MapEngine {
     return map.getExitRoom().equals(center_object.getRoom());
   }
 
-  public void spawnPyro(PyroPilot pilot, boolean is_center_object) {
-    map.spawnPyro(pilot, is_center_object);
+  public void spawnPyro(Pyro pyro, boolean is_center_object) {
+    map.spawnPyro(pyro, is_center_object);
   }
 
-  public void injectPyro(boolean is_center_object) {
-    spawnPyro(new PyroPilot(), is_center_object);
+  public void spawnPyro(boolean is_center_object) {
+    spawnPyro(null, is_center_object);
   }
 
   public void respawnPyroAfterDeath(Pyro pyro) {
-    spawnPyro((PyroPilot) pyro.getPilot(), pyro.equals(center_object));
+    spawnPyro(pyro, pyro.equals(center_object));
   }
 }
