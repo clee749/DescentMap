@@ -12,6 +12,8 @@ import common.DescentMapException;
 import common.RoomSide;
 
 public abstract class UnitPilot extends Pilot {
+  public static final double SHOT_EVASION_THRESHOLD = Math.PI / 16;
+
   protected Entry<RoomSide, RoomConnection> target_room_info;
   protected double target_x;
   protected double target_y;

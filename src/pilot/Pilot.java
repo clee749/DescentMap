@@ -5,7 +5,6 @@ import structure.Room;
 
 public abstract class Pilot {
   public static final double DIRECTION_EPSILON = Math.PI / 32;
-  public static final double SHOT_EVASION_THRESHOLD = Math.PI / 16;
 
   protected MovableObject bound_object;
   protected double bound_object_radius;

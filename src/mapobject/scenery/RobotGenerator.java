@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import mapobject.MapObject;
 import mapobject.ephemeral.Zunggg;
@@ -76,9 +77,11 @@ public class RobotGenerator extends Scenery {
         break;
       case WAIT_FOR_TRIGGER:
         HashSet<Pyro> pyros_in_room = room.getPyros();
-        for (Pyro ignored_pyro : ignored_pyros) {
+        Iterator<Pyro> ignored_pyro_it = ignored_pyros.iterator();
+        while (ignored_pyro_it.hasNext()) {
+          Pyro ignored_pyro = ignored_pyro_it.next();
           if (!pyros_in_room.contains(ignored_pyro)) {
-            ignored_pyros.remove(ignored_pyro);
+            ignored_pyro_it.remove();
           }
         }
         for (Pyro pyro_in_room : pyros_in_room) {
