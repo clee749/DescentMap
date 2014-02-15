@@ -39,6 +39,10 @@ public abstract class MapObject {
     return is_in_map;
   }
 
+  public void removeFromMap() {
+    is_in_map = false;
+  }
+
   public double getRadius() {
     return radius;
   }

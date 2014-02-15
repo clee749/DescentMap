@@ -399,7 +399,13 @@ public class PyroPilot extends UnitPilot {
 
     do {
       partial_paths = checkConnectedRooms(paths, partial_paths, checked_rooms);
-    } while (paths.isEmpty());
+    } while (paths.isEmpty() && !partial_paths.isEmpty());
+    if (paths.isEmpty()) {
+      // we have already visited all reachable Rooms
+      visited.clear();
+      findNextPath();
+      return;
+    }
     current_path = paths.get((int) (Math.random() * paths.size()));
   }
 

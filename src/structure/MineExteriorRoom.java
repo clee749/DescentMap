@@ -3,6 +3,12 @@ package structure;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.util.LinkedList;
+
+import mapobject.MapObject;
+import mapobject.unit.Pyro;
+
+import component.MapEngine;
 
 import external.ImageHandler;
 
@@ -25,5 +31,13 @@ public class MineExteriorRoom extends Room {
   @Override
   public String toString() {
     return super.toString() + " (Exterior)";
+  }
+
+  @Override
+  public LinkedList<MapObject> doNextStep(MapEngine engine, double s_elapsed) {
+    for (Pyro pyro : pyros) {
+      pyro.removeFromMap();
+    }
+    return super.doNextStep(engine, s_elapsed);
   }
 }

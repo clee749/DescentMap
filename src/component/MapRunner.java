@@ -25,7 +25,7 @@ public class MapRunner {
   public static final int MAX_ROOM_SIZE = 10;
   public static final int MAX_NUM_ROOMS = 10;
   public static final int NUM_LEVELS = 5;
-  public static final int NUM_PYROS = 1;
+  public static final int NUM_PYROS = 3;
   public static final long BUILD_SLEEP = 100;
   public static final long PAUSE_AFTER_BUILD_SLEEP = 1000;
   public static final long PAUSE_BEFORE_PLAY_SLEEP = 1000;

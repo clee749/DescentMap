@@ -190,7 +190,6 @@ public class Pyro extends Unit {
   }
 
   public void spawnNew() {
-    is_in_map = true;
     move_speed = max_move_speed;
     shields = starting_shields;
     energy = MIN_STARTING_ENERGY;
@@ -214,6 +213,7 @@ public class Pyro extends Unit {
     this.x_loc = x_loc;
     this.y_loc = y_loc;
     this.direction = direction;
+    is_in_map = true;
     is_visible = true;
     reload_time_left = 0.0;
     firing_cannon = false;

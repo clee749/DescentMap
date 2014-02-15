@@ -31,18 +31,18 @@ public class Room {
   public static final Color WALL_COLOR = Color.lightGray;
   public static final Stroke WALL_STROKE = new BasicStroke(3);
 
-  private final Point nw_corner;
-  private final Point se_corner;
-  private final int width;
-  private final int height;
-  private final HashMap<RoomSide, RoomConnection> neighbors;
-  private final HashSet<Scenery> sceneries;
-  private final HashSet<Powerup> powerups;
-  private final HashSet<Shot> shots;
-  private final HashSet<ProximityBomb> bombs;
-  private final HashSet<Unit> robots;
-  private final HashSet<Pyro> pyros;
-  private final HashSet<MapObject> misc_objects;
+  protected final Point nw_corner;
+  protected final Point se_corner;
+  protected final int width;
+  protected final int height;
+  protected final HashMap<RoomSide, RoomConnection> neighbors;
+  protected final HashSet<Scenery> sceneries;
+  protected final HashSet<Powerup> powerups;
+  protected final HashSet<Shot> shots;
+  protected final HashSet<ProximityBomb> bombs;
+  protected final HashSet<Unit> robots;
+  protected final HashSet<Pyro> pyros;
+  protected final HashSet<MapObject> misc_objects;
 
   public Room(Point nw_corner, Point se_corner) {
     this.nw_corner = nw_corner;
