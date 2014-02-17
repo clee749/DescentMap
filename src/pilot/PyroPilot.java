@@ -18,6 +18,7 @@ import mapobject.powerup.Powerup;
 import mapobject.powerup.ProximityPack;
 import mapobject.powerup.Shield;
 import mapobject.scenery.Entrance;
+import mapobject.scenery.Scenery;
 import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
@@ -75,6 +76,7 @@ public class PyroPilot extends UnitPilot {
   public static final int MISSILE_SHIELD_THRESHOLD = Shot.getDamage(ObjectType.ConcussionMissile);
   public static final double MISSILE_MIN_DISTANCE2 = 4.0;
   public static final double FRIENDLY_FIRE_DIRECTION_EPSILON = Math.PI / 8;
+  public static final double BOMB_DROP_RADIUS = 1.0;
 
   private final HashSet<Room> visited;
   private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
@@ -87,6 +89,7 @@ public class PyroPilot extends UnitPilot {
   private TurnDirection previous_turn_to_target;
   private double respawn_delay_left;
   private double inactive_time_left;
+  private Scenery target_scenery;
 
   public PyroPilot() {
     visited = new HashSet<Room>();
@@ -134,6 +137,13 @@ public class PyroPilot extends UnitPilot {
   public void updateCurrentRoom(Room room) {
     super.updateCurrentRoom(room);
     visitRoom(room);
+    target_scenery = null;
+    for (Scenery scenery : room.getSceneries()) {
+      if (scenery.getType().equals(ObjectType.RobotGenerator)) {
+        target_scenery = scenery;
+        break;
+      }
+    }
     if (bound_pyro.getShields() >= 0) {
       if (target_room_info != null && !room.equals(target_room_info.getValue().neighbor)) {
         current_path.clear();
@@ -207,6 +217,7 @@ public class PyroPilot extends UnitPilot {
     }
     boolean fire_primary = fire_commands.fire_primary;
     boolean fire_secondary = fire_commands.fire_secondary;
+    boolean drop_bomb = (state.equals(PyroPilotState.TURN_TO_OBJECT) ? false : shouldDropBomb());
 
     switch (state) {
       case INACTIVE:
@@ -216,12 +227,12 @@ public class PyroPilot extends UnitPilot {
         return new PilotAction(MoveDirection.FORWARD, strafe,
                 angleToTurnDirection(MapUtils.angleTo(bound_object.getDirection(),
                         target_x - bound_object.getX(), target_y - bound_object.getY())), fire_primary,
-                fire_secondary);
+                fire_secondary, drop_bomb);
       case MOVE_TO_NEIGHBOR_ROOM:
         return new PilotAction(MoveDirection.FORWARD, strafe,
                 angleToTurnDirection(MapUtils.angleTo(bound_object.getDirection(),
                         target_x - bound_object.getX(), target_y - bound_object.getY())), fire_primary,
-                fire_secondary);
+                fire_secondary, drop_bomb);
       case REACT_TO_OBJECT:
         TurnDirection turn = angleToTurnDirection(MapUtils.angleTo(bound_object, target_object));
         if (!turn.equals(TurnDirection.NONE) && turn.equals(previous_turn_to_target)) {
@@ -231,10 +242,10 @@ public class PyroPilot extends UnitPilot {
           previous_turn_to_target = turn;
           time_turning_to_target = 0.0;
         }
-        return new PilotAction(MoveDirection.FORWARD, strafe, turn, fire_primary, fire_secondary);
+        return new PilotAction(MoveDirection.FORWARD, strafe, turn, fire_primary, fire_secondary, drop_bomb);
       case TURN_TO_OBJECT:
         return new PilotAction(MoveDirection.NONE, strafe, angleToTurnDirection(MapUtils.angleTo(
-                bound_object, target_object)), fire_primary, fire_secondary);
+                bound_object, target_object)), fire_primary, fire_secondary, false);
       case REACT_TO_CLOAKED_ROBOT:
         if (target_unit.isVisible()) {
           target_x = target_unit.getX();
@@ -247,7 +258,7 @@ public class PyroPilot extends UnitPilot {
           fire_primary = true;
         }
         return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(angle_to_target),
-                fire_primary, fire_secondary);
+                fire_primary, fire_secondary, drop_bomb);
       default:
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
     }
@@ -413,9 +424,8 @@ public class PyroPilot extends UnitPilot {
       }
       double abs_angle_to_pyro = Math.abs(MapUtils.angleTo(bound_object, pyro));
       if (abs_angle_to_pyro < FRIENDLY_FIRE_DIRECTION_EPSILON ||
-              (abs_angle_to_pyro < MapUtils.PI_OVER_TWO &&
-                      Math.abs(pyro.getX() - bound_object.getX()) < bound_object_diameter && Math.abs(pyro
-                      .getY() - bound_object.getY()) < bound_object_diameter)) {
+              (Math.abs(pyro.getX() - bound_object.getX()) < bound_object_radius && Math.abs(pyro.getY() -
+                      bound_object.getY()) < bound_object_radius)) {
         return true;
       }
     }
@@ -495,6 +505,12 @@ public class PyroPilot extends UnitPilot {
       }
     }
     return new PyroFireCommands(fire_primary, false);
+  }
+
+  public boolean shouldDropBomb() {
+    return target_scenery != null &&
+            Math.abs(target_scenery.getX() - bound_object.getX()) < BOMB_DROP_RADIUS &&
+            Math.abs(target_scenery.getY() - bound_object.getY()) < BOMB_DROP_RADIUS;
   }
 
   public MapObject findNextTargetObject() {

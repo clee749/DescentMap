@@ -125,6 +125,7 @@ public class Pyro extends Unit {
   public static final int MIN_STARTING_CONCUSSION_MISSILES = 3;
   public static final double CANNON_SWITCH_TIME = 1.0;
   public static final int PROXIMITY_BOMB_ORDINAL = PyroSecondaryCannon.PROXIMITY_BOMB.ordinal();
+  public static final double BOMB_RELOAD_TIME = SECONDARY_RELOAD_TIMES[PROXIMITY_BOMB_ORDINAL];
 
   // death spin
   public static final double DEATH_SPIN_TIME = 5.0;
@@ -162,6 +163,10 @@ public class Pyro extends Unit {
   private int[] secondary_ammo;
   private Cannon selected_secondary_cannon;
   private PyroSecondaryCannon selected_secondary_cannon_type;
+
+  // bomb info
+  private double bomb_reload_time_left;
+  private boolean dropping_bomb;
 
   // death spin
   private boolean death_spin_started;
@@ -401,17 +406,26 @@ public class Pyro extends Unit {
       return;
     }
     super.planNextAction(s_elapsed);
-    if (next_action.fire_cannon && reload_time_left < 0.0) {
+    if (next_action.fire_cannon && reload_time_left < 0.0 && primary_energy_cost <= energy) {
       planToFireCannon();
     }
-    if (next_action.fire_secondary && secondary_reload_time_left < 0.0) {
+    if (next_action.fire_secondary && secondary_reload_time_left < 0.0 &&
+            secondary_ammo[selected_secondary_cannon_type.ordinal()] > 0) {
       planToFireSecondary();
+    }
+    if (next_action.drop_bomb && bomb_reload_time_left < 0.0 && secondary_ammo[PROXIMITY_BOMB_ORDINAL] > 0) {
+      planToDropBomb();
     }
   }
 
   public void planToFireSecondary() {
     firing_secondary = true;
     secondary_reload_time_left = secondary_reload_time;
+  }
+
+  public void planToDropBomb() {
+    dropping_bomb = true;
+    bomb_reload_time_left = BOMB_RELOAD_TIME;
   }
 
   @Override
@@ -432,6 +446,10 @@ public class Pyro extends Unit {
     if (firing_secondary) {
       firing_secondary = false;
       created_objects.addObject(fireSecondary());
+    }
+    if (dropping_bomb) {
+      dropping_bomb = false;
+      created_objects.addObject(dropBomb());
     }
     return created_objects;
   }
@@ -475,14 +493,12 @@ public class Pyro extends Unit {
   public void handleCooldowns(double s_elapsed) {
     super.handleCooldowns(s_elapsed);
     secondary_reload_time_left -= s_elapsed;
+    bomb_reload_time_left -= s_elapsed;
     energy_recharge_cooldown_left -= s_elapsed;
     cloak_time_left -= s_elapsed;
   }
 
   public MapObject fireCannon() {
-    if (energy < primary_energy_cost) {
-      return null;
-    }
     revealIfCloaked();
     MultipleObject shots = new MultipleObject();
     Point2D.Double abs_offset = MapUtils.perpendicularVector(cannon_offset, direction);
@@ -504,10 +520,6 @@ public class Pyro extends Unit {
   }
 
   public MapObject fireSecondary() {
-    int ammo = secondary_ammo[selected_secondary_cannon_type.ordinal()];
-    if (ammo < 1) {
-      return null;
-    }
     revealIfCloaked();
     MapObject shot;
     if (selected_secondary_cannon_type.equals(PyroSecondaryCannon.CONCUSSION_MISSILE) ||
@@ -517,8 +529,7 @@ public class Pyro extends Unit {
     else {
       shot = fireSecondaryWithoutOffset();
     }
-    --secondary_ammo[selected_secondary_cannon_type.ordinal()];
-    if (ammo == 1) {
+    if (--secondary_ammo[selected_secondary_cannon_type.ordinal()] < 1) {
       handleSecondaryAmmoDepleted();
     }
     return shot;
@@ -537,6 +548,17 @@ public class Pyro extends Unit {
 
   public MapObject fireSecondaryWithoutOffset() {
     return selected_secondary_cannon.fireCannon(this, room, x_loc, y_loc, direction);
+  }
+
+  public MapObject dropBomb() {
+    revealIfCloaked();
+    MapObject shot;
+    shot = secondary_cannons[PROXIMITY_BOMB_ORDINAL].fireCannon(this, room, x_loc, y_loc, direction);
+    if (--secondary_ammo[PROXIMITY_BOMB_ORDINAL] < 1 &&
+            selected_secondary_cannon_type.equals(PyroSecondaryCannon.PROXIMITY_BOMB)) {
+      handleSecondaryAmmoDepleted();
+    }
+    return shot;
   }
 
   @Override

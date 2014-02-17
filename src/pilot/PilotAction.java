@@ -9,53 +9,55 @@ public class PilotAction {
   public final TurnDirection turn;
   public final boolean fire_cannon;
   public final boolean fire_secondary;
+  public final boolean drop_bomb;
 
   public PilotAction() {
-    this(MoveDirection.NONE, StrafeDirection.NONE, TurnDirection.NONE, false, false);
+    this(MoveDirection.NONE, StrafeDirection.NONE, TurnDirection.NONE, false, false, false);
   }
 
   public PilotAction(MoveDirection move) {
-    this(move, StrafeDirection.NONE, TurnDirection.NONE, false, false);
+    this(move, StrafeDirection.NONE, TurnDirection.NONE, false, false, false);
   }
 
   public PilotAction(StrafeDirection strafe) {
-    this(MoveDirection.NONE, strafe, TurnDirection.NONE, false, false);
+    this(MoveDirection.NONE, strafe, TurnDirection.NONE, false, false, false);
   }
 
   public PilotAction(MoveDirection move, StrafeDirection strafe) {
-    this(move, strafe, TurnDirection.NONE, false, false);
+    this(move, strafe, TurnDirection.NONE, false, false, false);
   }
 
   public PilotAction(MoveDirection move, TurnDirection turn) {
-    this(move, StrafeDirection.NONE, turn, false, false);
+    this(move, StrafeDirection.NONE, turn, false, false, false);
   }
 
   public PilotAction(StrafeDirection strafe, TurnDirection turn) {
-    this(MoveDirection.NONE, strafe, turn, false, false);
+    this(MoveDirection.NONE, strafe, turn, false, false, false);
   }
 
   public PilotAction(MoveDirection move, StrafeDirection strafe, TurnDirection turn) {
-    this(move, strafe, turn, false, false);
+    this(move, strafe, turn, false, false, false);
   }
 
   public PilotAction(MoveDirection move, TurnDirection turn, boolean fire_cannon) {
-    this(move, StrafeDirection.NONE, turn, fire_cannon, false);
+    this(move, StrafeDirection.NONE, turn, fire_cannon, false, false);
   }
 
   public PilotAction(StrafeDirection strafe, TurnDirection turn, boolean fire_cannon) {
-    this(MoveDirection.NONE, strafe, turn, fire_cannon, false);
+    this(MoveDirection.NONE, strafe, turn, fire_cannon, false, false);
   }
 
   public PilotAction(MoveDirection move, StrafeDirection strafe, TurnDirection turn, boolean fire_cannon) {
-    this(move, strafe, turn, fire_cannon, false);
+    this(move, strafe, turn, fire_cannon, false, false);
   }
 
   public PilotAction(MoveDirection move, StrafeDirection strafe, TurnDirection turn, boolean fire_cannon,
-          boolean fire_secondary) {
+          boolean fire_secondary, boolean drop_bomb) {
     this.move = (move != null ? move : MoveDirection.NONE);
     this.strafe = (strafe != null ? strafe : StrafeDirection.NONE);
     this.turn = (turn != null ? turn : TurnDirection.NONE);
     this.fire_cannon = fire_cannon;
     this.fire_secondary = fire_secondary;
+    this.drop_bomb = drop_bomb;
   }
 }
