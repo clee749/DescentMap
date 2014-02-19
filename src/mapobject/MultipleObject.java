@@ -4,11 +4,11 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.LinkedList;
 
+import resource.ImageHandler;
+
 import common.DescentMapException;
 import common.ObjectType;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 public class MultipleObject extends MapObject {
   private final LinkedList<MapObject> objects;

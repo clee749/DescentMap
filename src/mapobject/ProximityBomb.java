@@ -8,13 +8,12 @@ import mapobject.ephemeral.Explosion;
 import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
+import resource.ImageHandler;
 import structure.Room;
 import util.MapUtils;
 
 import common.ObjectType;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 public class ProximityBomb extends MapObject {
   public static final double RADIUS = 0.12;

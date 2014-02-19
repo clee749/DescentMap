@@ -178,7 +178,7 @@ public class MapPopulator {
       double y_loc = (int) (Math.random() * (se_corner.y - nw_corner.y - 2)) + nw_corner.y + 1.5;
       room.addChild(new RobotGenerator(room, x_loc, y_loc,
               ROBOT_GENERATOR_TYPES[(int) (Math.random() * ROBOT_GENERATOR_TYPES.length)],
-              RoomSide.values()[RoomSide.values().length - 1]));
+              RoomSide.values()[(int) (Math.random() * RoomSide.values().length)]));
     }
   }
 

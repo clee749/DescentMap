@@ -6,13 +6,12 @@ import java.awt.Point;
 
 import mapobject.MapObject;
 import mapobject.unit.Pyro;
+import resource.ImageHandler;
 import structure.DescentMap;
 import structure.Room;
 import util.MapUtils;
 
 import common.ObjectType;
-
-import external.ImageHandler;
 
 public class MapPlayDisplayer {
   private final ImageHandler images;

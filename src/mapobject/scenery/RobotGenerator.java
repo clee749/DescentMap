@@ -9,6 +9,7 @@ import java.util.Iterator;
 import mapobject.MapObject;
 import mapobject.ephemeral.Zunggg;
 import mapobject.unit.Pyro;
+import resource.ImageHandler;
 import structure.Room;
 import util.RobotFactory;
 
@@ -16,8 +17,6 @@ import common.DescentMapException;
 import common.ObjectType;
 import common.RoomSide;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 enum RobotGeneratorState {
   INACTIVE,

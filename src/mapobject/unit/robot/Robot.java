@@ -12,14 +12,13 @@ import mapobject.unit.Unit;
 import pilot.Pilot;
 import pilot.RobotPilot;
 import pilot.UnitPilot;
+import resource.ImageHandler;
 import structure.Room;
 import util.MapUtils;
 import cannon.Cannon;
 
 import common.ObjectType;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 public abstract class Robot extends Unit {
   private static final HashMap<ObjectType, Double> RELOAD_TIMES = getReloadTimes();

@@ -6,13 +6,12 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 
 import mapobject.MapObject;
+import resource.ImageHandler;
 import structure.Room;
 import util.MapUtils;
 
 import common.ObjectType;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 public class Zunggg extends MapObject {
   public static final int STROKE_WIDTH_DIVISOR = 20;

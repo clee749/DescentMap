@@ -5,9 +5,9 @@ import java.awt.Image;
 import java.awt.Point;
 
 import mapobject.MapObject;
+import resource.ImageHandler;
 import structure.Room;
 import util.MapUtils;
-import external.ImageHandler;
 
 public abstract class Scenery extends MapObject {
   protected final double nw_corner_x;

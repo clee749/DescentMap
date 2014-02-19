@@ -6,13 +6,12 @@ import mapobject.MapObject;
 import mapobject.MovableObject;
 import mapobject.unit.Pyro;
 import pilot.PowerupPilot;
+import resource.ImageHandler;
 import structure.Room;
 import util.MapUtils;
 
 import common.RoomSide;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 public abstract class Powerup extends MovableObject {
   public static final double RADIUS = 0.12;

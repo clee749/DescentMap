@@ -170,17 +170,22 @@ public class MapRunner {
     frame.setVisible(true);
     frame.add(panel);
     frame.addComponentListener(panel);
+    frame.addKeyListener(panel);
 
     for (int level = 1; level <= NUM_LEVELS; ++level) {
-      System.out.print(String.format("Mine MN%04d: ", (int) Math.pow(level, 3)));
+      System.out.print(String.format("Mine MN%04d: ", panel.playMusic()));
       runner.newLevel();
       do {
         if (runner.doNextStep()) {
           panel.repaint();
         }
+        if (runner.getState().equals(RunnerState.PAUSE_AFTER_PLAY)) {
+          System.out.println(String.format("Level %d complete!", level));
+          panel.stopMusic();
+        }
         runner.sleepAfterStep();
       } while (!runner.getState().equals(RunnerState.COMPLETE));
-      System.out.println("Level complete!");
     }
+    panel.closeMusic();
   }
 }

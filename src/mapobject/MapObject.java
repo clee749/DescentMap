@@ -3,12 +3,11 @@ package mapobject;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
+import resource.ImageHandler;
 import structure.Room;
 
 import common.ObjectType;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 public abstract class MapObject {
   protected final ObjectType type;

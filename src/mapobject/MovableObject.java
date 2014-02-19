@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import pilot.Pilot;
 import pilot.PilotAction;
+import resource.ImageHandler;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
@@ -16,8 +17,6 @@ import common.DescentMapException;
 import common.ObjectType;
 import common.RoomSide;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 public abstract class MovableObject extends MapObject {
   private static final HashMap<ObjectType, Double> MAX_MOVE_SPEEDS = getMaxMoveSpeeds();

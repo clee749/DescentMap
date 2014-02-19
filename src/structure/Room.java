@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import resource.ImageHandler;
+
 import mapobject.MapObject;
 import mapobject.ProximityBomb;
 import mapobject.powerup.Powerup;
@@ -24,8 +26,6 @@ import util.MapUtils;
 import common.ObjectType;
 import common.RoomSide;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 public class Room {
   public static final Color WALL_COLOR = Color.lightGray;

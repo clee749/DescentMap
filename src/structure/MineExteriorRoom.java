@@ -5,12 +5,12 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.LinkedList;
 
+import resource.ImageHandler;
+
 import mapobject.MapObject;
 import mapobject.unit.Pyro;
 
 import component.MapEngine;
-
-import external.ImageHandler;
 
 /*
  * Mock Room to connect with the exit Room.

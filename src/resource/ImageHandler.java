@@ -1,4 +1,4 @@
-package external;
+package resource;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -137,7 +137,7 @@ class ImageUtils {
 
 
 public class ImageHandler {
-  public static final String DEFAULT_PATH = "/images";
+  public static final String DEFAULT_PATH = "/resrc/images";
   public static final int NUM_IMAGES_IN_QUADRANT = 10;
   public static final double SHOT_IMAGE_RADIUS = 0.12;
   public static final int NUM_IMAGES_IN_CIRCLE = NUM_IMAGES_IN_QUADRANT * 4;

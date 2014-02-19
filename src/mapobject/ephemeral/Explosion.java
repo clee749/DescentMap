@@ -5,13 +5,12 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 
 import mapobject.MapObject;
+import resource.ImageHandler;
 import structure.Room;
 import util.MapUtils;
 
 import common.ObjectType;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 public class Explosion extends MapObject {
   public static final Color[] COLORS = {Color.magenta, Color.orange, Color.pink, Color.red, Color.yellow,

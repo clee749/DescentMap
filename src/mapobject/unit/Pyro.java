@@ -21,6 +21,7 @@ import pilot.TurnDirection;
 import pilot.UnitPilot;
 import pyro.PyroPrimaryCannon;
 import pyro.PyroSecondaryCannon;
+import resource.ImageHandler;
 import structure.Room;
 import util.MapUtils;
 import util.PowerupFactory;
@@ -30,8 +31,6 @@ import cannon.LaserCannon;
 
 import common.ObjectType;
 import component.MapEngine;
-
-import external.ImageHandler;
 
 class PrimaryCannonInfo {
   public final double reload_time;
