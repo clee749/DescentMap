@@ -69,12 +69,12 @@ public abstract class Shot extends MovableObject {
 
     Unit hit_unit = checkForUnitCollisions();
     if (hit_unit != null) {
-      return handleUnitCollision(hit_unit);
+      return handleUnitCollision(engine, hit_unit);
     }
 
     boolean location_accepted = doNextMovement(engine, s_elapsed);
     if (!location_accepted) {
-      return handleWallCollision();
+      return handleWallCollision(engine);
     }
     return null;
   }
@@ -98,15 +98,15 @@ public abstract class Shot extends MovableObject {
             Math.abs(y_loc - unit.getY()) < unit.getRadius();
   }
 
-  public MapObject handleUnitCollision(Unit hit_unit) {
+  public MapObject handleUnitCollision(MapEngine engine, Unit hit_unit) {
     is_in_map = false;
-    hit_unit.beDamaged(damage);
+    hit_unit.beDamaged(engine, damage, false);
     return new Explosion(room, x_loc, y_loc,
             Math.min(damage / EXPLOSION_RADIUS_DIVISOR, EXPLOSION_MAX_RADIUS), Math.min(damage /
                     EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));
   }
 
-  public MapObject handleWallCollision() {
+  public MapObject handleWallCollision(MapEngine engine) {
     is_in_map = false;
     return null;
   }

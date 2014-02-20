@@ -74,6 +74,7 @@ public class Entrance extends Scenery {
             if (spawn_queue.peek().is_center_object) {
               engine.setCenterObject(this);
             }
+            playSound(engine, "effects/mtrl01.wav");
             return new Zunggg(room, x_loc, y_loc, ZUNGGG_TIME);
           }
         }

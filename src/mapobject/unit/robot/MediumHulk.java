@@ -15,7 +15,7 @@ public class MediumHulk extends Robot {
 
   public MediumHulk(Room room, double x_loc, double y_loc, double direction) {
     super(Unit.getRadius(ObjectType.MediumHulk), new ConcussionMissileCannon(
-            Shot.getDamage(ObjectType.ConcussionMissile)), room, x_loc, y_loc, direction);
+            Shot.getDamage(ObjectType.ConcussionMissile), false), room, x_loc, y_loc, direction);
   }
 
   @Override

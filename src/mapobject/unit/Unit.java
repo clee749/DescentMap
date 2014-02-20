@@ -145,7 +145,7 @@ public abstract class Unit extends MovableObject {
       is_visible = false;
     }
     if (shields < 0) {
-      return handleDeath(s_elapsed);
+      return handleDeath(engine, s_elapsed);
     }
     MultipleObject created_objects = new MultipleObject();
     int less_half_shields = half_shields - shields;
@@ -153,6 +153,7 @@ public abstract class Unit extends MovableObject {
             Math.random() * MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS < less_half_shields / (half_shields + 1.0) *
                     s_elapsed) {
       created_objects.addObject(createDamagedExplosion());
+      playSound(engine, "effects/explode2.wav");
     }
     created_objects.addObject(super.doNextAction(engine, s_elapsed));
     return created_objects;
@@ -172,7 +173,7 @@ public abstract class Unit extends MovableObject {
     reload_time_left = reload_time;
   }
 
-  public void beDamaged(int amount) {
+  public void beDamaged(MapEngine engine, int amount, boolean is_splash) {
     shields -= amount;
     revealIfCloaked();
   }
@@ -189,11 +190,12 @@ public abstract class Unit extends MovableObject {
     }
   }
 
-  public MapObject handleDeath(double s_elapsed) {
+  public MapObject handleDeath(MapEngine engine, double s_elapsed) {
     if (!is_exploded) {
       is_exploded = true;
       double explosion_time = Math.random() * (EXPLOSION_MAX_TIME - EXPLOSION_MIN_TIME) + EXPLOSION_MIN_TIME;
       exploding_time_left = explosion_time / EXPLOSION_TIME_DIVISOR;
+      playSound(engine, "weapons/explode1.wav");
       return new Explosion(room, x_loc, y_loc, radius * EXPLOSION_RADIUS_MULTIPLIER, explosion_time);
     }
     if (exploding_time_left < 0.0) {

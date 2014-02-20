@@ -15,7 +15,7 @@ public class PlatformMissile extends Robot {
 
   public PlatformMissile(Room room, double x_loc, double y_loc, double direction) {
     super(Unit.getRadius(ObjectType.PlatformMissile), new ConcussionMissileCannon(
-            Shot.getDamage(ObjectType.ConcussionMissile)), room, x_loc, y_loc, direction);
+            Shot.getDamage(ObjectType.ConcussionMissile), false), room, x_loc, y_loc, direction);
   }
 
   @Override

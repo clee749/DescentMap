@@ -5,8 +5,13 @@ import mapobject.ProximityBomb;
 import structure.Room;
 
 public class ProximityBombCannon extends Cannon {
-  public ProximityBombCannon(int damage) {
-    super(damage);
+  public ProximityBombCannon(int damage, boolean on_pyro) {
+    super(damage, on_pyro);
+  }
+
+  @Override
+  public void setSoundKey() {
+    sound_key = "weapons/dropbomb.wav";
   }
 
   @Override

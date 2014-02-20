@@ -12,8 +12,8 @@ import common.ObjectType;
 
 public class Bomber extends Robot {
   public Bomber(Room room, double x_loc, double y_loc, double direction) {
-    super(Unit.getRadius(ObjectType.Bomber), new BomberPilot(),
-            new ProximityBombCannon(ProximityBomb.DAMAGE), room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.Bomber), new BomberPilot(), new ProximityBombCannon(ProximityBomb.DAMAGE,
+            false), room, x_loc, y_loc, direction);
   }
 
   @Override

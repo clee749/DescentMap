@@ -11,8 +11,8 @@ import common.ObjectType;
 
 public class HeavyDriller extends Robot {
   public HeavyDriller(Room room, double x_loc, double y_loc, double direction) {
-    super(Unit.getRadius(ObjectType.HeavyDriller), new PlasmaCannon(Shot.getDamage(ObjectType.PlasmaShot)),
-            room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.HeavyDriller), new PlasmaCannon(Shot.getDamage(ObjectType.PlasmaShot),
+            false), room, x_loc, y_loc, direction);
   }
 
   @Override

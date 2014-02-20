@@ -11,8 +11,8 @@ import common.ObjectType;
 
 public class PlatformLaser extends Robot {
   public PlatformLaser(Room room, double x_loc, double y_loc, double direction) {
-    super(Unit.getRadius(ObjectType.PlatformLaser), new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 3),
-            room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.PlatformLaser), new LaserCannon(Shot.getDamage(ObjectType.LaserShot),
+            false, 3), room, x_loc, y_loc, direction);
   }
 
   @Override

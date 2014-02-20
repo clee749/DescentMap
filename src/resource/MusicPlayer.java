@@ -9,6 +9,7 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequencer;
 
 public class MusicPlayer {
+  public static final String DEFAULT_PATH = "resrc/music";
   public static final int NUM_LEVELS = 22;
 
   private final String path;
@@ -26,7 +27,7 @@ public class MusicPlayer {
   }
 
   public MusicPlayer() {
-    this("resrc/music");
+    this(DEFAULT_PATH);
   }
 
   public void playMusic(int level) {

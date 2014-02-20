@@ -58,6 +58,10 @@ public abstract class MapObject {
     return y_loc;
   }
 
+  public void playSound(MapEngine engine, String sound_key) {
+    engine.playSound(sound_key, x_loc, y_loc);
+  }
+
   public abstract ObjectType getType();
 
   public abstract void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,

@@ -10,8 +10,8 @@ import common.ObjectType;
 
 public class BabySpider extends Robot {
   public BabySpider(Room room, double x_loc, double y_loc, double direction) {
-    super(Unit.getRadius(ObjectType.BabySpider), new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 1),
-            room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.BabySpider), new LaserCannon(Shot.getDamage(ObjectType.LaserShot), false,
+            1), room, x_loc, y_loc, direction);
   }
 
   @Override

@@ -18,11 +18,11 @@ public enum PyroSecondaryCannon {
   public static Cannon createCannon(PyroSecondaryCannon cannon_type) {
     switch (cannon_type) {
       case CONCUSSION_MISSILE:
-        return new ConcussionMissileCannon(Shot.getDamage(ObjectType.ConcussionMissile));
+        return new ConcussionMissileCannon(Shot.getDamage(ObjectType.ConcussionMissile), true);
       case HOMING_MISSILE:
-        return new HomingMissileCannon(Shot.getDamage(ObjectType.HomingMissile));
+        return new HomingMissileCannon(Shot.getDamage(ObjectType.HomingMissile), true);
       case PROXIMITY_BOMB:
-        return new ProximityBombCannon(ProximityBomb.DAMAGE);
+        return new ProximityBombCannon(ProximityBomb.DAMAGE, true);
       default:
         throw new DescentMapException("Unexpected PyroSecondaryCannon: " + cannon_type);
     }

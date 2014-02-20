@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import mapobject.MapObject;
 import mapobject.MultipleObject;
 import mapobject.unit.Pyro;
+import resource.SoundPlayer;
 import structure.DescentMap;
 import structure.Room;
 
@@ -24,15 +25,28 @@ class RoomChange {
 
 
 public class MapEngine {
-  private final DescentMap map;
+  public static final double MAX_SOUND_DISTANCE = MapPanel.SIGHT_RADIUS * 2;
+  public static final float GAIN_REDUCTION_PER_UNIT_DISTANCE = 5.0f;
+  public static final float MAX_GAIN_REDUCTION = 40.0f;
+
+  private final SoundPlayer sounds;
   private final LinkedList<Pyro> created_pyros;
   private final LinkedList<RoomChange> room_changes;
+  private DescentMap map;
   private MapObject center_object;
+  private boolean sounds_active;
 
-  public MapEngine(DescentMap map) {
-    this.map = map;
+  public MapEngine() {
+    sounds = new SoundPlayer();
     created_pyros = new LinkedList<Pyro>();
     room_changes = new LinkedList<RoomChange>();
+  }
+
+  public void newMap(DescentMap map) {
+    this.map = map;
+    created_pyros.clear();
+    room_changes.clear();
+    center_object = null;
   }
 
   public LinkedList<Pyro> getCreatedPyros() {
@@ -41,10 +55,14 @@ public class MapEngine {
 
   public void addCreatedPyro(Pyro pyro) {
     created_pyros.add(pyro);
+    pyro.setEngine(this);
   }
 
   public void setCenterObject(MapObject center_object) {
     this.center_object = center_object;
+    if (center_object instanceof Pyro) {
+      ((Pyro) center_object).setPlayPersonalSounds(sounds_active);
+    }
     map.setCenterObject(center_object);
   }
 
@@ -90,6 +108,9 @@ public class MapEngine {
 
   public void spawnPyro(Pyro pyro, boolean is_center_object) {
     map.spawnPyro(pyro, is_center_object);
+    if (pyro != null) {
+      pyro.setEngine(this);
+    }
   }
 
   public void spawnPyro(boolean is_center_object) {
@@ -98,5 +119,28 @@ public class MapEngine {
 
   public void respawnPyroAfterDeath(Pyro pyro) {
     spawnPyro(pyro, pyro.equals(center_object));
+  }
+
+  public void toggleSounds() {
+    sounds_active = !sounds_active;
+    if (center_object instanceof Pyro) {
+      ((Pyro) center_object).setPlayPersonalSounds(sounds_active);
+    }
+  }
+
+  public void playSound(String name) {
+    sounds.playSound(name, 0.0f);
+  }
+
+  public void playSound(String name, double src_x, double src_y) {
+    if (sounds_active) {
+      double distance = Math.hypot(src_x - center_object.getX(), src_y - center_object.getY());
+      if (distance > MAX_SOUND_DISTANCE) {
+        return;
+      }
+      float gain_reduction =
+              Math.min(GAIN_REDUCTION_PER_UNIT_DISTANCE * (float) distance, MAX_GAIN_REDUCTION);
+      sounds.playSound(name, -gain_reduction);
+    }
   }
 }

@@ -31,15 +31,17 @@ public abstract class SplashDamageShot extends Shot {
   }
 
   @Override
-  public MapObject handleUnitCollision(Unit hit_unit) {
+  public MapObject handleUnitCollision(MapEngine engine, Unit hit_unit) {
     room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, hit_unit);
-    return super.handleUnitCollision(hit_unit);
+    playSound(engine, "weapons/explode1.wav");
+    return super.handleUnitCollision(engine, hit_unit);
   }
 
   @Override
-  public MapObject handleWallCollision() {
-    super.handleWallCollision();
+  public MapObject handleWallCollision(MapEngine engine) {
+    super.handleWallCollision(engine);
     room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, null);
+    playSound(engine, "weapons/explode1.wav");
     return new Explosion(room, x_loc, y_loc,
             Math.min(damage / EXPLOSION_RADIUS_DIVISOR, EXPLOSION_MAX_RADIUS), Math.min(damage /
                     EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));

@@ -17,14 +17,17 @@ public abstract class Powerup extends MovableObject {
   public static final double RADIUS = 0.12;
   public static final double SECONDS_PER_FRAME = 0.03;
   public static final double MOVE_SPEED_DECELERATION = 0.5;
+  public static final String ACQUIRED_SOUND = "effects/power03.wav";
 
   protected int frame_num;
   protected double frame_time_left;
+  protected boolean play_acquired_sound;
 
   public Powerup(Room room, double x_loc, double y_loc, double direction, double speed) {
     super(RADIUS, new PowerupPilot(), room, x_loc, y_loc, direction, speed, 0.0);
     frame_num = (int) (Math.random() * 9);
     frame_time_left = SECONDS_PER_FRAME;
+    play_acquired_sound = true;
   }
 
   @Override
@@ -53,6 +56,9 @@ public abstract class Powerup extends MovableObject {
       if (pyro.getShields() >= 0 && Math.abs(x_loc - pyro.getX()) < pyro_radius &&
               Math.abs(y_loc - pyro.getY()) < pyro_radius && beAcquired(pyro)) {
         is_in_map = false;
+        if (play_acquired_sound) {
+          playSound(engine, ACQUIRED_SOUND);
+        }
         break;
       }
     }

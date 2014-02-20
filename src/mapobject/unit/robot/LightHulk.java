@@ -11,8 +11,8 @@ import common.ObjectType;
 
 public class LightHulk extends Robot {
   public LightHulk(Room room, double x_loc, double y_loc, double direction) {
-    super(Unit.getRadius(ObjectType.LightHulk), new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 4),
-            room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.LightHulk), new LaserCannon(Shot.getDamage(ObjectType.LaserShot), false,
+            4), room, x_loc, y_loc, direction);
   }
 
   @Override

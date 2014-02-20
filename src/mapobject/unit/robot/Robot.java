@@ -127,7 +127,7 @@ public abstract class Robot extends Unit {
         else {
           volley_reload_time_left = VOLLEY_RELOAD_TIME;
         }
-        return fireCannon();
+        return handleFiringCannon(engine);
       }
     }
     return object_created;
@@ -147,17 +147,25 @@ public abstract class Robot extends Unit {
   }
 
   @Override
-  public void beDamaged(int amount) {
-    super.beDamaged(amount);
-    tempDisable(amount * DISABLE_TIME_PER_DAMAGE);
+  public void beDamaged(MapEngine engine, int amount, boolean is_splash) {
+    super.beDamaged(engine, amount, is_splash);
+    if (!is_splash) {
+      tempDisable(amount * DISABLE_TIME_PER_DAMAGE);
+      playSound(engine, "weapons/explode1.wav");
+    }
   }
 
   public void tempDisable(double inactive_time) {
     inactive_time_left = Math.max(inactive_time_left, inactive_time);
   }
 
-  public MapObject fireCannon() {
+  public MapObject handleFiringCannon(MapEngine engine) {
     revealIfCloaked();
+    playSound(engine, cannon.getSoundKey());
+    return fireCannon();
+  }
+
+  public MapObject fireCannon() {
     ++cannon_side;
     Point2D.Double abs_offset = MapUtils.perpendicularVector(cannon_offset, direction);
     if (cannon_side % 2 == 0) {

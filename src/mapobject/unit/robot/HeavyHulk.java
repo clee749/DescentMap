@@ -14,8 +14,8 @@ public class HeavyHulk extends Robot {
   public static final int MAX_HOMING_MISSILES_RELEASED = 3;
 
   public HeavyHulk(Room room, double x_loc, double y_loc, double direction) {
-    super(Unit.getRadius(ObjectType.HeavyHulk), new HomingMissileCannon(HOMING_MISSILE_DAMAGE), room, x_loc,
-            y_loc, direction);
+    super(Unit.getRadius(ObjectType.HeavyHulk), new HomingMissileCannon(HOMING_MISSILE_DAMAGE, false), room,
+            x_loc, y_loc, direction);
   }
 
   @Override

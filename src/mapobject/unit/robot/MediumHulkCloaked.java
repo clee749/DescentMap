@@ -15,7 +15,7 @@ public class MediumHulkCloaked extends Robot {
 
   public MediumHulkCloaked(Room room, double x_loc, double y_loc, double direction) {
     super(Unit.getRadius(ObjectType.MediumHulkCloaked), new ConcussionMissileCannon(
-            Shot.getDamage(ObjectType.ConcussionMissile)), room, x_loc, y_loc, direction);
+            Shot.getDamage(ObjectType.ConcussionMissile), false), room, x_loc, y_loc, direction);
     is_cloaked = true;
   }
 

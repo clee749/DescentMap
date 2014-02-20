@@ -5,8 +5,13 @@ import mapobject.shot.PlasmaShot;
 import structure.Room;
 
 public class PlasmaCannon extends Cannon {
-  public PlasmaCannon(int damage) {
-    super(damage);
+  public PlasmaCannon(int damage, boolean on_pyro) {
+    super(damage, on_pyro);
+  }
+
+  @Override
+  public void setSoundKey() {
+    sound_key = (on_pyro ? "weapons/plasma.wav" : "weapons/laser06.wav");
   }
 
   @Override

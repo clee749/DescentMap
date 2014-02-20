@@ -13,7 +13,6 @@ import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
 import mapobject.powerup.HomingPack;
 import mapobject.powerup.ProximityPack;
-import mapobject.shot.Shot;
 import pilot.Pilot;
 import pilot.PilotAction;
 import pilot.PyroPilot;
@@ -26,7 +25,6 @@ import structure.Room;
 import util.MapUtils;
 import util.PowerupFactory;
 import cannon.Cannon;
-import cannon.ConcussionMissileCannon;
 import cannon.LaserCannon;
 
 import common.ObjectType;
@@ -177,6 +175,8 @@ public class Pyro extends Unit {
   private final int starting_shields;
   private final double max_move_speed;
   private double cloak_time_left;
+  private boolean play_personal_sounds;
+  private MapEngine engine;
 
   public Pyro(Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(Unit.getRadius(ObjectType.Pyro), pilot, room, x_loc, y_loc, direction);
@@ -198,13 +198,13 @@ public class Pyro extends Unit {
     shields = starting_shields;
     energy = MIN_STARTING_ENERGY;
     primary_cannons = new Cannon[PyroPrimaryCannon.values().length];
-    selected_primary_cannon = new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 1);
+    selected_primary_cannon = PyroPrimaryCannon.createCannon(PyroPrimaryCannon.LASER);
     primary_cannons[PyroPrimaryCannon.LASER.ordinal()] = selected_primary_cannon;
     setPrimaryCannonInfo(PyroPrimaryCannon.LASER);
     missile_side = (int) (Math.random() * 2);
     secondary_ammo = new int[PyroSecondaryCannon.values().length];
     secondary_ammo[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()] = MIN_STARTING_CONCUSSION_MISSILES;
-    selected_secondary_cannon = new ConcussionMissileCannon(Shot.getDamage(ObjectType.ConcussionMissile));
+    selected_secondary_cannon = secondary_cannons[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()];
     selected_secondary_cannon_type = PyroSecondaryCannon.CONCUSSION_MISSILE;
     secondary_reload_time = SECONDARY_RELOAD_TIMES[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()];
     has_quad_lasers = false;
@@ -247,6 +247,14 @@ public class Pyro extends Unit {
   @Override
   public ObjectType getType() {
     return ObjectType.Pyro;
+  }
+
+  public void setEngine(MapEngine engine) {
+    this.engine = engine;
+  }
+
+  public void setPlayPersonalSounds(boolean play_personal_sounds) {
+    this.play_personal_sounds = play_personal_sounds;
   }
 
   public double getEnergy() {
@@ -429,9 +437,10 @@ public class Pyro extends Unit {
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
-    if (cloak_time_left < 0.0) {
+    if (is_cloaked && cloak_time_left < 0.0) {
       is_cloaked = false;
       is_visible = true;
+      playPublicSound("effects/cloakoff.wav");
     }
     if (shields < 0) {
       return doNextDeathSpinAction(engine, s_elapsed);
@@ -469,7 +478,7 @@ public class Pyro extends Unit {
       death_spin_direction =
               MapUtils.normalizeAngle(death_spin_direction + death_spin_delta_direction * s_elapsed);
       if (death_spin_time_left < 0.0) {
-        MapObject created_object = handleDeath(s_elapsed);
+        MapObject created_object = handleDeath(engine, s_elapsed);
         if (!is_in_map) {
           room.doSplashDamage(this, DEATH_SPLASH_DAMAGE, DEATH_SPLASH_DAMAGE_RADIUS, this);
           ((PyroPilot) pilot).prepareForRespawn();
@@ -485,6 +494,9 @@ public class Pyro extends Unit {
     if (shields < -MAX_DEATH_SPIN_DAMAGE_TAKEN) {
       death_spin_time_left = -1.0;
     }
+    if (Math.random() * MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS < s_elapsed) {
+      playPublicSound("effects/explode2.wav");
+    }
     return createDamagedExplosion();
   }
 
@@ -495,6 +507,14 @@ public class Pyro extends Unit {
     bomb_reload_time_left -= s_elapsed;
     energy_recharge_cooldown_left -= s_elapsed;
     cloak_time_left -= s_elapsed;
+  }
+
+  @Override
+  public void beDamaged(MapEngine engine, int amount, boolean is_splash) {
+    super.beDamaged(engine, amount, is_splash);
+    if (!is_splash) {
+      playPublicSound("effects/shit01.wav");
+    }
   }
 
   public MapObject fireCannon() {
@@ -515,6 +535,7 @@ public class Pyro extends Unit {
               x_forward_abs_offset, y_loc - abs_offset.y + y_forward_abs_offset, direction));
     }
     energy -= primary_energy_cost;
+    playPublicSound(selected_primary_cannon.getSoundKey());
     return shots;
   }
 
@@ -528,6 +549,7 @@ public class Pyro extends Unit {
     else {
       shot = fireSecondaryWithoutOffset();
     }
+    playPublicSound(selected_secondary_cannon.getSoundKey());
     if (--secondary_ammo[selected_secondary_cannon_type.ordinal()] < 1) {
       handleSecondaryAmmoDepleted();
     }
@@ -551,8 +573,9 @@ public class Pyro extends Unit {
 
   public MapObject dropBomb() {
     revealIfCloaked();
-    MapObject shot;
-    shot = secondary_cannons[PROXIMITY_BOMB_ORDINAL].fireCannon(this, room, x_loc, y_loc, direction);
+    Cannon cannon = secondary_cannons[PROXIMITY_BOMB_ORDINAL];
+    MapObject shot = cannon.fireCannon(this, room, x_loc, y_loc, direction);
+    playPublicSound(cannon.getSoundKey());
     if (--secondary_ammo[PROXIMITY_BOMB_ORDINAL] < 1 &&
             selected_secondary_cannon_type.equals(PyroSecondaryCannon.PROXIMITY_BOMB)) {
       handleSecondaryAmmoDepleted();
@@ -621,6 +644,7 @@ public class Pyro extends Unit {
       is_visible = false;
       cloak_time_left = time;
       visible_time_left = 0.0;
+      playPublicSound("effects/cloakon.wav");
       return true;
     }
     return false;
@@ -661,6 +685,7 @@ public class Pyro extends Unit {
     selected_primary_cannon = new_primary_cannon;
     reload_time_left = CANNON_SWITCH_TIME;
     setPrimaryCannonInfo(cannon_type);
+    playPersonalSound("effects/change1.wav");
     return true;
   }
 
@@ -695,6 +720,7 @@ public class Pyro extends Unit {
     selected_secondary_cannon = secondary_cannons[cannon_type.ordinal()];
     selected_secondary_cannon_type = cannon_type;
     secondary_reload_time_left = CANNON_SWITCH_TIME;
+    playPersonalSound("effects/change2.wav");
     return true;
   }
 
@@ -711,6 +737,20 @@ public class Pyro extends Unit {
     if (energy_recharge_cooldown_left < 0.0 && energy < 100.0) {
       energy = Math.min(energy + 1.0, MIN_STARTING_ENERGY);
       energy_recharge_cooldown_left = ENERGY_RECHARGE_COOLDOWN;
+    }
+  }
+
+  public boolean playPersonalSound(String name) {
+    if (play_personal_sounds) {
+      engine.playSound(name);
+      return true;
+    }
+    return false;
+  }
+
+  public void playPublicSound(String name) {
+    if (!playPersonalSound(name)) {
+      playSound(engine, name);
     }
   }
 }

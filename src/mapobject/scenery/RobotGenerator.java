@@ -91,7 +91,7 @@ public class RobotGenerator extends Scenery {
           state_time_left = TIME_TO_SPAWN;
           num_robots_left_in_volley = NUM_ROBOTS_PER_VOLLEY;
           --num_spawn_volleys_left;
-          return new Zunggg(room, x_loc, y_loc, ZUNGGG_TIME);
+          return createZunggg(engine);
         }
         break;
       case SPAWN:
@@ -119,7 +119,7 @@ public class RobotGenerator extends Scenery {
           else {
             state = RobotGeneratorState.SPAWN;
             state_time_left = TIME_TO_SPAWN;
-            return new Zunggg(room, x_loc, y_loc, ZUNGGG_TIME);
+            return createZunggg(engine);
           }
         }
         break;
@@ -127,5 +127,10 @@ public class RobotGenerator extends Scenery {
         throw new DescentMapException("Unexpected RobotGeneratorState: " + state);
     }
     return null;
+  }
+
+  public Zunggg createZunggg(MapEngine engine) {
+    playSound(engine, "effects/mtrl01.wav");
+    return new Zunggg(room, x_loc, y_loc, ZUNGGG_TIME);
   }
 }

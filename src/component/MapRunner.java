@@ -35,8 +35,8 @@ public class MapRunner {
 
   private final MapDisplayer displayer;
   private final LinkedList<Pyro> pyros;
+  private final MapEngine engine;
   private DescentMap map;
-  private MapEngine engine;
   private RunnerState state;
   private long target_sleep_ms;
   private long last_update_time;
@@ -46,6 +46,8 @@ public class MapRunner {
   public MapRunner(MapDisplayer displayer) {
     this.displayer = displayer;
     displayer.setRunner(this);
+    engine = new MapEngine();
+    displayer.setEngine(engine);
     pyros = new LinkedList<Pyro>();
   }
 
@@ -113,7 +115,7 @@ public class MapRunner {
     else {
       map.finishBuildingMap();
       MapPopulator.populateMap(map);
-      engine = new MapEngine(map);
+      engine.newMap(map);
       if (pyros.isEmpty()) {
         for (int count = 0; count < NUM_PYROS; ++count) {
           engine.spawnPyro(count == 0 ? true : false);

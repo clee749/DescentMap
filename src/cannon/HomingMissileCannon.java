@@ -5,8 +5,13 @@ import mapobject.shot.HomingMissile;
 import structure.Room;
 
 public class HomingMissileCannon extends Cannon {
-  public HomingMissileCannon(int damage) {
-    super(damage);
+  public HomingMissileCannon(int damage, boolean on_pyro) {
+    super(damage, on_pyro);
+  }
+
+  @Override
+  public void setSoundKey() {
+    sound_key = "weapons/missile1.wav";
   }
 
   @Override

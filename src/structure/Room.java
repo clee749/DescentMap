@@ -12,8 +12,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import resource.ImageHandler;
-
 import mapobject.MapObject;
 import mapobject.ProximityBomb;
 import mapobject.powerup.Powerup;
@@ -21,6 +19,7 @@ import mapobject.scenery.Scenery;
 import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
+import resource.ImageHandler;
 import util.MapUtils;
 
 import common.ObjectType;
@@ -389,7 +388,7 @@ public class Room {
                             unit.getRadius(), 0.0);
     if (distance < damage_radius &&
             (which_neighbor == null || MapUtils.canSeeObjectInNeighborRoom(src_object, unit, which_neighbor))) {
-      unit.beDamaged((int) (max_damage * (1 - distance / damage_radius)));
+      unit.beDamaged(null, (int) (max_damage * (1 - distance / damage_radius)), true);
     }
   }
 }

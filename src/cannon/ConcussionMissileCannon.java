@@ -5,8 +5,13 @@ import mapobject.shot.ConcussionMissile;
 import structure.Room;
 
 public class ConcussionMissileCannon extends Cannon {
-  public ConcussionMissileCannon(int damage) {
-    super(damage);
+  public ConcussionMissileCannon(int damage, boolean on_pyro) {
+    super(damage, on_pyro);
+  }
+
+  @Override
+  public void setSoundKey() {
+    sound_key = "weapons/missile1.wav";
   }
 
   @Override

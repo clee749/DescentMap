@@ -32,6 +32,7 @@ public class MapPanel extends JPanel implements MapDisplayer, ComponentListener,
   private final MapPlayDisplayer play_displayer;
   private final MusicPlayer music_player;
   private MapRunner runner;
+  private MapEngine engine;
   private DisplayMode display_mode;
   private int music_level;
   private boolean music_active;
@@ -47,6 +48,11 @@ public class MapPanel extends JPanel implements MapDisplayer, ComponentListener,
   @Override
   public void setRunner(MapRunner runner) {
     this.runner = runner;
+  }
+
+  @Override
+  public void setEngine(MapEngine engine) {
+    this.engine = engine;
   }
 
   @Override
@@ -148,6 +154,9 @@ public class MapPanel extends JPanel implements MapDisplayer, ComponentListener,
           music_playing = true;
           music_active = true;
         }
+        break;
+      case KeyEvent.VK_S:
+        engine.toggleSounds();
         break;
     }
   }

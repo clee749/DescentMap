@@ -7,6 +7,8 @@ import structure.DescentMap;
 public interface MapDisplayer {
   public void setRunner(MapRunner runner);
 
+  public void setEngine(MapEngine engine);
+
   public void setNewMap(DescentMap map);
 
   public void finishBuildingMap();

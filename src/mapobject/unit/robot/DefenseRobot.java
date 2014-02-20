@@ -14,8 +14,8 @@ public class DefenseRobot extends Robot {
   public static final int NUM_LASER_CANNON_POWERUPS_RELEASED = 3;
 
   public DefenseRobot(Room room, double x_loc, double y_loc, double direction) {
-    super(Unit.getRadius(ObjectType.DefenseRobot), new LaserCannon(Shot.getDamage(ObjectType.LaserShot), 4),
-            room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.DefenseRobot), new LaserCannon(Shot.getDamage(ObjectType.LaserShot),
+            false, 4), room, x_loc, y_loc, direction);
   }
 
   @Override

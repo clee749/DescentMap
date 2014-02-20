@@ -11,8 +11,8 @@ import common.ObjectType;
 
 public class Class1Drone extends Robot {
   public Class1Drone(Room room, double x_loc, double y_loc, double direction) {
-    super(Unit.getRadius(ObjectType.Class1Drone),
-            new FireballCannon(Shot.getDamage(ObjectType.FireballShot)), room, x_loc, y_loc, direction);
+    super(Unit.getRadius(ObjectType.Class1Drone), new FireballCannon(Shot.getDamage(ObjectType.FireballShot),
+            false), room, x_loc, y_loc, direction);
   }
 
   @Override

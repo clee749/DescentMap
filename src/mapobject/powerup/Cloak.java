@@ -10,6 +10,7 @@ public class Cloak extends Powerup {
 
   public Cloak(Room room, double x_loc, double y_loc, double direction, double speed) {
     super(room, x_loc, y_loc, direction, speed);
+    play_acquired_sound = false;
   }
 
   @Override

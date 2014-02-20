@@ -5,8 +5,13 @@ import mapobject.shot.FireballShot;
 import structure.Room;
 
 public class FireballCannon extends Cannon {
-  public FireballCannon(int damage) {
-    super(damage);
+  public FireballCannon(int damage, boolean on_pyro) {
+    super(damage, on_pyro);
+  }
+
+  @Override
+  public void setSoundKey() {
+    sound_key = "weapons/laser12.wav";
   }
 
   @Override
