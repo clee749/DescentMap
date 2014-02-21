@@ -114,11 +114,14 @@ public class Pyro extends Unit {
   public static final Color UNSELECTED_CANNON_COLOR = Color.gray;
   public static final Color AMMO_AMOUNT_COLOR = Color.red;
 
+  // energy
+  public static final double MIN_STARTING_ENERGY = 100.0;
+  public static final double MAX_ENERGY = 200.0;
+  public static final double ENERGY_RECHARGE_COOLDOWN = 0.04;
+  public static final int NUM_ENERGY_RECHARGES_PER_SOUND = 6;
+
   // armaments
   public static final int MAX_SHIELDS = 200;
-  public static final int MIN_STARTING_ENERGY = 100;
-  public static final int MAX_ENERGY = 200;
-  public static final double ENERGY_RECHARGE_COOLDOWN = 0.04;
   public static final int MIN_STARTING_CONCUSSION_MISSILES = 3;
   public static final double CANNON_SWITCH_TIME = 1.0;
   public static final int PROXIMITY_BOMB_ORDINAL = PyroSecondaryCannon.PROXIMITY_BOMB.ordinal();
@@ -134,17 +137,18 @@ public class Pyro extends Unit {
   public static final int DEATH_SPLASH_DAMAGE = 50;
   public static final int MAX_DEATH_SPIN_DAMAGE_TAKEN = 50;
 
-  // sounds
-  public static final double ENERGY_RECHARGE_SOUND_COOLDOWN = 0.25;
-
   // absolute Cannon offsets
   private final double outer_cannon_offset;
   private final double cannon_forward_offset;
   private final double missile_offset;
 
-  // primary Cannon info
-  private double energy_recharge_cooldown_left;
+  // energy
   private double energy;
+  private double energy_recharge_cooldown_left;
+  private boolean is_recharging_energy;
+  private int energy_recharge_left_until_sound;
+
+  // primary Cannon info
   private boolean has_quad_lasers;
   private Cannon[] primary_cannons;
   private Cannon selected_primary_cannon;
@@ -224,8 +228,11 @@ public class Pyro extends Unit {
     is_cloaked = false;
     is_exploded = false;
     energy_recharge_cooldown_left = 0.0;
+    is_recharging_energy = false;
     secondary_reload_time_left = 0.0;
     firing_secondary = false;
+    bomb_reload_time_left = 0.0;
+    dropping_bomb = false;
     if (death_spin_started) {
       spawnNew();
     }
@@ -407,6 +414,7 @@ public class Pyro extends Unit {
 
   @Override
   public void planNextAction(double s_elapsed) {
+    handleEnergyRechargeSound();
     if (shields < 0) {
       handleCooldowns(s_elapsed);
       next_action = PilotAction.MOVE_FORWARD;
@@ -423,6 +431,13 @@ public class Pyro extends Unit {
     if (next_action.drop_bomb && bomb_reload_time_left < 0.0 && secondary_ammo[PROXIMITY_BOMB_ORDINAL] > 0) {
       planToDropBomb();
     }
+  }
+
+  public void handleEnergyRechargeSound() {
+    if (!is_recharging_energy) {
+      energy_recharge_left_until_sound = 0;
+    }
+    is_recharging_energy = false;
   }
 
   public void planToFireSecondary() {
@@ -734,9 +749,15 @@ public class Pyro extends Unit {
   }
 
   public void rechargeEnergy() {
-    if (energy_recharge_cooldown_left < 0.0 && energy < 100.0) {
+    is_recharging_energy = true;
+    --energy_recharge_left_until_sound;
+    if (energy_recharge_cooldown_left < 0.0 && energy < MIN_STARTING_ENERGY) {
       energy = Math.min(energy + 1.0, MIN_STARTING_ENERGY);
       energy_recharge_cooldown_left = ENERGY_RECHARGE_COOLDOWN;
+      if (energy_recharge_left_until_sound < 1) {
+        energy_recharge_left_until_sound = NUM_ENERGY_RECHARGES_PER_SOUND;
+        playPublicSound("effects/power04.wav");
+      }
     }
   }
 
