@@ -143,7 +143,7 @@ public class MapRunner {
   }
 
   public void doPlayStep(double s_elapsed) {
-    engine.computeNextStep(s_elapsed);
+    engine.planNextStep(s_elapsed);
     engine.doNextStep(s_elapsed);
     if (engine.levelComplete()) {
       state = RunnerState.PAUSE_AFTER_PLAY;

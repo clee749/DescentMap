@@ -23,6 +23,7 @@ import component.MapEngine;
 public abstract class Robot extends Unit {
   private static final HashMap<ObjectType, Double> RELOAD_TIMES = getReloadTimes();
   private static final HashMap<ObjectType, Integer> SHOTS_PER_VOLLEYS = getShotsPerVolleys();
+  private static final HashMap<ObjectType, String> GROWL_SOUND_KEYS = getGrowlSoundKeys();
 
   private static HashMap<ObjectType, Double> getReloadTimes() {
     HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
@@ -62,15 +63,38 @@ public abstract class Robot extends Unit {
     return shots;
   }
 
+  private static HashMap<ObjectType, String> getGrowlSoundKeys() {
+    HashMap<ObjectType, String> keys = new HashMap<ObjectType, String>();
+    keys.put(ObjectType.BabySpider, "enemies/robot12.wav");
+    keys.put(ObjectType.Bomber, "enemies/robot01.wav");
+    keys.put(ObjectType.Class1Drone, "enemies/robot01.wav");
+    keys.put(ObjectType.Class2Drone, "enemies/robot11.wav");
+    keys.put(ObjectType.DefenseRobot, "enemies/robot21.wav");
+    keys.put(ObjectType.HeavyDriller, "enemies/robot27.wav");
+    keys.put(ObjectType.HeavyHulk, "enemies/robot07.wav");
+    keys.put(ObjectType.LightHulk, "enemies/robot04.wav");
+    keys.put(ObjectType.MediumHulk, "enemies/robot03.wav");
+    keys.put(ObjectType.MediumHulkCloaked, "enemies/robot03.wav");
+    keys.put(ObjectType.PlatformLaser, "enemies/robot20.wav");
+    keys.put(ObjectType.PlatformMissile, "enemies/robot16.wav");
+    keys.put(ObjectType.SecondaryLifter, "enemies/robot25.wav");
+    keys.put(ObjectType.Spider, "enemies/robot14.wav");
+    return keys;
+  }
+
   public static final double VOLLEY_RELOAD_TIME = 0.1;
   public static final double DISABLE_TIME_PER_DAMAGE = 0.03;
+  public static final double GROWL_COOLDOWN = 2.0;
 
   protected final Cannon cannon;
   protected final int shots_per_volley;
+  protected final String growl_sound_key;
   protected double shots_left_in_volley;
   protected double volley_reload_time_left;
   protected int cannon_side;
   protected double inactive_time_left;
+  protected boolean can_growl;
+  protected double growl_cooldown_left;
 
   public Robot(double radius, Pilot pilot, Cannon cannon, Room room, double x_loc, double y_loc,
           double direction) {
@@ -78,11 +102,28 @@ public abstract class Robot extends Unit {
     this.cannon = cannon;
     reload_time = RELOAD_TIMES.get(type);
     shots_per_volley = SHOTS_PER_VOLLEYS.get(type);
+    growl_sound_key = GROWL_SOUND_KEYS.get(type);
     cannon_side = (int) (Math.random() * 2);
   }
 
   public Robot(double radius, Cannon cannon, Room room, double x_loc, double y_loc, double direction) {
     this(radius, new RobotPilot(), cannon, room, x_loc, y_loc, direction);
+  }
+
+  public String getGrowlSoundKey() {
+    return growl_sound_key;
+  }
+
+  public boolean canGrowl() {
+    return can_growl;
+  }
+
+  public void allowGrowl() {
+    can_growl = true;
+  }
+
+  public void confirmGrowl() {
+    growl_cooldown_left = GROWL_COOLDOWN;
   }
 
   @Override
@@ -106,6 +147,7 @@ public abstract class Robot extends Unit {
 
   @Override
   public void planNextAction(double s_elapsed) {
+    can_growl = false;
     inactive_time_left -= s_elapsed;
     if (inactive_time_left < 0.0) {
       super.planNextAction(s_elapsed);
@@ -117,6 +159,9 @@ public abstract class Robot extends Unit {
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
+    if (can_growl && growl_cooldown_left < 0.0) {
+      engine.registerGrowler(this);
+    }
     MapObject object_created = super.doNextAction(engine, s_elapsed);
     if (firing_cannon && shields >= 0) {
       if (volley_reload_time_left < 0.0) {
@@ -137,6 +182,7 @@ public abstract class Robot extends Unit {
   public void handleCooldowns(double s_elapsed) {
     super.handleCooldowns(s_elapsed);
     volley_reload_time_left -= s_elapsed;
+    growl_cooldown_left -= s_elapsed;
   }
 
   @Override

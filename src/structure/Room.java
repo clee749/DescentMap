@@ -278,7 +278,7 @@ public class Room {
     return misc_objects.remove(child);
   }
 
-  public void computeNextStep(double s_elapsed) {
+  public void planNextStep(double s_elapsed) {
     for (Scenery scenery : sceneries) {
       scenery.planNextAction(s_elapsed);
     }

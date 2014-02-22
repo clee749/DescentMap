@@ -1,10 +1,12 @@
 package component;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import mapobject.MapObject;
 import mapobject.MultipleObject;
 import mapobject.unit.Pyro;
+import mapobject.unit.robot.Robot;
 import resource.SoundPlayer;
 import structure.DescentMap;
 import structure.Room;
@@ -26,12 +28,14 @@ class RoomChange {
 
 public class MapEngine {
   public static final double MAX_SOUND_DISTANCE = MapPanel.SIGHT_RADIUS * 2;
-  public static final float GAIN_REDUCTION_PER_UNIT_DISTANCE = 5.0f;
-  public static final float MAX_GAIN_REDUCTION = 40.0f;
+  public static final float SOUND_GAIN_REDUCTION_PER_UNIT_DISTANCE = 5.0f;
+  public static final float MAX_SOUND_GAIN_REDUCTION = 40.0f;
+  public static final double EXPECTED_NUM_GROWLERS_PER_SECOND = 3.0;
 
   private final SoundPlayer sounds;
   private final LinkedList<Pyro> created_pyros;
   private final LinkedList<RoomChange> room_changes;
+  private final ArrayList<Robot> growlers;
   private DescentMap map;
   private MapObject center_object;
   private boolean sounds_active;
@@ -40,13 +44,14 @@ public class MapEngine {
     sounds = new SoundPlayer();
     created_pyros = new LinkedList<Pyro>();
     room_changes = new LinkedList<RoomChange>();
+    growlers = new ArrayList<Robot>();
   }
 
   public void newMap(DescentMap map) {
     this.map = map;
     created_pyros.clear();
     room_changes.clear();
-    center_object = null;
+    center_object = map.getCenterObject();
   }
 
   public LinkedList<Pyro> getCreatedPyros() {
@@ -77,9 +82,9 @@ public class MapEngine {
     }
   }
 
-  public void computeNextStep(double s_elapsed) {
+  public void planNextStep(double s_elapsed) {
     for (Room room : map.getAllRooms()) {
-      room.computeNextStep(s_elapsed);
+      room.planNextStep(s_elapsed);
     }
   }
 
@@ -96,6 +101,7 @@ public class MapEngine {
     for (MapObject created : created_objects) {
       addObject(created);
     }
+    handleGrowlingRobots(s_elapsed);
   }
 
   public void changeRooms(MapObject object, Room src_room, Room dst_room) {
@@ -139,8 +145,23 @@ public class MapEngine {
         return;
       }
       float gain_reduction =
-              Math.min(GAIN_REDUCTION_PER_UNIT_DISTANCE * (float) distance, MAX_GAIN_REDUCTION);
+              Math.min(SOUND_GAIN_REDUCTION_PER_UNIT_DISTANCE * (float) distance, MAX_SOUND_GAIN_REDUCTION);
       sounds.playSound(name, -gain_reduction);
     }
+  }
+
+  public void registerGrowler(Robot robot) {
+    if (Math.hypot(robot.getX() - center_object.getX(), robot.getY() - center_object.getY()) < MAX_SOUND_DISTANCE) {
+      growlers.add(robot);
+    }
+  }
+
+  public void handleGrowlingRobots(double s_elapsed) {
+    if (!growlers.isEmpty() && Math.random() / s_elapsed < EXPECTED_NUM_GROWLERS_PER_SECOND) {
+      Robot growler = growlers.get((int) (Math.random() * growlers.size()));
+      growler.confirmGrowl();
+      playSound(growler.getGrowlSoundKey(), growler.getX(), growler.getY());
+    }
+    growlers.clear();
   }
 }

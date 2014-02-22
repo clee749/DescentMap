@@ -30,7 +30,7 @@ public class MapPanel extends JPanel implements MapDisplayer, ComponentListener,
   private final ImageHandler images;
   private final MapConstructionDisplayer construction_displayer;
   private final MapPlayDisplayer play_displayer;
-  private final MusicPlayer music_player;
+  private final MusicPlayer music;
   private MapRunner runner;
   private MapEngine engine;
   private DisplayMode display_mode;
@@ -42,7 +42,7 @@ public class MapPanel extends JPanel implements MapDisplayer, ComponentListener,
     images = new ImageHandler();
     construction_displayer = new MapConstructionDisplayer();
     play_displayer = new MapPlayDisplayer(images, SIGHT_RADIUS);
-    music_player = new MusicPlayer();
+    music = new MusicPlayer();
   }
 
   @Override
@@ -90,7 +90,7 @@ public class MapPanel extends JPanel implements MapDisplayer, ComponentListener,
   public int playMusic() {
     music_level = (int) (Math.random() * MusicPlayer.NUM_LEVELS + 1);
     if (music_active) {
-      music_player.playMusic(music_level);
+      music.playMusic(music_level);
       music_playing = true;
     }
     return music_level;
@@ -98,13 +98,13 @@ public class MapPanel extends JPanel implements MapDisplayer, ComponentListener,
 
   public void stopMusic() {
     if (music_active) {
-      music_player.stop();
+      music.stop();
       music_playing = false;
     }
   }
 
   public void closeMusic() {
-    music_player.close();
+    music.close();
   }
 
   @Override
@@ -145,12 +145,12 @@ public class MapPanel extends JPanel implements MapDisplayer, ComponentListener,
     switch (key_code) {
       case KeyEvent.VK_M:
         if (music_playing) {
-          music_player.stop();
+          music.stop();
           music_playing = false;
           music_active = false;
         }
         else {
-          music_player.playMusic(music_level);
+          music.playMusic(music_level);
           music_playing = true;
           music_active = true;
         }
