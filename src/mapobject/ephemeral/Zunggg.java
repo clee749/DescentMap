@@ -14,6 +14,7 @@ import common.ObjectType;
 import component.MapEngine;
 
 public class Zunggg extends MapObject {
+  public static final Color COLOR = Color.cyan;
   public static final int STROKE_WIDTH_DIVISOR = 20;
   public static final int NUM_BOLTS_DIVISOR = 5;
   public static final int MIN_NUM_BOLTS = 10;
@@ -37,7 +38,7 @@ public class Zunggg extends MapObject {
           int pixels_per_cell) {
     Point center_pixel = MapUtils.coordsToPixel(x_loc, y_loc, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     int pixels_per_half_cell = pixels_per_cell / 2;
-    g.setColor(Color.cyan);
+    g.setColor(COLOR);
     g.setStroke(new BasicStroke(Math.min(pixels_per_cell / STROKE_WIDTH_DIVISOR, 2)));
     int num_bolts = Math.min(pixels_per_cell / NUM_BOLTS_DIVISOR, MIN_NUM_BOLTS);
     for (int i = 0; i < num_bolts; ++i) {

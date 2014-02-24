@@ -153,7 +153,6 @@ public abstract class Unit extends MovableObject {
             Math.random() * MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS < less_half_shields / (half_shields + 1.0) *
                     s_elapsed) {
       created_objects.addObject(createDamagedExplosion());
-      playSound(engine, "effects/explode2.wav");
     }
     created_objects.addObject(super.doNextAction(engine, s_elapsed));
     return created_objects;

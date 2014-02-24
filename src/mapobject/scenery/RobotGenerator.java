@@ -62,6 +62,9 @@ public class RobotGenerator extends Scenery {
     super.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     g.setColor(Color.magenta);
     g.drawString(String.valueOf(num_spawn_volleys_left * 10 + num_robots_left_in_volley), 200, 20);
+    if (state_time_left > 0.0) {
+      g.drawString(String.valueOf((int) state_time_left), 200, 40);
+    }
   }
 
   @Override

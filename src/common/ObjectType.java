@@ -57,6 +57,7 @@ public enum ObjectType {
   FusionCannonPowerup,
 
   // ephemerals
+  EnergySpark,
   Explosion,
   Zunggg,
 

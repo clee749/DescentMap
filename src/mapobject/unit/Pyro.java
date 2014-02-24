@@ -170,6 +170,7 @@ public class Pyro extends Unit {
   private boolean dropping_bomb;
 
   // death spin
+  private TurnDirection previous_turn;
   private boolean death_spin_started;
   private double death_spin_time_left;
   private double death_spin_direction;
@@ -233,6 +234,7 @@ public class Pyro extends Unit {
     firing_secondary = false;
     bomb_reload_time_left = 0.0;
     dropping_bomb = false;
+    previous_turn = TurnDirection.NONE;
     if (death_spin_started) {
       spawnNew();
     }
@@ -460,6 +462,7 @@ public class Pyro extends Unit {
     if (shields < 0) {
       return doNextDeathSpinAction(engine, s_elapsed);
     }
+    previous_turn = next_action.turn;
     MultipleObject created_objects = new MultipleObject();
     created_objects.addObject(super.doNextAction(engine, s_elapsed));
     if (firing_cannon) {
@@ -484,8 +487,8 @@ public class Pyro extends Unit {
       death_spin_time_left = DEATH_SPIN_TIME;
       move_speed /= DEATH_SPIN_MOVE_SPEED_DIVISOR;
       death_spin_delta_direction = turn_speed * DEATH_SPIN_TURN_SPEED_MULTIPLIER;
-      if (next_action.turn.equals(TurnDirection.CLOCKWISE) ||
-              (next_action.turn.equals(TurnDirection.NONE) && Math.random() < 0.5)) {
+      if (previous_turn.equals(TurnDirection.CLOCKWISE) ||
+              (previous_turn.equals(TurnDirection.NONE) && Math.random() < 0.5)) {
         death_spin_delta_direction *= -1;
       }
     }
