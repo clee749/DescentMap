@@ -429,6 +429,19 @@ public class PyroPilot extends UnitPilot {
         return true;
       }
     }
+
+    if (state.equals(PyroPilotState.MOVE_TO_ROOM_CONNECTION) ||
+            state.equals(PyroPilotState.MOVE_TO_NEIGHBOR_ROOM)) {
+      RoomConnection connection = target_room_info.getValue();
+      for (Pyro pyro : connection.neighbor.getPyros()) {
+        double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, pyro));
+        if (abs_angle_to_unit < FRIENDLY_FIRE_DIRECTION_EPSILON &&
+                MapUtils.canSeeObjectInNeighborRoom(bound_object, pyro, target_room_info.getKey())) {
+          return true;
+        }
+      }
+    }
+
     return false;
   }
 
