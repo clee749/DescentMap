@@ -1,8 +1,12 @@
 package component;
 
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.io.IOException;
+import java.io.InputStream;
 
 import mapobject.MapObject;
 import mapobject.unit.Pyro;
@@ -14,8 +18,12 @@ import util.MapUtils;
 import common.ObjectType;
 
 public class MapPlayDisplayer {
+  public static final String FONT_PATH = "/resrc/fonts/DescScor.TTF";
+  public static final float FONT_SIZE = 12.0f;
+
   private final ImageHandler images;
   private final int sight_radius;
+  private final Font descent_font;
   private DescentMap map;
   private int pixels_per_cell;
   private Point center_pixel;
@@ -25,6 +33,7 @@ public class MapPlayDisplayer {
   public MapPlayDisplayer(ImageHandler images, int sight_radius) {
     this.images = images;
     this.sight_radius = sight_radius;
+    descent_font = readFont();
   }
 
   public int getPixelsPerCell() {
@@ -33,6 +42,20 @@ public class MapPlayDisplayer {
 
   public void setMap(DescentMap map) {
     this.map = map;
+  }
+
+  public Font readFont() {
+    InputStream is = getClass().getResourceAsStream(FONT_PATH);
+    try {
+      return Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(FONT_SIZE);
+    }
+    catch (FontFormatException e) {
+      e.printStackTrace();
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   public void setSizes(Dimension dims) {
@@ -44,6 +67,7 @@ public class MapPlayDisplayer {
   }
 
   public void paintMap(Graphics2D g) {
+    g.setFont(descent_font);
     MapObject center_object = map.getCenterObject();
     double center_x = center_object.getX();
     double center_y = center_object.getY();
