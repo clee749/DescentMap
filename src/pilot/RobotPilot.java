@@ -29,7 +29,8 @@ enum RobotPilotState {
 
 public class RobotPilot extends UnitPilot {
   public static final double TARGET_DIRECTION_EPSILON = MapUtils.PI_OVER_TWO;
-  public static final double MIN_DISTANCE_TO_PYRO = 1.0;
+  public static final double MIN_DISTANCE_TO_PYRO2 = 1.0;
+  public static final double MAX_DISTANCE_TO_PYRO2 = Math.pow(1.1, 2);
   public static final double START_EXPLORE_PROB = 0.1;
   public static final double STOP_EXPLORE_PROB = 0.1;
 
@@ -146,11 +147,17 @@ public class RobotPilot extends UnitPilot {
   }
 
   public PilotAction findReactToPyroAction(StrafeDirection strafe) {
-    MoveDirection move =
-            (Math.abs(target_unit.getX() - bound_object.getX()) < MIN_DISTANCE_TO_PYRO &&
-                    Math.abs(target_unit.getY() - bound_object.getY()) < MIN_DISTANCE_TO_PYRO
-                    ? MoveDirection.BACKWARD
-                    : MoveDirection.FORWARD);
+    double distance_to_target2 = MapUtils.distance2(bound_object, target_unit);
+    MoveDirection move;
+    if (distance_to_target2 > MAX_DISTANCE_TO_PYRO2) {
+      move = MoveDirection.FORWARD;
+    }
+    else if (distance_to_target2 < MIN_DISTANCE_TO_PYRO2) {
+      move = MoveDirection.BACKWARD;
+    }
+    else {
+      move = MoveDirection.NONE;
+    }
     double angle_to_target = MapUtils.angleTo(bound_object, target_unit);
     double abs_angle_to_target = Math.abs(angle_to_target);
     if (abs_angle_to_target < TARGET_DIRECTION_EPSILON) {
