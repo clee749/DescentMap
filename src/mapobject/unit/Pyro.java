@@ -398,7 +398,7 @@ public class Pyro extends Unit {
   public int paintSecondaryWeaponInfo(Graphics2D g, PyroSecondaryCannon cannon_type, String weapon_text,
           int text_offset) {
     int ammo = getSecondaryAmmo(cannon_type);
-    if (ammo < 1) {
+    if (ammo < 1 && !cannon_type.equals(selected_secondary_cannon_type)) {
       return text_offset;
     }
     FontMetrics metrics = g.getFontMetrics();

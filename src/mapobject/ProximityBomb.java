@@ -85,7 +85,7 @@ public class ProximityBomb extends MapObject {
       }
     }
     for (Unit unit : room.getRobots()) {
-      if (isUnitInRange(unit)) {
+      if (!unit.equals(source) && isUnitInRange(unit)) {
         return handleDetonation(engine, unit);
       }
     }
@@ -102,8 +102,7 @@ public class ProximityBomb extends MapObject {
 
   public boolean isUnitInRange(Unit unit) {
     double combined_radius = unit.getRadius() + radius;
-    return !unit.equals(source) && Math.abs(unit.getX() - x_loc) < combined_radius &&
-            Math.abs(unit.getY() - y_loc) < combined_radius;
+    return Math.abs(unit.getX() - x_loc) < combined_radius && Math.abs(unit.getY() - y_loc) < combined_radius;
   }
 
   public MapObject handleDetonation(MapEngine engine, Unit hit_unit) {

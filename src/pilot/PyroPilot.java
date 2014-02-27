@@ -424,8 +424,8 @@ public class PyroPilot extends UnitPilot {
       }
       double abs_angle_to_pyro = Math.abs(MapUtils.angleTo(bound_object, pyro));
       if (abs_angle_to_pyro < FRIENDLY_FIRE_DIRECTION_EPSILON ||
-              (Math.abs(pyro.getX() - bound_object.getX()) < bound_object_radius && Math.abs(pyro.getY() -
-                      bound_object.getY()) < bound_object_radius)) {
+              (Math.abs(pyro.getX() - bound_object.getX()) < bound_object_diameter && Math.abs(pyro.getY() -
+                      bound_object.getY()) < bound_object_diameter)) {
         return true;
       }
     }
