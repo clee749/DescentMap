@@ -13,6 +13,7 @@ import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
 import mapobject.powerup.HomingPack;
 import mapobject.powerup.ProximityPack;
+import pilot.ComputerPyroPilot;
 import pilot.Pilot;
 import pilot.PilotAction;
 import pilot.PyroPilot;
@@ -195,7 +196,7 @@ public class Pyro extends Unit {
   }
 
   public Pyro(Room room, double x_loc, double y_loc, double direction) {
-    this(new PyroPilot(), room, x_loc, y_loc, direction);
+    this(new ComputerPyroPilot(), room, x_loc, y_loc, direction);
   }
 
   public void spawnNew() {
@@ -256,6 +257,12 @@ public class Pyro extends Unit {
   @Override
   public ObjectType getType() {
     return ObjectType.Pyro;
+  }
+
+  @Override
+  public void setPilot(Pilot pilot) {
+    super.setPilot(pilot);
+    ((PyroPilot) pilot).startPilot();
   }
 
   public void setEngine(MapEngine engine) {
@@ -692,9 +699,12 @@ public class Pyro extends Unit {
     return acquireEnergy(Energy.ENERGY_AMOUNT);
   }
 
-  public boolean switchPrimaryCannon(PyroPrimaryCannon cannon_type) {
+  public boolean switchPrimaryCannon(PyroPrimaryCannon cannon_type, boolean action_on_error) {
     Cannon new_primary_cannon = primary_cannons[cannon_type.ordinal()];
     if (new_primary_cannon == null) {
+      if (action_on_error) {
+        playPersonalSound("effects/beep02.wav");
+      }
       return false;
     }
     if (new_primary_cannon.equals(selected_primary_cannon)) {
@@ -721,15 +731,18 @@ public class Pyro extends Unit {
     if (current_ammo < max_ammo) {
       secondary_ammo[cannon_type.ordinal()] = Math.min(current_ammo + amount, max_ammo);
       if (!has_any_ammo) {
-        switchSecondaryCannon(cannon_type);
+        switchSecondaryCannon(cannon_type, false);
       }
       return true;
     }
     return false;
   }
 
-  public boolean switchSecondaryCannon(PyroSecondaryCannon cannon_type) {
+  public boolean switchSecondaryCannon(PyroSecondaryCannon cannon_type, boolean action_on_error) {
     if (secondary_ammo[cannon_type.ordinal()] < 1) {
+      if (action_on_error) {
+        playPersonalSound("effects/beep02.wav");
+      }
       return false;
     }
     if (cannon_type.equals(selected_secondary_cannon_type)) {
@@ -745,7 +758,7 @@ public class Pyro extends Unit {
   public void handleSecondaryAmmoDepleted() {
     for (int i = PyroSecondaryCannon.values().length - 1; i >= 0; --i) {
       if (i != PROXIMITY_BOMB_ORDINAL && secondary_ammo[i] > 0) {
-        switchSecondaryCannon(PyroSecondaryCannon.values()[i]);
+        switchSecondaryCannon(PyroSecondaryCannon.values()[i], false);
         break;
       }
     }

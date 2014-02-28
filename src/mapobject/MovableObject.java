@@ -114,6 +114,7 @@ public abstract class MovableObject extends MapObject {
 
   public void setPilot(Pilot pilot) {
     this.pilot = pilot;
+    pilot.bindToObject(this);
   }
 
   public void updateRoom(MapEngine engine, Room next_room) {

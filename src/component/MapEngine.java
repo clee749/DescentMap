@@ -7,6 +7,8 @@ import mapobject.MapObject;
 import mapobject.MultipleObject;
 import mapobject.unit.Pyro;
 import mapobject.unit.robot.Robot;
+import pilot.ComputerPyroPilot;
+import pilot.HumanPyroPilot;
 import resource.SoundPlayer;
 import structure.DescentMap;
 import structure.Room;
@@ -36,15 +38,18 @@ public class MapEngine {
   private final LinkedList<Pyro> created_pyros;
   private final LinkedList<RoomChange> room_changes;
   private final ArrayList<Robot> growlers;
+  private final HumanPyroPilot human_pilot;
   private DescentMap map;
   private MapObject center_object;
   private boolean sounds_active;
+  private boolean is_playable;
 
   public MapEngine() {
     sounds = new SoundPlayer();
     created_pyros = new LinkedList<Pyro>();
     room_changes = new LinkedList<RoomChange>();
     growlers = new ArrayList<Robot>();
+    human_pilot = new HumanPyroPilot();
   }
 
   public void newMap(DescentMap map) {
@@ -65,7 +70,7 @@ public class MapEngine {
 
   public void setCenterObject(MapObject center_object) {
     this.center_object = center_object;
-    if (center_object instanceof Pyro) {
+    if (center_object.getType().equals(ObjectType.Pyro)) {
       ((Pyro) center_object).setPlayPersonalSounds(sounds_active);
     }
     map.setCenterObject(center_object);
@@ -163,5 +168,29 @@ public class MapEngine {
       playSound(growler.getGrowlSoundKey(), growler.getX(), growler.getY());
     }
     growlers.clear();
+  }
+
+  public void togglePlayability() {
+    is_playable = !is_playable;
+    if (center_object instanceof Pyro) {
+      if (is_playable) {
+        ((Pyro) center_object).setPilot(human_pilot);
+      }
+      else {
+        ((Pyro) center_object).setPilot(new ComputerPyroPilot());
+      }
+    }
+  }
+
+  public void handleKeyPressed(int key_code) {
+    if (is_playable) {
+      human_pilot.handleKeyPressed(key_code);
+    }
+  }
+
+  public void handleKeyReleased(int key_code) {
+    if (is_playable) {
+      human_pilot.handleKeyReleased(key_code);
+    }
   }
 }

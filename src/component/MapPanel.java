@@ -154,16 +154,20 @@ public class MapPanel extends JPanel implements MapDisplayer, ComponentListener,
           music_playing = true;
           music_active = true;
         }
-        break;
+        return;
       case KeyEvent.VK_S:
         engine.toggleSounds();
-        break;
+        return;
+      case KeyEvent.VK_BACK_SPACE:
+        engine.togglePlayability();
+        return;
     }
+    engine.handleKeyPressed(key_code);
   }
 
   @Override
   public void keyReleased(KeyEvent e) {
-
+    engine.handleKeyReleased(e.getKeyCode());
   }
 
   @Override
