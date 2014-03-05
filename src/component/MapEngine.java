@@ -29,7 +29,7 @@ class RoomChange {
 
 
 public class MapEngine {
-  public static final double MAX_SOUND_DISTANCE = MapPanel.SIGHT_RADIUS * 2;
+  public static final double MAX_SOUND_DISTANCE = MapDisplayer.SIGHT_RADIUS * 2;
   public static final float SOUND_GAIN_REDUCTION_PER_UNIT_DISTANCE = 5.0f;
   public static final float MAX_SOUND_GAIN_REDUCTION = 40.0f;
   public static final double EXPECTED_NUM_GROWLERS_PER_SECOND = 3.0;

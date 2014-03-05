@@ -43,12 +43,18 @@ public class MapRunner {
   private int num_build_steps;
   private boolean is_paused;
 
-  public MapRunner(MapDisplayer displayer) {
-    this.displayer = displayer;
-    displayer.setRunner(this);
+  public MapRunner() {
+    displayer = new MapDisplayer(this);
     engine = new MapEngine();
-    displayer.setEngine(engine);
     pyros = new LinkedList<Pyro>();
+  }
+
+  public MapDisplayer getDisplayer() {
+    return displayer;
+  }
+
+  public MapEngine getEngine() {
+    return engine;
   }
 
   public DescentMap getMap() {
@@ -65,7 +71,7 @@ public class MapRunner {
 
   public void newLevel() {
     map = new DescentMap(MAX_ROOM_SIZE);
-    displayer.setNewMap(map);
+    displayer.newMap();
     state = RunnerState.BUILD_MAP;
     target_sleep_ms = BUILD_SLEEP;
     last_update_time = 0L;
@@ -161,9 +167,9 @@ public class MapRunner {
   }
 
   public static void main(String[] args) throws InterruptedException {
+    MapRunner runner = new MapRunner();
     JFrame frame = new JFrame();
-    MapPanel panel = new MapPanel();
-    MapRunner runner = new MapRunner(panel);
+    MapPanel panel = new MapPanel(runner);
     Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setMinimumSize(new Dimension(100, 100));
@@ -180,10 +186,10 @@ public class MapRunner {
       do {
         if (runner.doNextStep()) {
           panel.repaint();
-        }
-        if (runner.getState().equals(RunnerState.PAUSE_AFTER_PLAY)) {
-          System.out.println(String.format("Level %d complete!", level));
-          panel.stopMusic();
+          if (runner.getState().equals(RunnerState.PAUSE_AFTER_PLAY)) {
+            System.out.println(String.format("Level %d complete!", level));
+            panel.stopMusic();
+          }
         }
         runner.sleepAfterStep();
       } while (!runner.getState().equals(RunnerState.COMPLETE));
