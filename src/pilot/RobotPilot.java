@@ -207,7 +207,7 @@ public class RobotPilot extends UnitPilot {
     switch (state) {
       case INACTIVE:
         if (Math.random() / s_elapsed < START_EXPLORE_PROB) {
-          initState(RobotPilotState.TURN_TO_ROOM_EXIT);
+          initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
         }
         break;
       case TURN_TO_ROOM_EXIT:

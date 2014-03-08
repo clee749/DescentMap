@@ -122,15 +122,14 @@ public class MapRunner {
       map.finishBuildingMap();
       MapPopulator.populateMap(map);
       engine.newMap(map);
-      if (pyros.isEmpty()) {
-        for (int count = 0; count < NUM_PYROS; ++count) {
-          engine.spawnPyro(count == 0 ? true : false);
-        }
+      int pyro_count = 0;
+      while (pyro_count < pyros.size()) {
+        engine.spawnPyro(pyros.get(pyro_count), (pyro_count == 0 ? true : false));
+        ++pyro_count;
       }
-      else {
-        for (int count = 0; count < pyros.size(); ++count) {
-          engine.spawnPyro(pyros.get(count), (count == 0 ? true : false));
-        }
+      while (pyro_count < NUM_PYROS) {
+        engine.spawnPyro(pyro_count == 0 ? true : false);
+        ++pyro_count;
       }
       state = RunnerState.PAUSE_AFTER_BUILD;
       target_sleep_ms = PAUSE_AFTER_BUILD_SLEEP;
@@ -159,7 +158,7 @@ public class MapRunner {
 
   public void doPauseAfterPlayStep() {
     state = RunnerState.COMPLETE;
-    if (pyros.isEmpty()) {
+    if (pyros.size() < NUM_PYROS) {
       for (Pyro pyro : engine.getCreatedPyros()) {
         pyros.add(pyro);
       }

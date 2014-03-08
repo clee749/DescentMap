@@ -80,18 +80,18 @@ public class ProximityBomb extends MapObject {
     }
 
     for (Pyro pyro : room.getPyros()) {
-      if ((is_fully_armed || !pyro.equals(source)) && isUnitInRange(pyro)) {
+      if ((is_fully_armed || !pyro.equals(source)) && isObjectInRange(pyro)) {
         return handleDetonation(engine, pyro);
       }
     }
     for (Unit unit : room.getRobots()) {
-      if (!unit.equals(source) && isUnitInRange(unit)) {
+      if (!unit.equals(source) && isObjectInRange(unit)) {
         return handleDetonation(engine, unit);
       }
     }
 
     for (Shot shot : room.getShots()) {
-      if (Math.hypot(shot.getX() - x_loc, shot.getY() - y_loc) < radius) {
+      if (isObjectInRange(shot)) {
         shot.detonate();
         return handleDetonation(engine, null);
       }
@@ -100,9 +100,10 @@ public class ProximityBomb extends MapObject {
     return null;
   }
 
-  public boolean isUnitInRange(Unit unit) {
-    double combined_radius = unit.getRadius() + radius;
-    return Math.abs(unit.getX() - x_loc) < combined_radius && Math.abs(unit.getY() - y_loc) < combined_radius;
+  public boolean isObjectInRange(MapObject object) {
+    double combined_radius = object.getRadius() + radius;
+    return Math.abs(object.getX() - x_loc) < combined_radius &&
+            Math.abs(object.getY() - y_loc) < combined_radius;
   }
 
   public MapObject handleDetonation(MapEngine engine, Unit hit_unit) {
