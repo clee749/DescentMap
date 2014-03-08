@@ -203,6 +203,7 @@ public abstract class Robot extends Unit {
 
   public void tempDisable(double inactive_time) {
     inactive_time_left = Math.max(inactive_time_left, inactive_time);
+    setZeroVelocity();
   }
 
   public MapObject handleFiringCannon(MapEngine engine) {

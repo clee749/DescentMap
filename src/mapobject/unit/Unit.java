@@ -1,5 +1,6 @@
 package mapobject.unit;
 
+import java.awt.geom.Point2D;
 import java.util.HashMap;
 
 import mapobject.MapObject;
@@ -9,8 +10,12 @@ import mapobject.ephemeral.Explosion;
 import pilot.Pilot;
 import pilot.PilotAction;
 import structure.Room;
+import structure.RoomConnection;
+import util.MapUtils;
 
+import common.DescentMapException;
 import common.ObjectType;
+import common.RoomSide;
 import component.MapEngine;
 
 public abstract class Unit extends MovableObject {
@@ -91,6 +96,8 @@ public abstract class Unit extends MovableObject {
   public static final double DAMAGED_EXPLOSION_TIME = 1.0;
   public static final double MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS = 0.5;
   public static final double VISIBLE_TIME_AFTER_REVEAL = 1.0;
+  public static final double SPEED_INCREASE_PER_SECOND = 2.0;
+  public static final double SPEED_DECREASE_PER_SECOND = 1.0;
   public static final double EXPLOSION_RADIUS_MULTIPLIER = 1.1;
   public static final double EXPLOSION_MIN_TIME = 0.5;
   public static final double EXPLOSION_MAX_TIME = EXPLOSION_MIN_TIME * 2;
@@ -98,6 +105,10 @@ public abstract class Unit extends MovableObject {
 
   protected final double cannon_offset;
   protected final int half_shields;
+  protected double move_x_velocity;
+  protected double move_y_velocity;
+  protected double strafe_x_velocity;
+  protected double strafe_y_velocity;
   protected double reload_time;
   protected double reload_time_left;
   protected boolean firing_cannon;
@@ -156,6 +167,150 @@ public abstract class Unit extends MovableObject {
     }
     created_objects.addObject(super.doNextAction(engine, s_elapsed));
     return created_objects;
+  }
+
+  @Override
+  public void applyMovementActions(double s_elapsed) {
+    super.applyMovementActions(s_elapsed);
+    x_loc += (move_x_velocity + strafe_x_velocity) * s_elapsed;
+    y_loc += (move_y_velocity + strafe_y_velocity) * s_elapsed;
+  }
+
+  @Override
+  public void applyMoveAction(double s_elapsed) {
+    switch (next_action.move) {
+      case NONE:
+        double move_velocity = Math.hypot(move_x_velocity, move_y_velocity);
+        double delta = s_elapsed * SPEED_DECREASE_PER_SECOND * move_x_velocity / move_velocity;
+        if (Math.abs(move_x_velocity) > Math.abs(delta)) {
+          move_x_velocity -= delta;
+        }
+        else {
+          move_x_velocity = 0.0;
+        }
+        delta = s_elapsed * SPEED_DECREASE_PER_SECOND * move_y_velocity / move_velocity;
+        if (Math.abs(move_y_velocity) > Math.abs(delta)) {
+          move_y_velocity -= delta;
+        }
+        else {
+          move_y_velocity = 0.0;
+        }
+        break;
+      case FORWARD:
+        double max = move_speed * Math.cos(direction);
+        move_x_velocity += SPEED_INCREASE_PER_SECOND * Math.cos(direction) * s_elapsed;
+        if (Math.abs(move_x_velocity) > Math.abs(max)) {
+          move_x_velocity = max;
+        }
+        max = move_speed * Math.sin(direction);
+        move_y_velocity += SPEED_INCREASE_PER_SECOND * Math.sin(direction) * s_elapsed;
+        if (Math.abs(move_y_velocity) > Math.abs(max)) {
+          move_y_velocity = max;
+        }
+        break;
+      case BACKWARD:
+        max = move_speed * Math.cos(direction);
+        move_x_velocity -= SPEED_INCREASE_PER_SECOND * Math.cos(direction) * s_elapsed;
+        if (Math.abs(move_x_velocity) > Math.abs(max)) {
+          move_x_velocity = -max;
+        }
+        max = move_speed * Math.sin(direction);
+        move_y_velocity -= SPEED_INCREASE_PER_SECOND * Math.sin(direction) * s_elapsed;
+        if (Math.abs(move_y_velocity) > Math.abs(max)) {
+          move_y_velocity = -max;
+        }
+        break;
+      default:
+        throw new DescentMapException("Unexpected MoveDirection: " + next_action.move);
+    }
+  }
+
+  @Override
+  public void applyStrafeAction(double s_elapsed) {
+    switch (next_action.strafe) {
+      case NONE:
+        double strafe_velocity = Math.hypot(strafe_x_velocity, strafe_y_velocity);
+        double delta = s_elapsed * SPEED_DECREASE_PER_SECOND * strafe_x_velocity / strafe_velocity;
+        if (Math.abs(strafe_x_velocity) > Math.abs(delta)) {
+          strafe_x_velocity -= delta;
+        }
+        else {
+          strafe_x_velocity = 0.0;
+        }
+        delta = s_elapsed * SPEED_DECREASE_PER_SECOND * strafe_y_velocity / strafe_velocity;
+        if (Math.abs(strafe_y_velocity) > Math.abs(delta)) {
+          strafe_y_velocity -= delta;
+        }
+        else {
+          strafe_y_velocity = 0.0;
+        }
+        break;
+      case LEFT:
+        Point2D.Double strafe_dxdy = MapUtils.perpendicularVector(1.0, direction);
+        double max = move_speed * strafe_dxdy.x;
+        strafe_x_velocity -= SPEED_INCREASE_PER_SECOND * strafe_dxdy.x * s_elapsed;
+        if (Math.abs(strafe_x_velocity) > Math.abs(max)) {
+          strafe_x_velocity = -max;
+        }
+        max = move_speed * strafe_dxdy.y;
+        strafe_y_velocity -= SPEED_INCREASE_PER_SECOND * strafe_dxdy.y * s_elapsed;
+        if (Math.abs(strafe_y_velocity) > Math.abs(max)) {
+          strafe_y_velocity = -max;
+        }
+        break;
+      case RIGHT:
+        strafe_dxdy = MapUtils.perpendicularVector(1.0, direction);
+        max = move_speed * strafe_dxdy.x;
+        strafe_x_velocity += SPEED_INCREASE_PER_SECOND * strafe_dxdy.x * s_elapsed;
+        if (Math.abs(strafe_x_velocity) > Math.abs(max)) {
+          strafe_x_velocity = max;
+        }
+        max = move_speed * strafe_dxdy.y;
+        strafe_y_velocity += SPEED_INCREASE_PER_SECOND * strafe_dxdy.y * s_elapsed;
+        if (Math.abs(strafe_y_velocity) > Math.abs(max)) {
+          strafe_y_velocity = max;
+        }
+        break;
+      default:
+        throw new DescentMapException("Unexpected StrafeDirection: " + next_action.strafe);
+    }
+  }
+
+  @Override
+  public void handleHittingWall(RoomSide wall_side) {
+    super.handleHittingWall(wall_side);
+    if (wall_side.equals(RoomSide.WEST) || wall_side.equals(RoomSide.EAST)) {
+      move_x_velocity = 0.0;
+      strafe_x_velocity = 0.0;
+    }
+    else {
+      move_y_velocity = 0.0;
+      strafe_y_velocity = 0.0;
+    }
+  }
+
+  @Override
+  public boolean handleHittingNeighborWall(RoomSide wall_side, RoomConnection connection_to_neighbor) {
+    boolean location_accepted = super.handleHittingNeighborWall(wall_side, connection_to_neighbor);
+    if (location_accepted) {
+      return true;
+    }
+    if (wall_side.equals(RoomSide.NORTH) || wall_side.equals(RoomSide.SOUTH)) {
+      move_x_velocity = 0.0;
+      strafe_x_velocity = 0.0;
+    }
+    else {
+      move_y_velocity = 0.0;
+      strafe_y_velocity = 0.0;
+    }
+    return false;
+  }
+
+  public void setZeroVelocity() {
+    move_x_velocity = 0.0;
+    move_y_velocity = 0.0;
+    strafe_x_velocity = 0.0;
+    strafe_y_velocity = 0.0;
   }
 
   public boolean isCannonReloaded() {

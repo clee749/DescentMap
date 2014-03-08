@@ -236,6 +236,7 @@ public class Pyro extends Unit {
     bomb_reload_time_left = 0.0;
     dropping_bomb = false;
     previous_turn = TurnDirection.NONE;
+    setZeroVelocity();
     if (death_spin_started) {
       spawnNew();
     }

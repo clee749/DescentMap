@@ -150,18 +150,24 @@ public abstract class MovableObject extends MapObject {
   public boolean doNextMovement(MapEngine engine, double s_elapsed) {
     previous_x_loc = x_loc;
     previous_y_loc = y_loc;
-    computeNextLocation(s_elapsed);
-    double uncorrected_x_loc = x_loc;
-    double uncorrected_y_loc = y_loc;
+    applyMovementActions(s_elapsed);
+    double unbounded_x_loc = x_loc;
+    double unbounded_y_loc = y_loc;
     boundInsideAndUpdateRoom(engine);
-    return uncorrected_x_loc == x_loc && uncorrected_y_loc == y_loc;
+    return unbounded_x_loc == x_loc && unbounded_y_loc == y_loc;
   }
 
-  public void computeNextLocation(double s_elapsed) {
+  public void applyMovementActions(double s_elapsed) {
     if (next_action == null) {
-      return;
+      next_action = PilotAction.NO_ACTION;
     }
+    applyMoveAction(s_elapsed);
+    applyStrafeAction(s_elapsed);
+    applyTurnAction(s_elapsed);
+    next_action = null;
+  }
 
+  public void applyMoveAction(double s_elapsed) {
     switch (next_action.move) {
       case NONE:
         break;
@@ -176,7 +182,9 @@ public abstract class MovableObject extends MapObject {
       default:
         throw new DescentMapException("Unexpected MoveDirection: " + next_action.move);
     }
+  }
 
+  public void applyStrafeAction(double s_elapsed) {
     switch (next_action.strafe) {
       case NONE:
         break;
@@ -193,7 +201,9 @@ public abstract class MovableObject extends MapObject {
       default:
         throw new DescentMapException("Unexpected StrafeDirection: " + next_action.strafe);
     }
+  }
 
+  public void applyTurnAction(double s_elapsed) {
     switch (next_action.turn) {
       case NONE:
         break;
@@ -206,8 +216,6 @@ public abstract class MovableObject extends MapObject {
       default:
         throw new DescentMapException("Unexpected TurnDirection: " + next_action.turn);
     }
-
-    next_action = null;
   }
 
   public void boundInsideAndUpdateRoom(MapEngine engine) {
@@ -308,16 +316,20 @@ public abstract class MovableObject extends MapObject {
     }
   }
 
-  public void handleHittingNeighborWall(RoomSide wall_side, RoomConnection connection_to_neighbor) {
+  public boolean handleHittingNeighborWall(RoomSide wall_side, RoomConnection connection_to_neighbor) {
     if (wall_side.equals(RoomSide.NORTH) || wall_side.equals(RoomSide.SOUTH)) {
+      double unbounded_x_loc = x_loc;
       x_loc =
               Math.min(Math.max(x_loc, connection_to_neighbor.min + radius), connection_to_neighbor.max -
                       radius);
+      return unbounded_x_loc == x_loc;
     }
     else {
+      double unbounded_y_loc = y_loc;
       y_loc =
               Math.min(Math.max(y_loc, connection_to_neighbor.min + radius), connection_to_neighbor.max -
                       radius);
+      return unbounded_y_loc == y_loc;
     }
   }
 }
