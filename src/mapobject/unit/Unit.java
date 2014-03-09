@@ -98,6 +98,7 @@ public abstract class Unit extends MovableObject {
   public static final double VISIBLE_TIME_AFTER_REVEAL = 1.0;
   public static final double SPEED_INCREASE_PER_SECOND = 2.0;
   public static final double SPEED_DECREASE_PER_SECOND = 1.0;
+  public static final double PUSH_FRACTION_DIVIDEND = 0.05;
   public static final double EXPLOSION_RADIUS_MULTIPLIER = 1.1;
   public static final double EXPLOSION_MIN_TIME = 0.5;
   public static final double EXPLOSION_MAX_TIME = EXPLOSION_MIN_TIME * 2;
@@ -170,8 +171,8 @@ public abstract class Unit extends MovableObject {
   }
 
   @Override
-  public void applyMovementActions(double s_elapsed) {
-    super.applyMovementActions(s_elapsed);
+  public void applyMovementActions(MapEngine engine, double s_elapsed) {
+    super.applyMovementActions(engine, s_elapsed);
     x_loc += (move_x_velocity + strafe_x_velocity) * s_elapsed;
     y_loc += (move_y_velocity + strafe_y_velocity) * s_elapsed;
   }
@@ -327,7 +328,7 @@ public abstract class Unit extends MovableObject {
     reload_time_left = reload_time;
   }
 
-  public void beDamaged(MapEngine engine, int amount, boolean is_splash) {
+  public void beDamaged(MapEngine engine, int amount, boolean is_direct_weapon_hit) {
     shields -= amount;
     revealIfCloaked();
   }
@@ -342,6 +343,19 @@ public abstract class Unit extends MovableObject {
       is_visible = true;
       visible_time_left = VISIBLE_TIME_AFTER_REVEAL;
     }
+  }
+
+  public void push(MapEngine engine, double dx, double dy, double fraction) {
+    double previous_x_loc = x_loc;
+    double previous_y_loc = y_loc;
+    x_loc += dx * fraction;
+    y_loc += dy * fraction;
+    setZeroVelocity();
+    boundInsideAndUpdateRoom(engine, previous_x_loc, previous_y_loc);
+  }
+
+  public void push(MapEngine engine, double dx, double dy) {
+    push(engine, dx, dy, PUSH_FRACTION_DIVIDEND / radius);
   }
 
   public MapObject handleDeath(MapEngine engine, double s_elapsed) {

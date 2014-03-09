@@ -72,8 +72,6 @@ public abstract class MovableObject extends MapObject {
   protected double turn_speed;
   protected Pilot pilot;
   protected double direction;
-  protected double previous_x_loc;
-  protected double previous_y_loc;
   protected PilotAction next_action;
 
   public MovableObject(double radius, Pilot pilot, Room room, double x_loc, double y_loc, double direction,
@@ -148,16 +146,16 @@ public abstract class MovableObject extends MapObject {
   }
 
   public boolean doNextMovement(MapEngine engine, double s_elapsed) {
-    previous_x_loc = x_loc;
-    previous_y_loc = y_loc;
-    applyMovementActions(s_elapsed);
+    double previous_x_loc = x_loc;
+    double previous_y_loc = y_loc;
+    applyMovementActions(engine, s_elapsed);
     double unbounded_x_loc = x_loc;
     double unbounded_y_loc = y_loc;
-    boundInsideAndUpdateRoom(engine);
+    boundInsideAndUpdateRoom(engine, previous_x_loc, previous_y_loc);
     return unbounded_x_loc == x_loc && unbounded_y_loc == y_loc;
   }
 
-  public void applyMovementActions(double s_elapsed) {
+  public void applyMovementActions(MapEngine engine, double s_elapsed) {
     if (next_action == null) {
       next_action = PilotAction.NO_ACTION;
     }
@@ -218,7 +216,7 @@ public abstract class MovableObject extends MapObject {
     }
   }
 
-  public void boundInsideAndUpdateRoom(MapEngine engine) {
+  public void boundInsideAndUpdateRoom(MapEngine engine, double previous_x_loc, double previous_y_loc) {
     Point nw_corner = room.getNWCorner();
     Point se_corner = room.getSECorner();
     Room next_room = null;

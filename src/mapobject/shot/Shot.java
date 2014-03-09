@@ -100,7 +100,7 @@ public abstract class Shot extends MovableObject {
 
   public MapObject handleUnitCollision(MapEngine engine, Unit hit_unit) {
     is_in_map = false;
-    hit_unit.beDamaged(engine, damage, false);
+    hit_unit.beDamaged(engine, damage, true);
     return new Explosion(room, x_loc, y_loc,
             Math.min(damage / EXPLOSION_RADIUS_DIVISOR, EXPLOSION_MAX_RADIUS), Math.min(damage /
                     EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));

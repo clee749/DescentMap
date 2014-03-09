@@ -193,10 +193,10 @@ public abstract class Robot extends Unit {
   }
 
   @Override
-  public void beDamaged(MapEngine engine, int amount, boolean is_splash) {
-    super.beDamaged(engine, amount, is_splash);
-    if (!is_splash) {
-      tempDisable(amount * DISABLE_TIME_PER_DAMAGE);
+  public void beDamaged(MapEngine engine, int amount, boolean is_direct_weapon_hit) {
+    super.beDamaged(engine, amount, is_direct_weapon_hit);
+    tempDisable(amount * DISABLE_TIME_PER_DAMAGE);
+    if (is_direct_weapon_hit) {
       playSound(engine, "weapons/explode1.wav");
     }
   }

@@ -108,7 +108,7 @@ public class ProximityBomb extends MapObject {
 
   public MapObject handleDetonation(MapEngine engine, Unit hit_unit) {
     if (hit_unit != null) {
-      hit_unit.beDamaged(engine, damage, false);
+      hit_unit.beDamaged(engine, damage, true);
     }
     is_in_map = false;
     room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, hit_unit);

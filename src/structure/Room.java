@@ -388,7 +388,7 @@ public class Room {
                             unit.getRadius(), 0.0);
     if (distance < damage_radius &&
             (which_neighbor == null || MapUtils.canSeeObjectInNeighborRoom(src_object, unit, which_neighbor))) {
-      unit.beDamaged(null, (int) (max_damage * (1 - distance / damage_radius)), true);
+      unit.beDamaged(null, (int) (max_damage * (1 - distance / damage_radius)), false);
     }
   }
 }

@@ -23,12 +23,14 @@ import pyro.PyroPrimaryCannon;
 import pyro.PyroSecondaryCannon;
 import resource.ImageHandler;
 import structure.Room;
+import structure.RoomConnection;
 import util.MapUtils;
 import util.PowerupFactory;
 import cannon.Cannon;
 import cannon.LaserCannon;
 
 import common.ObjectType;
+import common.RoomSide;
 import component.MapEngine;
 
 class PrimaryCannonInfo {
@@ -127,6 +129,10 @@ public class Pyro extends Unit {
   public static final double CANNON_SWITCH_TIME = 1.0;
   public static final int PROXIMITY_BOMB_ORDINAL = PyroSecondaryCannon.PROXIMITY_BOMB.ordinal();
   public static final double BOMB_RELOAD_TIME = SECONDARY_RELOAD_TIMES[PROXIMITY_BOMB_ORDINAL];
+
+  // collisions
+  public static final double MIN_WALL_COLLISION_SPEED_FOR_DAMAGE = 0.9;
+  public static final int ROBOT_COLLISION_BASE_DAMAGE = 1;
 
   // death spin
   public static final double DEATH_SPIN_TIME = 5.0;
@@ -488,6 +494,59 @@ public class Pyro extends Unit {
     return created_objects;
   }
 
+  @Override
+  public void applyMovementActions(MapEngine engine, double s_elapsed) {
+    super.applyMovementActions(engine, s_elapsed);
+    for (Unit unit : room.getRobots()) {
+      double dx = unit.getX() - x_loc;
+      double dy = unit.getY() - y_loc;
+      if (Math.hypot(dx, dy) < radius + unit.getRadius()) {
+        unit.push(engine, dx, dy);
+        setZeroVelocity();
+        beDamaged(engine, ROBOT_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
+        unit.beDamaged(engine, ROBOT_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
+        playPublicSound("effects/ramfast.wav");
+        if (death_spin_started) {
+          death_spin_time_left = 0.0;
+        }
+        break;
+      }
+    }
+  }
+
+  @Override
+  public void handleHittingWall(RoomSide wall_side) {
+    double impact_speed;
+    if (wall_side.equals(RoomSide.WEST) || wall_side.equals(RoomSide.EAST)) {
+      impact_speed = Math.abs(move_x_velocity) + Math.abs(strafe_x_velocity);
+    }
+    else {
+      impact_speed = Math.abs(move_y_velocity) + Math.abs(strafe_y_velocity);
+    }
+    super.handleHittingWall(wall_side);
+    if (impact_speed > MIN_WALL_COLLISION_SPEED_FOR_DAMAGE) {
+      beDamaged(engine, (int) (Math.random() * 2), false);
+      playPublicSound("effects/ramfast.wav");
+    }
+  }
+
+  @Override
+  public boolean handleHittingNeighborWall(RoomSide wall_side, RoomConnection connection_to_neighbor) {
+    double impact_speed;
+    if (wall_side.equals(RoomSide.NORTH) || wall_side.equals(RoomSide.SOUTH)) {
+      impact_speed = Math.abs(move_x_velocity) + Math.abs(strafe_x_velocity);
+    }
+    else {
+      impact_speed = Math.abs(move_y_velocity) + Math.abs(strafe_y_velocity);
+    }
+    boolean location_accepted = super.handleHittingNeighborWall(wall_side, connection_to_neighbor);
+    if (!location_accepted && impact_speed > MIN_WALL_COLLISION_SPEED_FOR_DAMAGE) {
+      beDamaged(engine, (int) (Math.random() * 2), false);
+      playPublicSound("effects/ramfast.wav");
+    }
+    return location_accepted;
+  }
+
   public MapObject doNextDeathSpinAction(MapEngine engine, double s_elapsed) {
     if (!death_spin_started) {
       death_spin_started = true;
@@ -536,9 +595,9 @@ public class Pyro extends Unit {
   }
 
   @Override
-  public void beDamaged(MapEngine engine, int amount, boolean is_splash) {
-    super.beDamaged(engine, amount, is_splash);
-    if (!is_splash) {
+  public void beDamaged(MapEngine engine, int amount, boolean is_direct_weapon_hit) {
+    super.beDamaged(engine, amount, is_direct_weapon_hit);
+    if (is_direct_weapon_hit) {
       playPublicSound("effects/shit01.wav");
     }
   }
