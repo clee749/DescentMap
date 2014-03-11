@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import mapobject.MapObject;
+import mapobject.ephemeral.Explosion;
 import mapobject.ephemeral.Zunggg;
 import mapobject.unit.Pyro;
 import resource.ImageHandler;
@@ -30,6 +31,10 @@ public class RobotGenerator extends Scenery {
   public static final int NUM_SPAWN_VOLLEYS = 3;
   public static final int NUM_ROBOTS_PER_VOLLEY = 5;
   public static final double SPAWN_COOLDOWN_TIME = 5.0;
+  public static final int ATTACK_DAMAGE = 4;
+  public static final double ATTACK_COOLDOWN_TIME = SPAWN_COOLDOWN_TIME / 2;
+  public static final double ATTACK_EXPLOSION_RADIUS = 0.1;
+  public static final double ATTACK_EXPLOSION_TIME = 0.5;
   public static final double TIME_TO_SPAWN = Entrance.TIME_TO_SPAWN;
   public static final double ZUNGGG_TIME = Entrance.ZUNGGG_TIME;
   public static final double ROBOT_INACTIVE_TIME = ZUNGGG_TIME - TIME_TO_SPAWN;
@@ -39,6 +44,7 @@ public class RobotGenerator extends Scenery {
   private final HashSet<Pyro> ignored_pyros;
   private int num_spawn_volleys_left;
   private int num_robots_left_in_volley;
+  private boolean next_attack_costs_robot;
   private RobotGeneratorState state;
   private double state_time_left;
 
@@ -90,11 +96,9 @@ public class RobotGenerator extends Scenery {
           if (ignored_pyros.contains(pyro_in_room)) {
             continue;
           }
-          state = RobotGeneratorState.SPAWN;
-          state_time_left = TIME_TO_SPAWN;
           num_robots_left_in_volley = NUM_ROBOTS_PER_VOLLEY;
           --num_spawn_volleys_left;
-          return createZunggg(engine);
+          return attemptToSpawn(engine);
         }
         break;
       case SPAWN:
@@ -120,9 +124,7 @@ public class RobotGenerator extends Scenery {
             }
           }
           else {
-            state = RobotGeneratorState.SPAWN;
-            state_time_left = TIME_TO_SPAWN;
-            return createZunggg(engine);
+            return attemptToSpawn(engine);
           }
         }
         break;
@@ -132,7 +134,25 @@ public class RobotGenerator extends Scenery {
     return null;
   }
 
-  public Zunggg createZunggg(MapEngine engine) {
+  public MapObject attemptToSpawn(MapEngine engine) {
+    for (Pyro pyro : room.getPyros()) {
+      double dx = pyro.getX() - x_loc;
+      double dy = pyro.getY() - y_loc;
+      if (Math.abs(dx) < radius && Math.abs(dy) < radius) {
+        state_time_left = ATTACK_COOLDOWN_TIME;
+        pyro.beDamaged(engine, ATTACK_DAMAGE, true);
+        if (next_attack_costs_robot) {
+          --num_robots_left_in_volley;
+        }
+        next_attack_costs_robot = !next_attack_costs_robot;
+        double pyro_radius = pyro.getRadius();
+        return new Explosion(room, x_loc + dx - pyro_radius + Math.random() * (radius - dx), y_loc + dy -
+                pyro_radius + Math.random() * (radius - dy), ATTACK_EXPLOSION_RADIUS, ATTACK_EXPLOSION_TIME);
+      }
+    }
+    state = RobotGeneratorState.SPAWN;
+    state_time_left = TIME_TO_SPAWN;
+    next_attack_costs_robot = true;
     playSound(engine, "effects/mtrl01.wav");
     return new Zunggg(room, x_loc, y_loc, ZUNGGG_TIME);
   }

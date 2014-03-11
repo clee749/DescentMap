@@ -98,7 +98,7 @@ public abstract class Unit extends MovableObject {
   public static final double VISIBLE_TIME_AFTER_REVEAL = 1.0;
   public static final double SPEED_INCREASE_PER_SECOND = 2.0;
   public static final double SPEED_DECREASE_PER_SECOND = 1.0;
-  public static final double PUSH_FRACTION_DIVIDEND = 0.05;
+  public static final double PUSH_FRACTION_DIVIDEND = 0.02;
   public static final double EXPLOSION_RADIUS_MULTIPLIER = 1.1;
   public static final double EXPLOSION_MIN_TIME = 0.5;
   public static final double EXPLOSION_MAX_TIME = EXPLOSION_MIN_TIME * 2;
@@ -138,6 +138,10 @@ public abstract class Unit extends MovableObject {
 
   public boolean isVisible() {
     return is_visible;
+  }
+
+  public boolean isExploded() {
+    return is_exploded;
   }
 
   @Override

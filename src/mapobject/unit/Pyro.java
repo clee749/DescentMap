@@ -132,6 +132,7 @@ public class Pyro extends Unit {
 
   // collisions
   public static final double MIN_WALL_COLLISION_SPEED_FOR_DAMAGE = 0.9;
+  public static final int MIN_SHIELDS_AFTER_WALL_COLLISION_DAMAGE = 10;
   public static final int ROBOT_COLLISION_BASE_DAMAGE = 1;
 
   // death spin
@@ -498,10 +499,14 @@ public class Pyro extends Unit {
   public void applyMovementActions(MapEngine engine, double s_elapsed) {
     super.applyMovementActions(engine, s_elapsed);
     for (Unit unit : room.getRobots()) {
+      if (unit.isExploded()) {
+        continue;
+      }
       double dx = unit.getX() - x_loc;
       double dy = unit.getY() - y_loc;
-      if (Math.hypot(dx, dy) < radius + unit.getRadius()) {
-        unit.push(engine, dx, dy);
+      double distance = Math.hypot(dx, dy);
+      if (distance < radius + unit.getRadius()) {
+        unit.push(engine, dx / distance, dy / distance);
         setZeroVelocity();
         beDamaged(engine, ROBOT_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
         unit.beDamaged(engine, ROBOT_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
@@ -524,10 +529,7 @@ public class Pyro extends Unit {
       impact_speed = Math.abs(move_y_velocity) + Math.abs(strafe_y_velocity);
     }
     super.handleHittingWall(wall_side);
-    if (impact_speed > MIN_WALL_COLLISION_SPEED_FOR_DAMAGE) {
-      beDamaged(engine, (int) (Math.random() * 2), false);
-      playPublicSound("effects/ramfast.wav");
-    }
+    handleWallImpactDamage(impact_speed);
   }
 
   @Override
@@ -540,11 +542,19 @@ public class Pyro extends Unit {
       impact_speed = Math.abs(move_y_velocity) + Math.abs(strafe_y_velocity);
     }
     boolean location_accepted = super.handleHittingNeighborWall(wall_side, connection_to_neighbor);
-    if (!location_accepted && impact_speed > MIN_WALL_COLLISION_SPEED_FOR_DAMAGE) {
-      beDamaged(engine, (int) (Math.random() * 2), false);
-      playPublicSound("effects/ramfast.wav");
+    if (!location_accepted) {
+      handleWallImpactDamage(impact_speed);
     }
     return location_accepted;
+  }
+
+  public void handleWallImpactDamage(double impact_speed) {
+    if (impact_speed > MIN_WALL_COLLISION_SPEED_FOR_DAMAGE) {
+      if (shields > MIN_SHIELDS_AFTER_WALL_COLLISION_DAMAGE) {
+        beDamaged(engine, (int) (Math.random() * 2), false);
+      }
+      playPublicSound("effects/ramfast.wav");
+    }
   }
 
   public MapObject doNextDeathSpinAction(MapEngine engine, double s_elapsed) {

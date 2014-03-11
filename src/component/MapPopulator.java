@@ -33,6 +33,7 @@ public class MapPopulator {
   // robots
   public static final int ALL_ROBOTS_MIN_ROOM_AREA = 50;
   public static final double ROBOT_PLACEMENT_PROB = 0.5;
+  public static final double MIN_ROBOT_DISTANCE_FROM_ENTRANCE = 2.0;
   public static final ObjectType[] ROBOTS_TO_POPULATE =
           {ObjectType.Bomber, ObjectType.Class1Drone, ObjectType.Class2Drone, ObjectType.DefenseRobot,
                   ObjectType.HeavyDriller, ObjectType.HeavyHulk, ObjectType.LightHulk, ObjectType.MediumHulk,
@@ -51,7 +52,7 @@ public class MapPopulator {
     special_rooms.add(entrance_room);
     special_rooms.add(exit_room);
     special_rooms.add(exterior_room);
-    placeEntrance(map);
+    Entrance entrance = placeEntrance(map);
     placeExit(map);
     placeEnergyCenters(map, special_rooms);
     placeRobotGenerators(map, special_rooms);
@@ -59,11 +60,11 @@ public class MapPopulator {
       if (room.equals(exit_room) || room.equals(exterior_room)) {
         continue;
       }
-      placeRobotsInRoom(room);
+      placeRobotsInRoom(room, (room.equals(entrance_room) ? entrance : null));
     }
   }
 
-  public static void placeEntrance(DescentMap map) {
+  public static Entrance placeEntrance(DescentMap map) {
     Room entrance_room = map.getEntranceRoom();
     RoomSide entrance_side = map.getEntranceSide();
     Point nw_corner = entrance_room.getNWCorner();
@@ -94,9 +95,10 @@ public class MapPopulator {
     entrance_room.addChild(entrance);
     map.setEntrance(entrance);
     map.setCenterObject(entrance);
+    return entrance;
   }
 
-  public static void placeExit(DescentMap map) {
+  public static Exit placeExit(DescentMap map) {
     Room exit_room = map.getExitRoom();
     Point nw_corner = exit_room.getNWCorner();
     Point se_corner = exit_room.getSECorner();
@@ -122,7 +124,9 @@ public class MapPopulator {
       default:
         throw new DescentMapException("Unexpected RoomSide: " + map.getExitSide());
     }
-    exit_room.addChild(new Exit(exit_room, x_loc, y_loc));
+    Exit exit = new Exit(exit_room, x_loc, y_loc);
+    exit_room.addChild(exit);
+    return exit;
   }
 
   public static void placeEnergyCenters(DescentMap map, HashSet<Room> restricted_rooms) {
@@ -182,19 +186,22 @@ public class MapPopulator {
     }
   }
 
-  public static void placeRobotsInRoom(Room room) {
+  public static void placeRobotsInRoom(Room room, Entrance entrance) {
     int room_area = room.getHeight() * room.getWidth();
     for (ObjectType type : ROBOTS_TO_POPULATE) {
       if (Math.random() < ROBOT_PLACEMENT_PROB &&
               (Unit.getStartingShields(type) <= room_area || room_area >= ALL_ROBOTS_MIN_ROOM_AREA)) {
-        placeRobotInRoom(room, type);
+        placeRobotInRoom(room, type, entrance);
       }
     }
   }
 
-  public static void placeRobotInRoom(Room room, ObjectType type) {
+  public static void placeRobotInRoom(Room room, ObjectType type, Entrance entrance) {
     Point2D.Double location =
             MapUtils.randomInternalPoint(room.getNWCorner(), room.getSECorner(), Unit.getRadius(type));
-    room.addChild(RobotFactory.newRobot(type, room, location.x, location.y, Math.random() * MapUtils.TWO_PI));
+    if (entrance == null || Math.abs(location.x - entrance.getX()) > MIN_ROBOT_DISTANCE_FROM_ENTRANCE ||
+            Math.abs(location.y - entrance.getY()) > MIN_ROBOT_DISTANCE_FROM_ENTRANCE) {
+      room.addChild(RobotFactory.newRobot(type, room, location.x, location.y, Math.random() * MapUtils.TWO_PI));
+    }
   }
 }
