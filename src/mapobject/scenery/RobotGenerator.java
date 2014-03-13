@@ -96,6 +96,7 @@ public class RobotGenerator extends Scenery {
           if (ignored_pyros.contains(pyro_in_room)) {
             continue;
           }
+          next_attack_costs_robot = true;
           num_robots_left_in_volley = NUM_ROBOTS_PER_VOLLEY;
           --num_spawn_volleys_left;
           return attemptToSpawn(engine);
@@ -139,6 +140,7 @@ public class RobotGenerator extends Scenery {
       double dx = pyro.getX() - x_loc;
       double dy = pyro.getY() - y_loc;
       if (Math.abs(dx) < radius && Math.abs(dy) < radius) {
+        state = RobotGeneratorState.COOLDOWN;
         state_time_left = ATTACK_COOLDOWN_TIME;
         pyro.beDamaged(engine, ATTACK_DAMAGE, true);
         if (next_attack_costs_robot) {
