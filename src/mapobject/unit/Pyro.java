@@ -506,7 +506,7 @@ public class Pyro extends Unit {
       double dy = unit.getY() - y_loc;
       double distance = Math.hypot(dx, dy);
       if (distance < radius + unit.getRadius()) {
-        unit.push(engine, dx / distance, dy / distance);
+        unit.bePushed(engine, dx / distance, dy / distance);
         setZeroVelocity();
         beDamaged(engine, ROBOT_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
         unit.beDamaged(engine, ROBOT_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
@@ -521,29 +521,35 @@ public class Pyro extends Unit {
 
   @Override
   public void handleHittingWall(RoomSide wall_side) {
+    Point2D.Double strafe_dxdy = MapUtils.perpendicularVector(move_speed, strafe_positive_direction);
     double impact_speed;
     if (wall_side.equals(RoomSide.WEST) || wall_side.equals(RoomSide.EAST)) {
-      impact_speed = Math.abs(move_x_velocity) + Math.abs(strafe_x_velocity);
+      double move_component = move_speed * Math.cos(move_positive_direction);
+      impact_speed = move_component * move_x_fraction + strafe_dxdy.x * strafe_x_fraction;
     }
     else {
-      impact_speed = Math.abs(move_y_velocity) + Math.abs(strafe_y_velocity);
+      double move_component = move_speed * Math.sin(move_positive_direction);
+      impact_speed = move_component * move_y_fraction + strafe_dxdy.y * strafe_y_fraction;
     }
     super.handleHittingWall(wall_side);
-    handleWallImpactDamage(impact_speed);
+    handleWallImpactDamage(Math.abs(impact_speed));
   }
 
   @Override
   public boolean handleHittingNeighborWall(RoomSide wall_side, RoomConnection connection_to_neighbor) {
+    Point2D.Double strafe_dxdy = MapUtils.perpendicularVector(move_speed, strafe_positive_direction);
     double impact_speed;
     if (wall_side.equals(RoomSide.NORTH) || wall_side.equals(RoomSide.SOUTH)) {
-      impact_speed = Math.abs(move_x_velocity) + Math.abs(strafe_x_velocity);
+      double move_component = move_speed * Math.cos(move_positive_direction);
+      impact_speed = move_component * move_x_fraction + strafe_dxdy.x * strafe_x_fraction;
     }
     else {
-      impact_speed = Math.abs(move_y_velocity) + Math.abs(strafe_y_velocity);
+      double move_component = move_speed * Math.sin(move_positive_direction);
+      impact_speed = move_component * move_y_fraction + strafe_dxdy.y * strafe_y_fraction;
     }
     boolean location_accepted = super.handleHittingNeighborWall(wall_side, connection_to_neighbor);
     if (!location_accepted) {
-      handleWallImpactDamage(impact_speed);
+      handleWallImpactDamage(Math.abs(impact_speed));
     }
     return location_accepted;
   }

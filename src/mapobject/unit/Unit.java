@@ -96,8 +96,8 @@ public abstract class Unit extends MovableObject {
   public static final double DAMAGED_EXPLOSION_TIME = 1.0;
   public static final double MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS = 0.5;
   public static final double VISIBLE_TIME_AFTER_REVEAL = 1.0;
-  public static final double SPEED_INCREASE_PER_SECOND = 2.0;
-  public static final double SPEED_DECREASE_PER_SECOND = 1.0;
+  public static final double TIME_FOR_ZERO_TO_MAX_SPEED = 0.5;
+  public static final double TIME_FOR_MAX_TO_ZERO_SPEED = 1.0;
   public static final double PUSH_FRACTION_DIVIDEND = 0.02;
   public static final double EXPLOSION_RADIUS_MULTIPLIER = 1.1;
   public static final double EXPLOSION_MIN_TIME = 0.5;
@@ -106,10 +106,12 @@ public abstract class Unit extends MovableObject {
 
   protected final double cannon_offset;
   protected final int half_shields;
-  protected double move_x_velocity;
-  protected double move_y_velocity;
-  protected double strafe_x_velocity;
-  protected double strafe_y_velocity;
+  protected double move_x_fraction;
+  protected double move_y_fraction;
+  protected double move_positive_direction;
+  protected double strafe_x_fraction;
+  protected double strafe_y_fraction;
+  protected double strafe_positive_direction;
   protected double reload_time;
   protected double reload_time_left;
   protected boolean firing_cannon;
@@ -175,122 +177,113 @@ public abstract class Unit extends MovableObject {
   }
 
   @Override
-  public void applyMovementActions(MapEngine engine, double s_elapsed) {
-    super.applyMovementActions(engine, s_elapsed);
-    x_loc += (move_x_velocity + strafe_x_velocity) * s_elapsed;
-    y_loc += (move_y_velocity + strafe_y_velocity) * s_elapsed;
-  }
-
-  @Override
   public void applyMoveAction(double s_elapsed) {
     switch (next_action.move) {
       case NONE:
-        double move_velocity = Math.hypot(move_x_velocity, move_y_velocity);
-        double delta = s_elapsed * SPEED_DECREASE_PER_SECOND * move_x_velocity / move_velocity;
-        if (Math.abs(move_x_velocity) > Math.abs(delta)) {
-          move_x_velocity -= delta;
+        boolean do_move = false;
+        if (move_x_fraction != 0.0) {
+          move_x_fraction =
+                  (move_x_fraction > 0.0 ? Math.max(move_x_fraction - s_elapsed / TIME_FOR_MAX_TO_ZERO_SPEED,
+                          0.0) : Math.min(move_x_fraction + s_elapsed / TIME_FOR_MAX_TO_ZERO_SPEED, 0.0));
+          do_move = true;
         }
-        else {
-          move_x_velocity = 0.0;
+        if (move_y_fraction != 0.0) {
+          move_y_fraction =
+                  (move_y_fraction > 0.0 ? Math.max(move_y_fraction - s_elapsed / TIME_FOR_MAX_TO_ZERO_SPEED,
+                          0.0) : Math.min(move_y_fraction + s_elapsed / TIME_FOR_MAX_TO_ZERO_SPEED, 0.0));
+          do_move = true;
         }
-        delta = s_elapsed * SPEED_DECREASE_PER_SECOND * move_y_velocity / move_velocity;
-        if (Math.abs(move_y_velocity) > Math.abs(delta)) {
-          move_y_velocity -= delta;
-        }
-        else {
-          move_y_velocity = 0.0;
+        if (!do_move) {
+          return;
         }
         break;
       case FORWARD:
-        double max = move_speed * Math.cos(direction);
-        move_x_velocity += SPEED_INCREASE_PER_SECOND * Math.cos(direction) * s_elapsed;
-        if (Math.abs(move_x_velocity) > Math.abs(max)) {
-          move_x_velocity = max;
+        move_positive_direction = direction;
+        if (move_x_fraction < 1.0) {
+          move_x_fraction = Math.min(move_x_fraction + s_elapsed / TIME_FOR_ZERO_TO_MAX_SPEED, 1.0);
         }
-        max = move_speed * Math.sin(direction);
-        move_y_velocity += SPEED_INCREASE_PER_SECOND * Math.sin(direction) * s_elapsed;
-        if (Math.abs(move_y_velocity) > Math.abs(max)) {
-          move_y_velocity = max;
+        if (move_y_fraction < 1.0) {
+          move_y_fraction = Math.min(move_y_fraction + s_elapsed / TIME_FOR_ZERO_TO_MAX_SPEED, 1.0);
         }
         break;
       case BACKWARD:
-        max = move_speed * Math.cos(direction);
-        move_x_velocity -= SPEED_INCREASE_PER_SECOND * Math.cos(direction) * s_elapsed;
-        if (Math.abs(move_x_velocity) > Math.abs(max)) {
-          move_x_velocity = -max;
+        move_positive_direction = direction;
+        if (move_x_fraction > -1.0) {
+          move_x_fraction = Math.max(move_x_fraction - s_elapsed / TIME_FOR_ZERO_TO_MAX_SPEED, -1.0);
         }
-        max = move_speed * Math.sin(direction);
-        move_y_velocity -= SPEED_INCREASE_PER_SECOND * Math.sin(direction) * s_elapsed;
-        if (Math.abs(move_y_velocity) > Math.abs(max)) {
-          move_y_velocity = -max;
+        if (move_y_fraction > -1.0) {
+          move_y_fraction = Math.max(move_y_fraction - s_elapsed / TIME_FOR_ZERO_TO_MAX_SPEED, -1.0);
         }
         break;
       default:
         throw new DescentMapException("Unexpected MoveDirection: " + next_action.move);
     }
+
+    x_loc += move_x_fraction * move_speed * Math.cos(move_positive_direction) * s_elapsed;
+    y_loc += move_y_fraction * move_speed * Math.sin(move_positive_direction) * s_elapsed;
   }
 
   @Override
   public void applyStrafeAction(double s_elapsed) {
     switch (next_action.strafe) {
       case NONE:
-        double strafe_velocity = Math.hypot(strafe_x_velocity, strafe_y_velocity);
-        double delta = s_elapsed * SPEED_DECREASE_PER_SECOND * strafe_x_velocity / strafe_velocity;
-        if (Math.abs(strafe_x_velocity) > Math.abs(delta)) {
-          strafe_x_velocity -= delta;
+        boolean do_strafe = false;
+        if (strafe_x_fraction != 0.0) {
+          strafe_x_fraction =
+                  (strafe_x_fraction > 0.0 ? Math.max(strafe_x_fraction - s_elapsed /
+                          TIME_FOR_MAX_TO_ZERO_SPEED, 0.0) : Math.min(strafe_x_fraction + s_elapsed /
+                          TIME_FOR_MAX_TO_ZERO_SPEED, 0.0));
+          do_strafe = true;
         }
-        else {
-          strafe_x_velocity = 0.0;
+        if (strafe_y_fraction != 0.0) {
+          strafe_y_fraction =
+                  (strafe_y_fraction > 0.0 ? Math.max(strafe_y_fraction - s_elapsed /
+                          TIME_FOR_MAX_TO_ZERO_SPEED, 0.0) : Math.min(strafe_y_fraction + s_elapsed /
+                          TIME_FOR_MAX_TO_ZERO_SPEED, 0.0));
+          do_strafe = true;
         }
-        delta = s_elapsed * SPEED_DECREASE_PER_SECOND * strafe_y_velocity / strafe_velocity;
-        if (Math.abs(strafe_y_velocity) > Math.abs(delta)) {
-          strafe_y_velocity -= delta;
-        }
-        else {
-          strafe_y_velocity = 0.0;
+        if (!do_strafe) {
+          return;
         }
         break;
       case LEFT:
-        Point2D.Double strafe_dxdy = MapUtils.perpendicularVector(1.0, direction);
-        double max = move_speed * strafe_dxdy.x;
-        strafe_x_velocity -= SPEED_INCREASE_PER_SECOND * strafe_dxdy.x * s_elapsed;
-        if (Math.abs(strafe_x_velocity) > Math.abs(max)) {
-          strafe_x_velocity = -max;
+        strafe_positive_direction = direction;
+        if (strafe_x_fraction > -1.0) {
+          strafe_x_fraction = Math.max(strafe_x_fraction - s_elapsed / TIME_FOR_ZERO_TO_MAX_SPEED, -1.0);
         }
-        max = move_speed * strafe_dxdy.y;
-        strafe_y_velocity -= SPEED_INCREASE_PER_SECOND * strafe_dxdy.y * s_elapsed;
-        if (Math.abs(strafe_y_velocity) > Math.abs(max)) {
-          strafe_y_velocity = -max;
+        if (strafe_y_fraction > -1.0) {
+          strafe_y_fraction = Math.max(strafe_y_fraction - s_elapsed / TIME_FOR_ZERO_TO_MAX_SPEED, -1.0);
         }
         break;
       case RIGHT:
-        strafe_dxdy = MapUtils.perpendicularVector(1.0, direction);
-        max = move_speed * strafe_dxdy.x;
-        strafe_x_velocity += SPEED_INCREASE_PER_SECOND * strafe_dxdy.x * s_elapsed;
-        if (Math.abs(strafe_x_velocity) > Math.abs(max)) {
-          strafe_x_velocity = max;
+        strafe_positive_direction = direction;
+        if (strafe_x_fraction < 1.0) {
+          strafe_x_fraction = Math.min(strafe_x_fraction + s_elapsed / TIME_FOR_ZERO_TO_MAX_SPEED, 1.0);
         }
-        max = move_speed * strafe_dxdy.y;
-        strafe_y_velocity += SPEED_INCREASE_PER_SECOND * strafe_dxdy.y * s_elapsed;
-        if (Math.abs(strafe_y_velocity) > Math.abs(max)) {
-          strafe_y_velocity = max;
+        if (strafe_y_fraction < 1.0) {
+          strafe_y_fraction = Math.min(strafe_y_fraction + s_elapsed / TIME_FOR_ZERO_TO_MAX_SPEED, 1.0);
         }
         break;
       default:
         throw new DescentMapException("Unexpected StrafeDirection: " + next_action.strafe);
     }
+
+    Point2D.Double strafe_dxdy =
+            MapUtils.perpendicularVector(move_speed * s_elapsed, strafe_positive_direction);
+    x_loc += strafe_x_fraction * strafe_dxdy.x;
+    y_loc += strafe_y_fraction * strafe_dxdy.y;
   }
 
   @Override
   public void handleHittingWall(RoomSide wall_side) {
     super.handleHittingWall(wall_side);
     if (wall_side.equals(RoomSide.WEST) || wall_side.equals(RoomSide.EAST)) {
-      move_x_velocity = 0.0;
-      strafe_x_velocity = 0.0;
+      move_x_fraction = 0.0;
+      strafe_x_fraction = 0.0;
     }
     else {
-      move_y_velocity = 0.0;
-      strafe_y_velocity = 0.0;
+      move_y_fraction = 0.0;
+      strafe_y_fraction = 0.0;
     }
   }
 
@@ -301,21 +294,21 @@ public abstract class Unit extends MovableObject {
       return true;
     }
     if (wall_side.equals(RoomSide.NORTH) || wall_side.equals(RoomSide.SOUTH)) {
-      move_x_velocity = 0.0;
-      strafe_x_velocity = 0.0;
+      move_x_fraction = 0.0;
+      strafe_x_fraction = 0.0;
     }
     else {
-      move_y_velocity = 0.0;
-      strafe_y_velocity = 0.0;
+      move_y_fraction = 0.0;
+      strafe_y_fraction = 0.0;
     }
     return false;
   }
 
   public void setZeroVelocity() {
-    move_x_velocity = 0.0;
-    move_y_velocity = 0.0;
-    strafe_x_velocity = 0.0;
-    strafe_y_velocity = 0.0;
+    move_x_fraction = 0.0;
+    move_y_fraction = 0.0;
+    strafe_x_fraction = 0.0;
+    strafe_y_fraction = 0.0;
   }
 
   public boolean isCannonReloaded() {
@@ -349,7 +342,7 @@ public abstract class Unit extends MovableObject {
     }
   }
 
-  public void push(MapEngine engine, double dx, double dy, double fraction) {
+  public void bePushed(MapEngine engine, double dx, double dy, double fraction) {
     double previous_x_loc = x_loc;
     double previous_y_loc = y_loc;
     x_loc += dx * fraction;
@@ -358,8 +351,8 @@ public abstract class Unit extends MovableObject {
     boundInsideAndUpdateRoom(engine, previous_x_loc, previous_y_loc);
   }
 
-  public void push(MapEngine engine, double dx, double dy) {
-    push(engine, dx, dy, PUSH_FRACTION_DIVIDEND / radius);
+  public void bePushed(MapEngine engine, double dx, double dy) {
+    bePushed(engine, dx, dy, PUSH_FRACTION_DIVIDEND / radius);
   }
 
   public MapObject handleDeath(MapEngine engine, double s_elapsed) {
