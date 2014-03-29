@@ -41,9 +41,11 @@ public abstract class Unit extends MovableObject {
     radii.put(ObjectType.SecondaryLifter, 0.2);
     radii.put(ObjectType.Pyro, 0.25);
     radii.put(ObjectType.LightHulk, 0.25);
+    radii.put(ObjectType.MediumLifter, 0.25);
     radii.put(ObjectType.PlatformLaser, 0.25);
     radii.put(ObjectType.PlatformMissile, 0.25);
     radii.put(ObjectType.DefenseRobot, 0.3);
+    radii.put(ObjectType.AdvancedLifter, 0.35);
     radii.put(ObjectType.HeavyHulk, 0.35);
     radii.put(ObjectType.MediumHulk, 0.35);
     radii.put(ObjectType.MediumHulkCloaked, 0.35);
@@ -54,9 +56,11 @@ public abstract class Unit extends MovableObject {
 
   private static HashMap<ObjectType, Double> getCannonOffsets() {
     HashMap<ObjectType, Double> offsets = new HashMap<ObjectType, Double>();
+    offsets.put(ObjectType.AdvancedLifter, 0.0);
     offsets.put(ObjectType.BabySpider, 0.0);
     offsets.put(ObjectType.Bomber, 0.0);
     offsets.put(ObjectType.Class2Drone, 0.0);
+    offsets.put(ObjectType.MediumLifter, 0.0);
     offsets.put(ObjectType.PlatformLaser, 0.0);
     offsets.put(ObjectType.PlatformMissile, 0.0);
     offsets.put(ObjectType.Spider, 0.13);
@@ -82,6 +86,8 @@ public abstract class Unit extends MovableObject {
     shields.put(ObjectType.DefenseRobot, 23);
     shields.put(ObjectType.LightHulk, 23);
     shields.put(ObjectType.PlatformLaser, 23);
+    shields.put(ObjectType.MediumLifter, 26);
+    shields.put(ObjectType.AdvancedLifter, 32);
     shields.put(ObjectType.MediumHulk, 32);
     shields.put(ObjectType.MediumHulkCloaked, 32);
     shields.put(ObjectType.Spider, 35);
@@ -98,6 +104,7 @@ public abstract class Unit extends MovableObject {
   public static final double VISIBLE_TIME_AFTER_REVEAL = 1.0;
   public static final double SPEED_INCREASE_PER_SECOND = 2.0;
   public static final double SPEED_DECREASE_PER_SECOND = 1.0;
+  public static final int HOSTILE_COLLISION_BASE_DAMAGE = 1;
   public static final double PUSH_FRACTION_DIVIDEND = 0.02;
   public static final double EXPLOSION_RADIUS_MULTIPLIER = 1.1;
   public static final double EXPLOSION_MIN_TIME = 0.5;
@@ -332,9 +339,12 @@ public abstract class Unit extends MovableObject {
     reload_time_left = reload_time;
   }
 
-  public void beDamaged(MapEngine engine, int amount, boolean is_direct_weapon_hit) {
+  public void beDamaged(MapEngine engine, int amount, boolean play_weapon_hit_sound) {
     shields -= amount;
     revealIfCloaked();
+    if (play_weapon_hit_sound) {
+      playWeaponHitSound(engine);
+    }
   }
 
   public Explosion createDamagedExplosion() {
@@ -349,17 +359,16 @@ public abstract class Unit extends MovableObject {
     }
   }
 
-  public void push(MapEngine engine, double dx, double dy, double fraction) {
+  public void bePushed(MapEngine engine, double dx, double dy, double fraction) {
     double previous_x_loc = x_loc;
     double previous_y_loc = y_loc;
     x_loc += dx * fraction;
     y_loc += dy * fraction;
-    setZeroVelocity();
     boundInsideAndUpdateRoom(engine, previous_x_loc, previous_y_loc);
   }
 
-  public void push(MapEngine engine, double dx, double dy) {
-    push(engine, dx, dy, PUSH_FRACTION_DIVIDEND / radius);
+  public void bePushed(MapEngine engine, double dx, double dy) {
+    bePushed(engine, dx, dy, PUSH_FRACTION_DIVIDEND / radius);
   }
 
   public MapObject handleDeath(MapEngine engine, double s_elapsed) {
@@ -379,4 +388,6 @@ public abstract class Unit extends MovableObject {
   }
 
   public abstract MapObject releasePowerups();
+
+  public abstract void playWeaponHitSound(MapEngine engine);
 }

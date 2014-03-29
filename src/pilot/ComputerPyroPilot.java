@@ -21,6 +21,7 @@ import mapobject.scenery.Scenery;
 import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
+import mapobject.unit.robot.Robot;
 import pyro.PyroPrimaryCannon;
 import pyro.PyroSecondaryCannon;
 import structure.Room;
@@ -245,8 +246,7 @@ public class ComputerPyroPilot extends PyroPilot {
                 bound_object, target_object)), fire_primary, fire_secondary, false);
       case REACT_TO_CLOAKED_ROBOT:
         if (target_unit.isVisible()) {
-          target_x = target_unit.getX();
-          target_y = target_unit.getY();
+          setTargetLocation(target_unit);
         }
         double angle_to_target =
                 MapUtils.angleTo(bound_object.getDirection(), target_x - bound_object.getX(), target_y -
@@ -447,16 +447,16 @@ public class ComputerPyroPilot extends PyroPilot {
 
   public PyroFireCommands searchCurrentRoomTargets() {
     boolean fire_primary = false;
-    for (Unit unit : current_room.getRobots()) {
-      if (!unit.isVisible()) {
+    for (Robot robot : current_room.getRobots()) {
+      if (!robot.isVisible()) {
         continue;
       }
-      if (Math.abs(MapUtils.angleTo(bound_object, unit)) < DIRECTION_EPSILON) {
+      if (Math.abs(MapUtils.angleTo(bound_object, robot)) < DIRECTION_EPSILON) {
         fire_primary = true;
-        if ((!unit.isCloaked() || bound_pyro.getSelectedSecondaryCannonType().equals(
+        if ((!robot.isCloaked() || bound_pyro.getSelectedSecondaryCannonType().equals(
                 PyroSecondaryCannon.CONCUSSION_MISSILE)) &&
-                unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
-                MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
+                robot.getShields() > MISSILE_SHIELD_THRESHOLD &&
+                MapUtils.distance2(bound_object, robot) > MISSILE_MIN_DISTANCE2) {
           return new PyroFireCommands(true, true);
         }
       }
@@ -485,20 +485,20 @@ public class ComputerPyroPilot extends PyroPilot {
               MapUtils.anglesToNeighborConnectionPoints(bound_object, neighbor_side);
       if (angles_to_connection.x < angle_from_neighbor_to_self &&
               angle_from_neighbor_to_self < angles_to_connection.y) {
-        for (Unit unit : connection.neighbor.getRobots()) {
-          if (!unit.isVisible()) {
+        for (Robot robot : connection.neighbor.getRobots()) {
+          if (!robot.isVisible()) {
             continue;
           }
-          double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, unit));
+          double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, robot));
           double neighbor_angle_to_unit =
-                  MapUtils.angleTo(direction_to_neighbor, unit.getX() - src_x, unit.getY() - src_y);
+                  MapUtils.angleTo(direction_to_neighbor, robot.getX() - src_x, robot.getY() - src_y);
           if (abs_angle_to_unit < DIRECTION_EPSILON && angles_to_connection.x < neighbor_angle_to_unit &&
                   neighbor_angle_to_unit < angles_to_connection.y) {
             fire_primary = true;
-            if ((!unit.isCloaked() || bound_pyro.getSelectedSecondaryCannonType().equals(
+            if ((!robot.isCloaked() || bound_pyro.getSelectedSecondaryCannonType().equals(
                     PyroSecondaryCannon.CONCUSSION_MISSILE)) &&
-                    unit.getShields() > MISSILE_SHIELD_THRESHOLD &&
-                    MapUtils.distance2(bound_object, unit) > MISSILE_MIN_DISTANCE2) {
+                    robot.getShields() > MISSILE_SHIELD_THRESHOLD &&
+                    MapUtils.distance2(bound_object, robot) > MISSILE_MIN_DISTANCE2) {
               return new PyroFireCommands(true, true);
             }
           }
@@ -528,9 +528,9 @@ public class ComputerPyroPilot extends PyroPilot {
 
   public MapObject findNextTargetObject() {
     if (!bound_pyro.isCloaked()) {
-      for (Unit unit : current_room.getRobots()) {
-        if (unit.isVisible() && shouldTargetObject(unit)) {
-          return unit;
+      for (Robot robot : current_room.getRobots()) {
+        if (robot.isVisible() && shouldTargetObject(robot)) {
+          return robot;
         }
       }
     }

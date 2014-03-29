@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.HashMap;
 
 import mapobject.MapObject;
+import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
 import pilot.Pilot;
 import pilot.RobotPilot;
@@ -27,7 +28,9 @@ public abstract class Robot extends Unit {
 
   private static HashMap<ObjectType, Double> getReloadTimes() {
     HashMap<ObjectType, Double> times = new HashMap<ObjectType, Double>();
+    times.put(ObjectType.AdvancedLifter, 1.0);
     times.put(ObjectType.HeavyHulk, 1.0);
+    times.put(ObjectType.MediumLifter, 1.0);
     times.put(ObjectType.BabySpider, 2.0);
     times.put(ObjectType.Class1Drone, 2.0);
     times.put(ObjectType.Class2Drone, 2.0);
@@ -65,6 +68,7 @@ public abstract class Robot extends Unit {
 
   private static HashMap<ObjectType, String> getGrowlSoundKeys() {
     HashMap<ObjectType, String> keys = new HashMap<ObjectType, String>();
+    keys.put(ObjectType.AdvancedLifter, "enemies/robot09.wav");
     keys.put(ObjectType.BabySpider, "enemies/robot12.wav");
     keys.put(ObjectType.Bomber, "enemies/robot01.wav");
     keys.put(ObjectType.Class1Drone, "enemies/robot01.wav");
@@ -75,6 +79,7 @@ public abstract class Robot extends Unit {
     keys.put(ObjectType.LightHulk, "enemies/robot04.wav");
     keys.put(ObjectType.MediumHulk, "enemies/robot03.wav");
     keys.put(ObjectType.MediumHulkCloaked, "enemies/robot03.wav");
+    keys.put(ObjectType.MediumLifter, "enemies/robot02.wav");
     keys.put(ObjectType.PlatformLaser, "enemies/robot20.wav");
     keys.put(ObjectType.PlatformMissile, "enemies/robot16.wav");
     keys.put(ObjectType.SecondaryLifter, "enemies/robot25.wav");
@@ -101,7 +106,7 @@ public abstract class Robot extends Unit {
     super(radius, pilot, room, x_loc, y_loc, direction);
     this.cannon = cannon;
     reload_time = RELOAD_TIMES.get(type);
-    shots_per_volley = SHOTS_PER_VOLLEYS.get(type);
+    shots_per_volley = (cannon != null ? SHOTS_PER_VOLLEYS.get(type) : 0);
     growl_sound_key = GROWL_SOUND_KEYS.get(type);
     cannon_side = (int) (Math.random() * 2);
   }
@@ -193,12 +198,14 @@ public abstract class Robot extends Unit {
   }
 
   @Override
-  public void beDamaged(MapEngine engine, int amount, boolean is_direct_weapon_hit) {
-    super.beDamaged(engine, amount, is_direct_weapon_hit);
+  public void beDamaged(MapEngine engine, int amount, boolean play_weapon_hit_sound) {
+    super.beDamaged(engine, amount, play_weapon_hit_sound);
     tempDisable(amount * DISABLE_TIME_PER_DAMAGE);
-    if (is_direct_weapon_hit) {
-      playSound(engine, "weapons/explode1.wav");
-    }
+  }
+
+  @Override
+  public void playWeaponHitSound(MapEngine engine) {
+    playSound(engine, "weapons/explode1.wav");
   }
 
   public void tempDisable(double inactive_time) {
@@ -219,5 +226,14 @@ public abstract class Robot extends Unit {
       return cannon.fireCannon(this, room, x_loc + abs_offset.x, y_loc + abs_offset.y, direction);
     }
     return cannon.fireCannon(this, room, x_loc - abs_offset.x, y_loc - abs_offset.y, direction);
+  }
+
+  public void handlePyroCollision(MapEngine engine, Pyro pyro, double dx, double dy, double distance) {
+    bePushed(engine, dx / distance, dy / distance);
+    setZeroVelocity();
+    beDamaged(engine, HOSTILE_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
+    pyro.setZeroVelocity();
+    pyro.beDamaged(engine, HOSTILE_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
+    pyro.playPublicSound("effects/ramfast.wav");
   }
 }

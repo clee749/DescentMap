@@ -7,6 +7,7 @@ import mapobject.MovableObject;
 import mapobject.ephemeral.Explosion;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
+import mapobject.unit.robot.Robot;
 import pilot.Pilot;
 import pilot.ShotPilot;
 import structure.Room;
@@ -85,9 +86,9 @@ public abstract class Shot extends MovableObject {
         return pyro;
       }
     }
-    for (Unit unit : room.getRobots()) {
-      if (hitsUnit(unit)) {
-        return unit;
+    for (Robot robot : room.getRobots()) {
+      if (hitsUnit(robot)) {
+        return robot;
       }
     }
     return null;

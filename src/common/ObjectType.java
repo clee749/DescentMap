@@ -7,54 +7,56 @@ public enum ObjectType {
   // sceneries
   Barrier,
   EnergyCenter,
-  RobotGenerator,
   Entrance,
   Exit,
+  RobotGenerator,
 
   // robots
   GreenRobot,
   YellowRobot,
   RedRobot,
+  AdvancedLifter,
   BabySpider,
+  Bomber,
   Class1Drone,
   Class2Drone,
   DefenseRobot,
-  LightHulk,
-  MediumHulk,
-  PlatformLaser,
-  SecondaryLifter,
-  Spider,
-  Bomber,
   HeavyDriller,
   HeavyHulk,
+  LightHulk,
+  MediumHulk,
   MediumHulkCloaked,
+  MediumLifter,
+  PlatformLaser,
   PlatformMissile,
+  SecondaryLifter,
+  Spider,
 
   // shots
+  ConcussionMissile,
+  FireballShot,
+  FusionShot,
+  HomingMissile,
   LaserShot,
   PlasmaShot,
-  FusionShot,
-  FireballShot,
-  ConcussionMissile,
-  HomingMissile,
   SmartMissile,
   SmartPlasma,
 
   // power ups
-  Shield,
-  Energy,
-  QuadLasers,
   Cloak,
-  Invulnerability,
   ConcussionMissilePowerup,
   ConcussionPack,
+  Energy,
+  FusionCannonPowerup,
   HomingMissilePowerup,
   HomingPack,
-  ProximityPack,
-  SmartMissilePowerup,
+  Invulnerability,
   LaserCannonPowerup,
   PlasmaCannonPowerup,
-  FusionCannonPowerup,
+  ProximityPack,
+  QuadLasers,
+  Shield,
+  SmartMissilePowerup,
 
   // ephemerals
   EnergySpark,
@@ -62,19 +64,19 @@ public enum ObjectType {
   Zunggg,
 
   // miscellaneous
-  ProximityBomb,
-  MultipleObject;
+  MultipleObject,
+  ProximityBomb;
 
-  public static final ObjectType[] SCENERIES = {Barrier, EnergyCenter, RobotGenerator, Entrance, Exit};
+  public static final ObjectType[] SCENERIES = {Barrier, EnergyCenter, Entrance, Exit, RobotGenerator};
 
-  public static final ObjectType[] ROBOTS = {GreenRobot, YellowRobot, RedRobot, BabySpider, Class1Drone,
-          Class2Drone, DefenseRobot, LightHulk, MediumHulk, PlatformLaser, SecondaryLifter, Spider, Bomber,
-          HeavyDriller, HeavyHulk, MediumHulkCloaked, PlatformMissile, ProximityBomb};
+  public static final ObjectType[] ROBOTS = {AdvancedLifter, BabySpider, Bomber, Class1Drone, Class2Drone,
+          DefenseRobot, HeavyDriller, HeavyHulk, LightHulk, MediumHulk, MediumHulkCloaked, MediumLifter,
+          PlatformLaser, PlatformMissile, SecondaryLifter, Spider};
 
-  public static final ObjectType[] SHOTS = {LaserShot, PlasmaShot, FusionShot, FireballShot,
-          ConcussionMissile, HomingMissile, SmartMissile, SmartPlasma};
+  public static final ObjectType[] SHOTS = {ConcussionMissile, FireballShot, FusionShot, HomingMissile,
+          LaserShot, PlasmaShot, SmartMissile, SmartPlasma};
 
-  public static final ObjectType[] POWERUPS = {Shield, Energy, QuadLasers, Cloak, Invulnerability,
-          ConcussionMissilePowerup, ConcussionPack, HomingMissilePowerup, HomingPack, ProximityPack,
-          SmartMissilePowerup, LaserCannonPowerup, PlasmaCannonPowerup, FusionCannonPowerup};
+  public static final ObjectType[] POWERUPS = {Cloak, ConcussionMissilePowerup, ConcussionPack, Energy,
+          FusionCannonPowerup, HomingMissilePowerup, HomingPack, Invulnerability, LaserCannonPowerup,
+          PlasmaCannonPowerup, ProximityPack, QuadLasers, Shield, SmartMissilePowerup};
 }

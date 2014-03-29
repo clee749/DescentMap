@@ -13,6 +13,7 @@ import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
 import mapobject.powerup.HomingPack;
 import mapobject.powerup.ProximityPack;
+import mapobject.unit.robot.Robot;
 import pilot.ComputerPyroPilot;
 import pilot.Pilot;
 import pilot.PilotAction;
@@ -132,8 +133,7 @@ public class Pyro extends Unit {
 
   // collisions
   public static final double MIN_WALL_COLLISION_SPEED_FOR_DAMAGE = 0.9;
-  public static final int MIN_SHIELDS_AFTER_WALL_COLLISION_DAMAGE = 10;
-  public static final int ROBOT_COLLISION_BASE_DAMAGE = 1;
+  public static final int MIN_SHIELDS_AFTER_WALL_COLLISION = 10;
 
   // death spin
   public static final double DEATH_SPIN_TIME = 5.0;
@@ -498,19 +498,15 @@ public class Pyro extends Unit {
   @Override
   public void applyMovementActions(MapEngine engine, double s_elapsed) {
     super.applyMovementActions(engine, s_elapsed);
-    for (Unit unit : room.getRobots()) {
-      if (unit.isExploded()) {
+    for (Robot robot : room.getRobots()) {
+      if (robot.isExploded()) {
         continue;
       }
-      double dx = unit.getX() - x_loc;
-      double dy = unit.getY() - y_loc;
+      double dx = robot.getX() - x_loc;
+      double dy = robot.getY() - y_loc;
       double distance = Math.hypot(dx, dy);
-      if (distance < radius + unit.getRadius()) {
-        unit.push(engine, dx / distance, dy / distance);
-        setZeroVelocity();
-        beDamaged(engine, ROBOT_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
-        unit.beDamaged(engine, ROBOT_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
-        playPublicSound("effects/ramfast.wav");
+      if (distance < radius + robot.getRadius()) {
+        robot.handlePyroCollision(engine, this, dx, dy, distance);
         if (death_spin_started) {
           death_spin_time_left = 0.0;
         }
@@ -550,7 +546,7 @@ public class Pyro extends Unit {
 
   public void handleWallImpactDamage(double impact_speed) {
     if (impact_speed > MIN_WALL_COLLISION_SPEED_FOR_DAMAGE) {
-      if (shields > MIN_SHIELDS_AFTER_WALL_COLLISION_DAMAGE) {
+      if (shields > MIN_SHIELDS_AFTER_WALL_COLLISION) {
         beDamaged(engine, (int) (Math.random() * 2), false);
       }
       playPublicSound("effects/ramfast.wav");
@@ -605,11 +601,8 @@ public class Pyro extends Unit {
   }
 
   @Override
-  public void beDamaged(MapEngine engine, int amount, boolean is_direct_weapon_hit) {
-    super.beDamaged(engine, amount, is_direct_weapon_hit);
-    if (is_direct_weapon_hit) {
-      playPublicSound("effects/shit01.wav");
-    }
+  public void playWeaponHitSound(MapEngine engine) {
+    playPublicSound("effects/shit01.wav");
   }
 
   public MapObject fireCannon() {

@@ -7,6 +7,7 @@ import mapobject.MapObject;
 import mapobject.MovableObject;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
+import mapobject.unit.robot.Robot;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
@@ -106,13 +107,13 @@ public class HomingPilot extends Pilot {
         }
         break;
       case ROBOT:
-        for (Unit unit : current_room.getRobots()) {
-          if (unit.isCloaked()) {
+        for (Robot robot : current_room.getRobots()) {
+          if (robot.isCloaked()) {
             continue;
           }
-          double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, unit));
+          double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, robot));
           if (abs_angle_to_target < smallest_angle_to_target) {
-            new_target = unit;
+            new_target = robot;
             smallest_angle_to_target = abs_angle_to_target;
           }
         }
@@ -142,15 +143,15 @@ public class HomingPilot extends Pilot {
         }
         break;
       case ROBOT:
-        for (Unit unit : current_room.getNeighborInDirection(neighbor_side).getRobots()) {
-          if (unit.isCloaked()) {
+        for (Robot robot : current_room.getNeighborInDirection(neighbor_side).getRobots()) {
+          if (robot.isCloaked()) {
             continue;
           }
-          double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, unit));
+          double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, robot));
           if (abs_angle_to_target < smallest_angle_to_target &&
-                  (neighbor_side == null || MapUtils.canSeeObjectInNeighborRoom(bound_object, unit,
+                  (neighbor_side == null || MapUtils.canSeeObjectInNeighborRoom(bound_object, robot,
                           neighbor_side, angles_to_connection))) {
-            new_target = unit;
+            new_target = robot;
             smallest_angle_to_target = abs_angle_to_target;
           }
         }

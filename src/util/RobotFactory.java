@@ -1,5 +1,6 @@
 package util;
 
+import mapobject.unit.robot.AdvancedLifter;
 import mapobject.unit.robot.BabySpider;
 import mapobject.unit.robot.Bomber;
 import mapobject.unit.robot.Class1Drone;
@@ -10,6 +11,7 @@ import mapobject.unit.robot.HeavyHulk;
 import mapobject.unit.robot.LightHulk;
 import mapobject.unit.robot.MediumHulk;
 import mapobject.unit.robot.MediumHulkCloaked;
+import mapobject.unit.robot.MediumLifter;
 import mapobject.unit.robot.PlatformLaser;
 import mapobject.unit.robot.PlatformMissile;
 import mapobject.unit.robot.Robot;
@@ -27,6 +29,8 @@ public class RobotFactory {
 
   public static Robot newRobot(ObjectType type, Room room, double x_loc, double y_loc, double direction) {
     switch (type) {
+      case AdvancedLifter:
+        return new AdvancedLifter(room, x_loc, y_loc, direction);
       case BabySpider:
         return new BabySpider(room, x_loc, y_loc, direction);
       case Bomber:
@@ -47,6 +51,8 @@ public class RobotFactory {
         return new MediumHulk(room, x_loc, y_loc, direction);
       case MediumHulkCloaked:
         return new MediumHulkCloaked(room, x_loc, y_loc, direction);
+      case MediumLifter:
+        return new MediumLifter(room, x_loc, y_loc, direction);
       case PlatformLaser:
         return new PlatformLaser(room, x_loc, y_loc, direction);
       case PlatformMissile:

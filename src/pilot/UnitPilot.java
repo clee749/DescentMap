@@ -2,6 +2,7 @@ package pilot;
 
 import java.util.Map.Entry;
 
+import mapobject.MapObject;
 import mapobject.shot.Shot;
 import mapobject.unit.Unit;
 import structure.Room;
@@ -33,6 +34,11 @@ public abstract class UnitPilot extends Pilot {
   public void setTargetLocation(double target_x, double target_y) {
     this.target_x = target_x;
     this.target_y = target_y;
+  }
+
+  public void setTargetLocation(MapObject target) {
+    target_x = target.getX();
+    target_y = target.getY();
   }
 
   public void setTargetDirection(double target_direction) {

@@ -8,6 +8,7 @@ import mapobject.ephemeral.Explosion;
 import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
+import mapobject.unit.robot.Robot;
 import resource.ImageHandler;
 import structure.Room;
 import util.MapUtils;
@@ -84,9 +85,9 @@ public class ProximityBomb extends MapObject {
         return handleDetonation(engine, pyro);
       }
     }
-    for (Unit unit : room.getRobots()) {
-      if (!unit.equals(source) && isObjectInRange(unit)) {
-        return handleDetonation(engine, unit);
+    for (Robot robot : room.getRobots()) {
+      if (!robot.equals(source) && isObjectInRange(robot)) {
+        return handleDetonation(engine, robot);
       }
     }
 

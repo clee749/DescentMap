@@ -19,6 +19,7 @@ import mapobject.scenery.Scenery;
 import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
+import mapobject.unit.robot.Robot;
 import resource.ImageHandler;
 import util.MapUtils;
 
@@ -39,7 +40,7 @@ public class Room {
   protected final HashSet<Powerup> powerups;
   protected final HashSet<Shot> shots;
   protected final HashSet<ProximityBomb> bombs;
-  protected final HashSet<Unit> robots;
+  protected final HashSet<Robot> robots;
   protected final HashSet<Pyro> pyros;
   protected final HashSet<MapObject> misc_objects;
 
@@ -53,7 +54,7 @@ public class Room {
     powerups = new HashSet<Powerup>();
     shots = new HashSet<Shot>();
     bombs = new HashSet<ProximityBomb>();
-    robots = new HashSet<Unit>();
+    robots = new HashSet<Robot>();
     pyros = new HashSet<Pyro>();
     misc_objects = new HashSet<MapObject>();
   }
@@ -111,7 +112,7 @@ public class Room {
     return bombs;
   }
 
-  public HashSet<Unit> getRobots() {
+  public HashSet<Robot> getRobots() {
     return robots;
   }
 
@@ -206,8 +207,8 @@ public class Room {
       for (ProximityBomb bomb : bombs) {
         bomb.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
-      for (Unit unit : robots) {
-        unit.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      for (Robot robot : robots) {
+        robot.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
       }
       for (Pyro pyro : pyros) {
         pyro.paint(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
@@ -245,8 +246,8 @@ public class Room {
     else if (object.getType().equals(ObjectType.Pyro)) {
       pyros.add((Pyro) object);
     }
-    else if (object instanceof Unit) {
-      robots.add((Unit) object);
+    else if (object instanceof Robot) {
+      robots.add((Robot) object);
     }
     else if (object instanceof Scenery) {
       sceneries.add((Scenery) object);
@@ -266,7 +267,7 @@ public class Room {
     if (child.getType().equals(ObjectType.Pyro)) {
       return pyros.remove(child);
     }
-    if (child instanceof Unit) {
+    if (child instanceof Robot) {
       return robots.remove(child);
     }
     if (child.getType().equals(ObjectType.ProximityBomb)) {
@@ -291,8 +292,8 @@ public class Room {
     for (ProximityBomb bomb : bombs) {
       bomb.planNextAction(s_elapsed);
     }
-    for (Unit unit : robots) {
-      unit.planNextAction(s_elapsed);
+    for (Robot robot : robots) {
+      robot.planNextAction(s_elapsed);
     }
     for (Pyro pyro : pyros) {
       pyro.planNextAction(s_elapsed);
@@ -340,9 +341,9 @@ public class Room {
         applySplashDamage(pyro, src_object, max_damage, damage_radius, which_neighbor);
       }
     }
-    for (Unit unit : robots) {
-      if (!unit.equals(already_damaged)) {
-        applySplashDamage(unit, src_object, max_damage, damage_radius, which_neighbor);
+    for (Robot robot : robots) {
+      if (!robot.equals(already_damaged)) {
+        applySplashDamage(robot, src_object, max_damage, damage_radius, which_neighbor);
       }
     }
 

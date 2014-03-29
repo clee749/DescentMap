@@ -103,8 +103,7 @@ public class RobotPilot extends UnitPilot {
 
   public void initReactToCloakedPyroState() {
     previous_exploration_room = null;
-    target_x = target_unit.getX();
-    target_y = target_unit.getY();
+    setTargetLocation(target_unit);
     react_to_cloaked_pyro_time_left = Cloak.CLOAK_TIME;
   }
 
@@ -301,7 +300,7 @@ public class RobotPilot extends UnitPilot {
     can_growl = true;
     if (!target_unit.isInMap()) {
       initState(RobotPilotState.INACTIVE);
-
+      can_growl = true;
     }
     else if (target_object_room.equals(current_room)) {
       if (target_unit.getRoom().equals(target_object_room)) {
@@ -309,8 +308,7 @@ public class RobotPilot extends UnitPilot {
           initState(RobotPilotState.REACT_TO_PYRO);
           return;
         }
-        target_x = target_unit.getX();
-        target_y = target_unit.getY();
+        setTargetLocation(target_unit);
       }
     }
     else if (MapUtils.canSeeObjectInNeighborRoom(bound_object, target_unit, target_object_room_info.getKey())) {
@@ -318,8 +316,7 @@ public class RobotPilot extends UnitPilot {
         initState(RobotPilotState.REACT_TO_PYRO);
         return;
       }
-      target_x = target_unit.getX();
-      target_y = target_unit.getY();
+      setTargetLocation(target_unit);
     }
   }
 
