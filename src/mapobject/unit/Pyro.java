@@ -507,9 +507,6 @@ public class Pyro extends Unit {
       double distance = Math.hypot(dx, dy);
       if (distance < radius + robot.getRadius()) {
         robot.handlePyroCollision(engine, this, dx, dy, distance);
-        if (death_spin_started) {
-          death_spin_time_left = 0.0;
-        }
         break;
       }
     }
@@ -550,6 +547,14 @@ public class Pyro extends Unit {
         beDamaged(engine, (int) (Math.random() * 2), false);
       }
       playPublicSound("effects/ramfast.wav");
+    }
+  }
+
+  @Override
+  public void setZeroVelocity() {
+    super.setZeroVelocity();
+    if (death_spin_started) {
+      death_spin_time_left = 0.0;
     }
   }
 

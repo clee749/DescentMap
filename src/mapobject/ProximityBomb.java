@@ -27,6 +27,7 @@ public class ProximityBomb extends MapObject {
 
   private final MapObject source;
   private final int damage;
+  private final double source_combined_radius;
   private int frame_num;
   private double frame_time_left;
   private boolean is_fully_armed;
@@ -36,6 +37,7 @@ public class ProximityBomb extends MapObject {
     super(RADIUS, room, x_loc, y_loc);
     this.source = source;
     this.damage = damage;
+    source_combined_radius = source.getRadius() + radius;
     frame_num = (int) (Math.random() * 9);
     frame_time_left = SECONDS_PER_FRAME;
     if (source.getType().equals(ObjectType.Pyro)) {
@@ -91,8 +93,11 @@ public class ProximityBomb extends MapObject {
       }
     }
 
+    boolean is_outside_source =
+            Math.abs(source.getX() - x_loc) < source_combined_radius &&
+                    Math.abs(source.getY() - y_loc) < source_combined_radius;
     for (Shot shot : room.getShots()) {
-      if (isObjectInRange(shot)) {
+      if ((is_outside_source || !shot.getSource().equals(source)) && isObjectInRange(shot)) {
         shot.detonate();
         return handleDetonation(engine, null);
       }

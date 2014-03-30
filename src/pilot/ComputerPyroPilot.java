@@ -200,8 +200,8 @@ public class ComputerPyroPilot extends PyroPilot {
   @Override
   public PilotAction findNextAction(double s_elapsed) {
     updateState();
-    StrafeDirection strafe = StrafeDirection.NONE;
-    // StrafeDirection strafe = reactToShots();
+    // StrafeDirection strafe = StrafeDirection.NONE;
+    StrafeDirection strafe = reactToShots();
 
     PyroFireCommands fire_commands;
     if (pyroInFireLine()) {

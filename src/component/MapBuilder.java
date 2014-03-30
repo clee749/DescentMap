@@ -150,7 +150,13 @@ public class MapBuilder {
 
     entrance_edge_room = edge_rooms.remove((int) (Math.random() * edge_rooms.size()));
 
-    EdgeRoom pre_exit_edge_room = edge_rooms.remove((int) (Math.random() * edge_rooms.size()));
+    EdgeRoom pre_exit_edge_room = null;
+    do {
+      pre_exit_edge_room = edge_rooms.remove((int) (Math.random() * edge_rooms.size()));
+      if (pre_exit_edge_room.room.equals(entrance_edge_room.room)) {
+        pre_exit_edge_room = null;
+      }
+    } while (pre_exit_edge_room == null);
     RoomSide direction = pre_exit_edge_room.direction;
     Dimension exit_room_dims;
     if (direction.equals(RoomSide.EAST) || direction.equals(RoomSide.WEST)) {
