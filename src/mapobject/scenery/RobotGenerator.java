@@ -10,6 +10,7 @@ import mapobject.MapObject;
 import mapobject.ephemeral.Explosion;
 import mapobject.ephemeral.Zunggg;
 import mapobject.unit.Pyro;
+import mapobject.unit.Unit;
 import resource.ImageHandler;
 import structure.Room;
 import util.RobotFactory;
@@ -42,6 +43,7 @@ public class RobotGenerator extends Scenery {
   private final ObjectType robot_type;
   private final double spawn_direction;
   private final HashSet<Pyro> ignored_pyros;
+  private final double spawn_radius_required;
   private int num_spawn_volleys_left;
   private int num_robots_left_in_volley;
   private boolean next_attack_costs_robot;
@@ -53,6 +55,7 @@ public class RobotGenerator extends Scenery {
     this.robot_type = robot_type;
     this.spawn_direction = RoomSide.directionToRadians(spawn_direction);
     ignored_pyros = new HashSet<Pyro>();
+    spawn_radius_required = Math.min(Unit.getRadius(ObjectType.Pyro) + Unit.getRadius(robot_type), radius);
     num_spawn_volleys_left = NUM_SPAWN_VOLLEYS;
     state = RobotGeneratorState.WAIT_FOR_TRIGGER;
   }
@@ -139,7 +142,7 @@ public class RobotGenerator extends Scenery {
     for (Pyro pyro : room.getPyros()) {
       double dx = pyro.getX() - x_loc;
       double dy = pyro.getY() - y_loc;
-      if (Math.abs(dx) < radius && Math.abs(dy) < radius) {
+      if (Math.abs(dx) < spawn_radius_required && Math.abs(dy) < spawn_radius_required) {
         state = RobotGeneratorState.COOLDOWN;
         state_time_left = ATTACK_COOLDOWN_TIME;
         pyro.beDamaged(engine, ATTACK_DAMAGE, true);

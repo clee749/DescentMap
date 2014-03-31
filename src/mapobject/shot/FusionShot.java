@@ -30,4 +30,9 @@ public class FusionShot extends Shot {
     }
     return null;
   }
+
+  @Override
+  public void detonate() {
+
+  }
 }

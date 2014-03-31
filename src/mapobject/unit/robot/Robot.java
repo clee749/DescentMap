@@ -52,13 +52,13 @@ public abstract class Robot extends Unit {
     HashMap<ObjectType, Integer> shots = new HashMap<ObjectType, Integer>();
     shots.put(ObjectType.Bomber, 1);
     shots.put(ObjectType.HeavyHulk, 1);
-    shots.put(ObjectType.MiniBoss, 1);
     shots.put(ObjectType.BabySpider, 2);
     shots.put(ObjectType.Class1Drone, 2);
     shots.put(ObjectType.Class2Drone, 2);
     shots.put(ObjectType.LightHulk, 2);
     shots.put(ObjectType.MediumHulk, 2);
     shots.put(ObjectType.MediumHulkCloaked, 2);
+    shots.put(ObjectType.MiniBoss, 2);
     shots.put(ObjectType.SecondaryLifter, 2);
     shots.put(ObjectType.HeavyDriller, 3);
     shots.put(ObjectType.PlatformMissile, 3);
