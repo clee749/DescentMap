@@ -12,6 +12,7 @@ import mapobject.unit.robot.LightHulk;
 import mapobject.unit.robot.MediumHulk;
 import mapobject.unit.robot.MediumHulkCloaked;
 import mapobject.unit.robot.MediumLifter;
+import mapobject.unit.robot.MiniBoss;
 import mapobject.unit.robot.PlatformLaser;
 import mapobject.unit.robot.PlatformMissile;
 import mapobject.unit.robot.Robot;
@@ -53,6 +54,8 @@ public class RobotFactory {
         return new MediumHulkCloaked(room, x_loc, y_loc, direction);
       case MediumLifter:
         return new MediumLifter(room, x_loc, y_loc, direction);
+      case MiniBoss:
+        return new MiniBoss(room, x_loc, y_loc, direction);
       case PlatformLaser:
         return new PlatformLaser(room, x_loc, y_loc, direction);
       case PlatformMissile:

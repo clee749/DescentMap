@@ -62,6 +62,7 @@ public class Pyro extends Unit {
     PrimaryCannonInfo[] infos = new PrimaryCannonInfo[PyroPrimaryCannon.values().length];
     infos[PyroPrimaryCannon.LASER.ordinal()] = new PrimaryCannonInfo(0.25, 0.5);
     infos[PyroPrimaryCannon.PLASMA.ordinal()] = new PrimaryCannonInfo(0.15, 0.5);
+    infos[PyroPrimaryCannon.FUSION.ordinal()] = new PrimaryCannonInfo(1.0, 2.0);
     return infos;
   }
 
@@ -387,7 +388,9 @@ public class Pyro extends Unit {
     int text_offset =
             paintCannonInfo(g, PyroPrimaryCannon.LASER, "Laser Lvl: " + getLaserLevel() +
                     (has_quad_lasers ? " Quad" : ""), 70);
-    text_offset = paintCannonInfo(g, PyroPrimaryCannon.PLASMA, "Plasma", text_offset) + 10;
+    text_offset = paintCannonInfo(g, PyroPrimaryCannon.PLASMA, "Plasma", text_offset);
+    text_offset = paintCannonInfo(g, PyroPrimaryCannon.FUSION, "Fusion", text_offset);
+    text_offset += 10;
     for (int i = 0; i < secondary_ammo.length; ++i) {
       text_offset =
               paintSecondaryWeaponInfo(g, PyroSecondaryCannon.values()[i], SECONDARY_AMMO_TEXTS[i],
@@ -694,6 +697,9 @@ public class Pyro extends Unit {
     }
     if (hasPrimaryCannon(PyroPrimaryCannon.PLASMA)) {
       powerups.addObject(PowerupFactory.newPowerup(ObjectType.PlasmaCannonPowerup, room, x_loc, y_loc));
+    }
+    if (hasPrimaryCannon(PyroPrimaryCannon.FUSION)) {
+      powerups.addObject(PowerupFactory.newPowerup(ObjectType.FusionCannonPowerup, room, x_loc, y_loc));
     }
     if (getSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE) >= ConcussionPack.NUM_MISSILES) {
       powerups.addObject(PowerupFactory.newPowerup(ObjectType.ConcussionPack, room, x_loc, y_loc));

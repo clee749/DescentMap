@@ -4,6 +4,7 @@ import mapobject.powerup.Cloak;
 import mapobject.powerup.ConcussionMissilePowerup;
 import mapobject.powerup.ConcussionPack;
 import mapobject.powerup.Energy;
+import mapobject.powerup.FusionCannonPowerup;
 import mapobject.powerup.HomingMissilePowerup;
 import mapobject.powerup.HomingPack;
 import mapobject.powerup.LaserCannonPowerup;
@@ -35,6 +36,8 @@ public class PowerupFactory {
         return new ConcussionPack(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case Energy:
         return new Energy(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
+      case FusionCannonPowerup:
+        return new FusionCannonPowerup(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case HomingMissilePowerup:
         return new HomingMissilePowerup(room, x_loc, y_loc, randomPowerupDirection(), randomPowerupSpeed());
       case HomingPack:

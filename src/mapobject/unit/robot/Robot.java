@@ -44,6 +44,7 @@ public abstract class Robot extends Unit {
     times.put(ObjectType.MediumHulkCloaked, 3.0);
     times.put(ObjectType.PlatformMissile, 4.0);
     times.put(ObjectType.Bomber, 5.0);
+    times.put(ObjectType.MiniBoss, 5.0);
     return times;
   }
 
@@ -51,6 +52,7 @@ public abstract class Robot extends Unit {
     HashMap<ObjectType, Integer> shots = new HashMap<ObjectType, Integer>();
     shots.put(ObjectType.Bomber, 1);
     shots.put(ObjectType.HeavyHulk, 1);
+    shots.put(ObjectType.MiniBoss, 1);
     shots.put(ObjectType.BabySpider, 2);
     shots.put(ObjectType.Class1Drone, 2);
     shots.put(ObjectType.Class2Drone, 2);
@@ -80,6 +82,7 @@ public abstract class Robot extends Unit {
     keys.put(ObjectType.MediumHulk, "enemies/robot03.wav");
     keys.put(ObjectType.MediumHulkCloaked, "enemies/robot03.wav");
     keys.put(ObjectType.MediumLifter, "enemies/robot02.wav");
+    keys.put(ObjectType.MiniBoss, "enemies/robot36.wav");
     keys.put(ObjectType.PlatformLaser, "enemies/robot20.wav");
     keys.put(ObjectType.PlatformMissile, "enemies/robot16.wav");
     keys.put(ObjectType.SecondaryLifter, "enemies/robot25.wav");

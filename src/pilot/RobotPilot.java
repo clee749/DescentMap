@@ -321,6 +321,16 @@ public class RobotPilot extends UnitPilot {
   }
 
   public void findNextExplorationRoom() {
+    ArrayList<Entry<RoomSide, RoomConnection>> possible_next_infos = findPossibleNextRoomInfos();
+    if (possible_next_infos.isEmpty()) {
+      target_room_info = null;
+    }
+    else {
+      target_room_info = possible_next_infos.get((int) (Math.random() * possible_next_infos.size()));
+    }
+  }
+
+  public ArrayList<Entry<RoomSide, RoomConnection>> findPossibleNextRoomInfos() {
     ArrayList<Entry<RoomSide, RoomConnection>> possible_next_infos =
             new ArrayList<Entry<RoomSide, RoomConnection>>();
     for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
@@ -329,11 +339,6 @@ public class RobotPilot extends UnitPilot {
         possible_next_infos.add(entry);
       }
     }
-    if (possible_next_infos.isEmpty()) {
-      target_room_info = null;
-    }
-    else {
-      target_room_info = possible_next_infos.get((int) (Math.random() * possible_next_infos.size()));
-    }
+    return possible_next_infos;
   }
 }

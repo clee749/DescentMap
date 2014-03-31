@@ -27,6 +27,7 @@ public enum ObjectType {
   MediumHulk,
   MediumHulkCloaked,
   MediumLifter,
+  MiniBoss,
   PlatformLaser,
   PlatformMissile,
   SecondaryLifter,
@@ -71,7 +72,7 @@ public enum ObjectType {
 
   public static final ObjectType[] ROBOTS = {AdvancedLifter, BabySpider, Bomber, Class1Drone, Class2Drone,
           DefenseRobot, HeavyDriller, HeavyHulk, LightHulk, MediumHulk, MediumHulkCloaked, MediumLifter,
-          PlatformLaser, PlatformMissile, SecondaryLifter, Spider};
+          MiniBoss, PlatformLaser, PlatformMissile, SecondaryLifter, Spider};
 
   public static final ObjectType[] SHOTS = {ConcussionMissile, FireballShot, FusionShot, HomingMissile,
           LaserShot, PlasmaShot, SmartMissile, SmartPlasma};

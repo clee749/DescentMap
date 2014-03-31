@@ -25,6 +25,7 @@ public abstract class MovableObject extends MapObject {
   private static HashMap<ObjectType, Double> getMaxMoveSpeeds() {
     HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
     speeds.put(ObjectType.HeavyHulk, 0.1);
+    speeds.put(ObjectType.MiniBoss, 0.1);
     speeds.put(ObjectType.PlatformMissile, 0.1);
     speeds.put(ObjectType.MediumHulk, 0.2);
     speeds.put(ObjectType.MediumHulkCloaked, 0.2);
@@ -45,6 +46,7 @@ public abstract class MovableObject extends MapObject {
     speeds.put(ObjectType.HomingMissile, 2.5);
     speeds.put(ObjectType.ConcussionMissile, 2.5);
     speeds.put(ObjectType.LaserShot, 3.0);
+    speeds.put(ObjectType.FusionShot, 3.5);
     speeds.put(ObjectType.PlasmaShot, 3.5);
     return speeds;
   }
@@ -52,6 +54,7 @@ public abstract class MovableObject extends MapObject {
   private static HashMap<ObjectType, Double> getMaxTurnSpeeds() {
     HashMap<ObjectType, Double> speeds = new HashMap<ObjectType, Double>();
     speeds.put(ObjectType.HeavyHulk, MapUtils.PI_OVER_FOUR);
+    speeds.put(ObjectType.MiniBoss, MapUtils.PI_OVER_FOUR);
     speeds.put(ObjectType.PlatformMissile, MapUtils.PI_OVER_FOUR);
     speeds.put(ObjectType.Pyro, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.Bomber, MapUtils.PI_OVER_TWO);

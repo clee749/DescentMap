@@ -1,7 +1,6 @@
 package mapobject.shot;
 
 import mapobject.MapObject;
-import mapobject.ephemeral.Explosion;
 import mapobject.unit.Unit;
 import pilot.Pilot;
 import structure.Room;
@@ -24,8 +23,7 @@ public abstract class SplashDamageShot extends Shot {
     MapObject created_object = super.doNextAction(engine, s_elapsed);
     if (is_detonated) {
       room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, null);
-      return new Explosion(room, x_loc, y_loc, Math.min(damage / EXPLOSION_RADIUS_DIVISOR,
-              EXPLOSION_MAX_RADIUS), Math.min(damage / EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));
+      return createExplosion();
     }
     return created_object;
   }
@@ -42,8 +40,6 @@ public abstract class SplashDamageShot extends Shot {
     super.handleWallCollision(engine);
     room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, null);
     playSound(engine, "weapons/explode1.wav");
-    return new Explosion(room, x_loc, y_loc,
-            Math.min(damage / EXPLOSION_RADIUS_DIVISOR, EXPLOSION_MAX_RADIUS), Math.min(damage /
-                    EXPLOSION_TIME_DIVISOR, EXPLOSION_MAX_TIME));
+    return createExplosion();
   }
 }

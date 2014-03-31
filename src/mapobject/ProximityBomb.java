@@ -94,8 +94,8 @@ public class ProximityBomb extends MapObject {
     }
 
     boolean is_outside_source =
-            Math.abs(source.getX() - x_loc) < source_combined_radius &&
-                    Math.abs(source.getY() - y_loc) < source_combined_radius;
+            Math.abs(source.getX() - x_loc) > source_combined_radius ||
+                    Math.abs(source.getY() - y_loc) > source_combined_radius;
     for (Shot shot : room.getShots()) {
       if ((is_outside_source || !shot.getSource().equals(source)) && isObjectInRange(shot)) {
         shot.detonate();

@@ -37,7 +37,7 @@ public class MapPopulator {
   public static final ObjectType[] ROBOTS_TO_POPULATE = {ObjectType.AdvancedLifter, ObjectType.Bomber,
           ObjectType.Class1Drone, ObjectType.Class2Drone, ObjectType.DefenseRobot, ObjectType.HeavyDriller,
           ObjectType.HeavyHulk, ObjectType.LightHulk, ObjectType.MediumHulk, ObjectType.MediumHulkCloaked,
-          ObjectType.MediumLifter, ObjectType.PlatformLaser, ObjectType.PlatformMissile,
+          ObjectType.MediumLifter, ObjectType.MiniBoss, ObjectType.PlatformLaser, ObjectType.PlatformMissile,
           ObjectType.SecondaryLifter, ObjectType.Spider};
 
   protected MapPopulator() {
