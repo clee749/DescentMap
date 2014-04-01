@@ -46,6 +46,7 @@ public abstract class MovableObject extends MapObject {
     speeds.put(ObjectType.HomingMissile, 2.5);
     speeds.put(ObjectType.ConcussionMissile, 2.5);
     speeds.put(ObjectType.LaserShot, 3.0);
+    speeds.put(ObjectType.SpreadfireShot, 3.0);
     speeds.put(ObjectType.FusionShot, 3.5);
     speeds.put(ObjectType.PlasmaShot, 3.5);
     return speeds;

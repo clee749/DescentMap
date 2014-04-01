@@ -29,6 +29,7 @@ import util.MapUtils;
 
 import common.ObjectType;
 
+// Powerups: http://old.r1ch.net/old/descent/weapons.htm
 // Robots: http://www.descent2.com/goodies/3dmodels/thinman/descent1
 
 /**

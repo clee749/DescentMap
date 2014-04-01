@@ -27,13 +27,13 @@ public class MiniBoss extends Robot {
   public MapObject releasePowerups() {
     double rand = Math.random();
     if (rand < 0.1) {
-      return PowerupFactory.newPowerup(ObjectType.Shield, room, x_loc, y_loc);
+      return PowerupFactory.newReleasedPowerup(ObjectType.Shield, room, x_loc, y_loc);
     }
     if (rand < 0.2) {
-      return PowerupFactory.newPowerup(ObjectType.Energy, room, x_loc, y_loc);
+      return PowerupFactory.newReleasedPowerup(ObjectType.Energy, room, x_loc, y_loc);
     }
     if (rand < 0.5) {
-      return PowerupFactory.newPowerup(ObjectType.FusionCannonPowerup, room, x_loc, y_loc);
+      return PowerupFactory.newReleasedPowerup(ObjectType.FusionCannonPowerup, room, x_loc, y_loc);
     }
     return null;
   }

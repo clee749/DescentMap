@@ -31,7 +31,8 @@ public class HeavyHulk extends Robot {
     }
     MultipleObject powerups = new MultipleObject();
     for (int i = 0; i < num_homing_missiles; ++i) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.HomingMissilePowerup, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.HomingMissilePowerup, room, x_loc,
+              y_loc));
     }
     return powerups;
   }

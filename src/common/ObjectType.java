@@ -42,6 +42,7 @@ public enum ObjectType {
   PlasmaShot,
   SmartMissile,
   SmartPlasma,
+  SpreadfireShot,
 
   // power ups
   Cloak,
@@ -58,6 +59,7 @@ public enum ObjectType {
   QuadLasers,
   Shield,
   SmartMissilePowerup,
+  SpreadfireCannonPowerup,
 
   // ephemerals
   EnergySpark,
@@ -75,9 +77,10 @@ public enum ObjectType {
           MiniBoss, PlatformLaser, PlatformMissile, SecondaryLifter, Spider};
 
   public static final ObjectType[] SHOTS = {ConcussionMissile, FireballShot, FusionShot, HomingMissile,
-          LaserShot, PlasmaShot, SmartMissile, SmartPlasma};
+          LaserShot, PlasmaShot, SmartMissile, SmartPlasma, SpreadfireShot};
 
   public static final ObjectType[] POWERUPS = {Cloak, ConcussionMissilePowerup, ConcussionPack, Energy,
           FusionCannonPowerup, HomingMissilePowerup, HomingPack, Invulnerability, LaserCannonPowerup,
-          PlasmaCannonPowerup, ProximityPack, QuadLasers, Shield, SmartMissilePowerup};
+          PlasmaCannonPowerup, ProximityPack, QuadLasers, Shield, SmartMissilePowerup,
+          SpreadfireCannonPowerup};
 }

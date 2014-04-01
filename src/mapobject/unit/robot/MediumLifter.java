@@ -20,7 +20,7 @@ public class MediumLifter extends MeleeRobot {
   @Override
   public MapObject releasePowerups() {
     if (Math.random() < 0.1) {
-      return PowerupFactory.newPowerup(ObjectType.Shield, room, x_loc, y_loc);
+      return PowerupFactory.newReleasedPowerup(ObjectType.Shield, room, x_loc, y_loc);
     }
     return null;
   }

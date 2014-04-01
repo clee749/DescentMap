@@ -30,6 +30,7 @@ import util.PowerupFactory;
 import cannon.Cannon;
 import cannon.LaserCannon;
 
+import common.DescentMapException;
 import common.ObjectType;
 import common.RoomSide;
 import component.MapEngine;
@@ -61,6 +62,7 @@ public class Pyro extends Unit {
   private static PrimaryCannonInfo[] getPrimaryCannonInfos() {
     PrimaryCannonInfo[] infos = new PrimaryCannonInfo[PyroPrimaryCannon.values().length];
     infos[PyroPrimaryCannon.LASER.ordinal()] = new PrimaryCannonInfo(0.25, 0.5);
+    infos[PyroPrimaryCannon.SPREADFIRE.ordinal()] = new PrimaryCannonInfo(0.2, 0.5);
     infos[PyroPrimaryCannon.PLASMA.ordinal()] = new PrimaryCannonInfo(0.15, 0.5);
     infos[PyroPrimaryCannon.FUSION.ordinal()] = new PrimaryCannonInfo(1.0, 2.0);
     return infos;
@@ -131,6 +133,7 @@ public class Pyro extends Unit {
   public static final double CANNON_SWITCH_TIME = 1.0;
   public static final int PROXIMITY_BOMB_ORDINAL = PyroSecondaryCannon.PROXIMITY_BOMB.ordinal();
   public static final double BOMB_RELOAD_TIME = SECONDARY_RELOAD_TIMES[PROXIMITY_BOMB_ORDINAL];
+  public static final double SPREADFIRE_DIRECTION_DELTA = Math.PI / 12;
 
   // collisions
   public static final double MIN_WALL_COLLISION_SPEED_FOR_DAMAGE = 0.9;
@@ -387,10 +390,11 @@ public class Pyro extends Unit {
     g.drawString("Shield: " + shields, 10, 40);
     int text_offset =
             paintCannonInfo(g, PyroPrimaryCannon.LASER, "Laser Lvl: " + getLaserLevel() +
-                    (has_quad_lasers ? " Quad" : ""), 70);
+                    (has_quad_lasers ? " Quad" : ""), 20);
+    text_offset = paintCannonInfo(g, PyroPrimaryCannon.SPREADFIRE, "Spread", text_offset);
     text_offset = paintCannonInfo(g, PyroPrimaryCannon.PLASMA, "Plasma", text_offset);
-    text_offset = paintCannonInfo(g, PyroPrimaryCannon.FUSION, "Fusion", text_offset);
-    text_offset += 10;
+    paintCannonInfo(g, PyroPrimaryCannon.FUSION, "Fusion", text_offset);
+    text_offset = 20;
     for (int i = 0; i < secondary_ammo.length; ++i) {
       text_offset =
               paintSecondaryWeaponInfo(g, PyroSecondaryCannon.values()[i], SECONDARY_AMMO_TEXTS[i],
@@ -409,7 +413,7 @@ public class Pyro extends Unit {
     else {
       g.setColor(UNSELECTED_CANNON_COLOR);
     }
-    g.drawString(cannon_text, 10, text_offset);
+    g.drawString(cannon_text, 160, text_offset);
     return text_offset + 20;
   }
 
@@ -426,9 +430,9 @@ public class Pyro extends Unit {
     else {
       g.setColor(UNSELECTED_CANNON_COLOR);
     }
-    g.drawString(weapon_text, 10, text_offset);
+    g.drawString(weapon_text, 310, text_offset);
     g.setColor(AMMO_AMOUNT_COLOR);
-    g.drawString(String.format("%03d", ammo), 10 + metrics.stringWidth(weapon_text), text_offset);
+    g.drawString(String.format("%03d", ammo), 310 + metrics.stringWidth(weapon_text), text_offset);
     return text_offset + 20;
   }
 
@@ -616,19 +620,37 @@ public class Pyro extends Unit {
   public MapObject fireCannon() {
     revealIfCloaked();
     MultipleObject shots = new MultipleObject();
-    Point2D.Double abs_offset = MapUtils.perpendicularVector(cannon_offset, direction);
-    shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc + abs_offset.x,
-            y_loc + abs_offset.y, direction));
-    shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc - abs_offset.x,
-            y_loc - abs_offset.y, direction));
-    if (has_quad_lasers && selected_primary_cannon_type.equals(PyroPrimaryCannon.LASER)) {
-      abs_offset = MapUtils.perpendicularVector(outer_cannon_offset, direction);
-      double x_forward_abs_offset = Math.cos(direction) * cannon_forward_offset;
-      double y_forward_abs_offset = Math.sin(direction) * cannon_forward_offset;
-      shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc + abs_offset.x +
-              x_forward_abs_offset, y_loc + abs_offset.y + y_forward_abs_offset, direction));
-      shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc - abs_offset.x +
-              x_forward_abs_offset, y_loc - abs_offset.y + y_forward_abs_offset, direction));
+    switch (selected_primary_cannon_type) {
+      case LASER:
+        if (has_quad_lasers) {
+          Point2D.Double abs_offset = MapUtils.perpendicularVector(outer_cannon_offset, direction);
+          double x_forward_abs_offset = Math.cos(direction) * cannon_forward_offset;
+          double y_forward_abs_offset = Math.sin(direction) * cannon_forward_offset;
+          shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc + abs_offset.x +
+                  x_forward_abs_offset, y_loc + abs_offset.y + y_forward_abs_offset, direction));
+          shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc - abs_offset.x +
+                  x_forward_abs_offset, y_loc - abs_offset.y + y_forward_abs_offset, direction));
+        }
+        // fall through
+      case PLASMA:
+        // fall through
+      case FUSION:
+        Point2D.Double abs_offset = MapUtils.perpendicularVector(cannon_offset, direction);
+        shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc + abs_offset.x, y_loc +
+                abs_offset.y, direction));
+        shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc - abs_offset.x, y_loc -
+                abs_offset.y, direction));
+        break;
+      case SPREADFIRE:
+        shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc, y_loc,
+                MapUtils.normalizeAngle(direction + SPREADFIRE_DIRECTION_DELTA)));
+        shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc, y_loc,
+                MapUtils.normalizeAngle(direction - SPREADFIRE_DIRECTION_DELTA)));
+        // Vulcan here
+        shots.addObject(selected_primary_cannon.fireCannon(this, room, x_loc, y_loc, direction));
+        break;
+      default:
+        throw new DescentMapException("Unexpected PyroPrimaryCannon " + selected_primary_cannon_type);
     }
     energy -= primary_energy_cost;
     playPublicSound(selected_primary_cannon.getSoundKey());
@@ -682,41 +704,49 @@ public class Pyro extends Unit {
   @Override
   public MapObject releasePowerups() {
     MultipleObject powerups = new MultipleObject();
-    powerups.addObject(PowerupFactory.newPowerup(ObjectType.Shield, room, x_loc, y_loc));
+    powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.Shield, room, x_loc, y_loc));
     if (energy >= Energy.ENERGY_AMOUNT) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.Energy, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.Energy, room, x_loc, y_loc));
     }
     if (is_cloaked) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.Cloak, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.Cloak, room, x_loc, y_loc));
     }
     if (has_quad_lasers) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.QuadLasers, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.QuadLasers, room, x_loc, y_loc));
     }
     if (getLaserCannon().getLevel() > 1) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.LaserCannonPowerup, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.LaserCannonPowerup, room, x_loc, y_loc));
+    }
+    if (hasPrimaryCannon(PyroPrimaryCannon.SPREADFIRE)) {
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.SpreadfireCannonPowerup, room, x_loc,
+              y_loc));
     }
     if (hasPrimaryCannon(PyroPrimaryCannon.PLASMA)) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.PlasmaCannonPowerup, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory
+              .newReleasedPowerup(ObjectType.PlasmaCannonPowerup, room, x_loc, y_loc));
     }
     if (hasPrimaryCannon(PyroPrimaryCannon.FUSION)) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.FusionCannonPowerup, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory
+              .newReleasedPowerup(ObjectType.FusionCannonPowerup, room, x_loc, y_loc));
     }
     if (getSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE) >= ConcussionPack.NUM_MISSILES) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.ConcussionPack, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.ConcussionPack, room, x_loc, y_loc));
       secondary_ammo[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()] -= ConcussionPack.NUM_MISSILES;
     }
     if (getSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE) > 0) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.ConcussionMissilePowerup, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.ConcussionMissilePowerup, room, x_loc,
+              y_loc));
     }
     if (getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) >= HomingPack.NUM_MISSILES) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.HomingPack, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.HomingPack, room, x_loc, y_loc));
       secondary_ammo[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] -= HomingPack.NUM_MISSILES;
     }
     if (getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) > 0) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.HomingMissilePowerup, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.HomingMissilePowerup, room, x_loc,
+              y_loc));
     }
     if (getSecondaryAmmo(PyroSecondaryCannon.PROXIMITY_BOMB) >= ProximityPack.NUM_BOMBS) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.ProximityPack, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.ProximityPack, room, x_loc, y_loc));
     }
     return powerups;
   }

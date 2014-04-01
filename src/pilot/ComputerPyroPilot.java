@@ -66,7 +66,8 @@ public class ComputerPyroPilot extends PyroPilot {
   private static Point[] getPrimaryCannonPreferredEnergies() {
     Point[] energies = new Point[PyroPrimaryCannon.values().length];
     energies[PyroPrimaryCannon.LASER.ordinal()] = new Point(0, 80);
-    energies[PyroPrimaryCannon.PLASMA.ordinal()] = new Point(80, 120);
+    energies[PyroPrimaryCannon.SPREADFIRE.ordinal()] = new Point(80, 100);
+    energies[PyroPrimaryCannon.PLASMA.ordinal()] = new Point(100, 120);
     energies[PyroPrimaryCannon.FUSION.ordinal()] = new Point(120, 200);
     return energies;
   }
@@ -560,6 +561,8 @@ public class ComputerPyroPilot extends PyroPilot {
         return !bound_pyro.hasQuadLasers();
       case LaserCannonPowerup:
         return bound_pyro.getLaserLevel() < LaserCannon.MAX_LEVEL;
+      case SpreadfireCannonPowerup:
+        return !bound_pyro.hasPrimaryCannon(PyroPrimaryCannon.SPREADFIRE);
       case PlasmaCannonPowerup:
         return !bound_pyro.hasPrimaryCannon(PyroPrimaryCannon.PLASMA);
       case FusionCannonPowerup:

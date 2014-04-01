@@ -27,7 +27,7 @@ public class MediumHulkCloaked extends Robot {
   @Override
   public MapObject releasePowerups() {
     if (Math.random() < 0.5) {
-      return PowerupFactory.newPowerup(ObjectType.Cloak, room, x_loc, y_loc);
+      return PowerupFactory.newReleasedPowerup(ObjectType.Cloak, room, x_loc, y_loc);
     }
     int num_concussion_missiles = (int) (Math.random() * (MAX_CONCUSSION_MISSILES_RELEASED + 1));
     if (num_concussion_missiles < 1) {
@@ -35,7 +35,8 @@ public class MediumHulkCloaked extends Robot {
     }
     MultipleObject powerups = new MultipleObject();
     for (int i = 0; i < num_concussion_missiles; ++i) {
-      powerups.addObject(PowerupFactory.newPowerup(ObjectType.ConcussionMissilePowerup, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.ConcussionMissilePowerup, room, x_loc,
+              y_loc));
     }
     return powerups;
   }

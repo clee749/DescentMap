@@ -24,10 +24,10 @@ public class Bomber extends Robot {
   @Override
   public MapObject releasePowerups() {
     if (Math.random() < 0.1) {
-      return PowerupFactory.newPowerup(ObjectType.Energy, room, x_loc, y_loc);
+      return PowerupFactory.newReleasedPowerup(ObjectType.Energy, room, x_loc, y_loc);
     }
     if (Math.random() < 0.2) {
-      return PowerupFactory.newPowerup(ObjectType.ProximityPack, room, x_loc, y_loc);
+      return PowerupFactory.newReleasedPowerup(ObjectType.ProximityPack, room, x_loc, y_loc);
     }
     return null;
   }
