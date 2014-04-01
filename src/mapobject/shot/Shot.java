@@ -25,7 +25,6 @@ public abstract class Shot extends MovableObject {
   private static HashMap<ObjectType, Integer> getDamages() {
     HashMap<ObjectType, Integer> damages = new HashMap<ObjectType, Integer>();
     damages.put(ObjectType.LaserShot, 3);
-    damages.put(ObjectType.SpreadfireShot, 3);
     damages.put(ObjectType.FireballShot, 6);
     damages.put(ObjectType.PlasmaShot, 7);
     damages.put(ObjectType.ConcussionMissile, 16);

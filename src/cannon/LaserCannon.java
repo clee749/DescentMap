@@ -15,6 +15,10 @@ public class LaserCannon extends Cannon {
     setSoundKey();
   }
 
+  public LaserCannon(int damage, boolean on_pyro) {
+    this(damage, on_pyro, 1);
+  }
+
   @Override
   public void setSoundKey() {
     if (level < 1) {

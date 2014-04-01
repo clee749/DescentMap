@@ -96,6 +96,9 @@ public class HumanPyroPilot extends PyroPilot {
         case KeyEvent.VK_1:
           bound_pyro.switchPrimaryCannon(PyroPrimaryCannon.LASER, true);
           break;
+        case KeyEvent.VK_3:
+          bound_pyro.switchPrimaryCannon(PyroPrimaryCannon.SPREADFIRE, true);
+          break;
         case KeyEvent.VK_4:
           bound_pyro.switchPrimaryCannon(PyroPrimaryCannon.PLASMA, true);
           break;
