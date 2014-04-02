@@ -114,6 +114,9 @@ public class HumanPyroPilot extends PyroPilot {
         case KeyEvent.VK_8:
           bound_pyro.switchSecondaryCannon(PyroSecondaryCannon.PROXIMITY_BOMB, true);
           break;
+        case KeyEvent.VK_9:
+          bound_pyro.switchSecondaryCannon(PyroSecondaryCannon.SMART_MISSILE, true);
+          break;
       }
     }
   }

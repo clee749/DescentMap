@@ -29,6 +29,8 @@ public abstract class Shot extends MovableObject {
     damages.put(ObjectType.PlasmaShot, 7);
     damages.put(ObjectType.ConcussionMissile, 16);
     damages.put(ObjectType.HomingMissile, 16);
+    damages.put(ObjectType.SmartMissile, 16);
+    damages.put(ObjectType.SmartPlasma, 35);
     damages.put(ObjectType.FusionShot, 60);
     return damages;
   }

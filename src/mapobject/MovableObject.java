@@ -43,8 +43,10 @@ public abstract class MovableObject extends MapObject {
     speeds.put(ObjectType.MediumLifter, 0.9);
     speeds.put(ObjectType.Pyro, 1.0);
     speeds.put(ObjectType.FireballShot, 1.1);
+    speeds.put(ObjectType.SmartPlasma, 1.5);
     speeds.put(ObjectType.HomingMissile, 2.5);
     speeds.put(ObjectType.ConcussionMissile, 2.5);
+    speeds.put(ObjectType.SmartMissile, 2.5);
     speeds.put(ObjectType.LaserShot, 3.0);
     speeds.put(ObjectType.SpreadfireShot, 3.0);
     speeds.put(ObjectType.FusionShot, 3.5);
@@ -73,6 +75,7 @@ public abstract class MovableObject extends MapObject {
     speeds.put(ObjectType.MediumLifter, Math.PI);
     speeds.put(ObjectType.SecondaryLifter, Math.PI);
     speeds.put(ObjectType.HomingMissile, Math.PI);
+    speeds.put(ObjectType.SmartPlasma, Math.PI);
     return speeds;
   }
 

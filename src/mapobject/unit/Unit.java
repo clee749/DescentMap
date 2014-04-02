@@ -57,11 +57,9 @@ public abstract class Unit extends MovableObject {
 
   private static HashMap<ObjectType, Double> getCannonOffsets() {
     HashMap<ObjectType, Double> offsets = new HashMap<ObjectType, Double>();
-    offsets.put(ObjectType.AdvancedLifter, 0.0);
     offsets.put(ObjectType.BabySpider, 0.0);
     offsets.put(ObjectType.Bomber, 0.0);
     offsets.put(ObjectType.Class2Drone, 0.0);
-    offsets.put(ObjectType.MediumLifter, 0.0);
     offsets.put(ObjectType.PlatformLaser, 0.0);
     offsets.put(ObjectType.PlatformMissile, 0.0);
     offsets.put(ObjectType.Spider, 0.13);
@@ -132,7 +130,8 @@ public abstract class Unit extends MovableObject {
 
   public Unit(double radius, Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(radius, pilot, room, x_loc, y_loc, direction);
-    cannon_offset = CANNON_OFFSETS.get(type) * radius;
+    Double raw_cannon_offset = CANNON_OFFSETS.get(type);
+    cannon_offset = (raw_cannon_offset != null ? CANNON_OFFSETS.get(type) * radius : 0.0);
     shields = STARTING_SHIELDS.get(type);
     half_shields = shields / 2;
     is_visible = true;

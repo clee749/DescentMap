@@ -13,6 +13,7 @@ import mapobject.powerup.Powerup;
 import mapobject.powerup.ProximityPack;
 import mapobject.powerup.QuadLasers;
 import mapobject.powerup.Shield;
+import mapobject.powerup.SmartMissilePowerup;
 import mapobject.powerup.SpreadfireCannonPowerup;
 import structure.Room;
 
@@ -53,6 +54,8 @@ public class PowerupFactory {
         return new PlasmaCannonPowerup(room, x_loc, y_loc, direction, speed);
       case Shield:
         return new Shield(room, x_loc, y_loc, direction, speed);
+      case SmartMissilePowerup:
+        return new SmartMissilePowerup(room, x_loc, y_loc, direction, speed);
       case SpreadfireCannonPowerup:
         return new SpreadfireCannonPowerup(room, x_loc, y_loc, direction, speed);
       default:

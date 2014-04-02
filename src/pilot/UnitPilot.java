@@ -92,8 +92,7 @@ public abstract class UnitPilot extends Pilot {
   }
 
   public void planTurnToTarget() {
-    setTargetDirection(-MapUtils
-            .absoluteAngleTo(bound_object.getX(), bound_object.getY(), target_x, target_y));
+    setTargetDirection(MapUtils.absoluteAngleTo(bound_object.getX(), bound_object.getY(), target_x, target_y));
   }
 
   public StrafeDirection reactToShots() {

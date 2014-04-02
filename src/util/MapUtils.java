@@ -121,7 +121,7 @@ public class MapUtils {
    * @return direction from source point to destination point
    */
   public static double absoluteAngleTo(double src_x, double src_y, double dst_x, double dst_y) {
-    return -normalizeAngle(Math.atan2(dst_y - src_y, dst_x - src_x));
+    return normalizeAngle(Math.atan2(dst_y - src_y, dst_x - src_x));
   }
 
   /**

@@ -24,13 +24,21 @@ enum HomingTargetType {
 
 public class HomingPilot extends Pilot {
   private final HomingTargetType target_type;
-  private final double max_angle_to_target;
+  private double max_angle_to_target;
   private Unit target_unit;
   private Room target_unit_room;
   private Entry<RoomSide, RoomConnection> target_unit_room_info;
 
   public HomingPilot(MapObject source, double max_angle_to_target) {
     target_type = (source.getType().equals(ObjectType.Pyro) ? HomingTargetType.ROBOT : HomingTargetType.PYRO);
+    this.max_angle_to_target = max_angle_to_target;
+  }
+
+  public Unit getTargetUnit() {
+    return target_unit;
+  }
+
+  public void setMaxAngleToTarget(double max_angle_to_target) {
     this.max_angle_to_target = max_angle_to_target;
   }
 
