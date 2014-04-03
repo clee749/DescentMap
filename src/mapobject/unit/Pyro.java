@@ -488,19 +488,21 @@ public class Pyro extends Unit {
     }
     previous_turn = next_action.turn;
     MultipleObject created_objects = new MultipleObject();
+    if (!death_spin_started) {
+      if (firing_cannon) {
+        firing_cannon = false;
+        created_objects.addObject(fireCannon());
+      }
+      if (firing_secondary) {
+        firing_secondary = false;
+        created_objects.addObject(fireSecondary());
+      }
+      if (dropping_bomb) {
+        dropping_bomb = false;
+        created_objects.addObject(dropBomb());
+      }
+    }
     created_objects.addObject(super.doNextAction(engine, s_elapsed));
-    if (firing_cannon) {
-      firing_cannon = false;
-      created_objects.addObject(fireCannon());
-    }
-    if (firing_secondary) {
-      firing_secondary = false;
-      created_objects.addObject(fireSecondary());
-    }
-    if (dropping_bomb) {
-      dropping_bomb = false;
-      created_objects.addObject(dropBomb());
-    }
     return created_objects;
   }
 

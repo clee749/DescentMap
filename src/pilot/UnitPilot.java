@@ -45,42 +45,42 @@ public abstract class UnitPilot extends Pilot {
     this.target_direction = target_direction;
   }
 
-  public void planMoveToRoomConnection(RoomSide direction, double radius) {
+  public void planMoveToRoomConnection(RoomSide direction, double margin) {
     RoomConnection connection = current_room.getConnectionInDirection(direction);
     double middle = (connection.min + connection.max) / 2.0;
     switch (direction) {
       case EAST:
-        setTargetLocation(current_room.getSECorner().x - radius, middle);
+        setTargetLocation(current_room.getSECorner().x - margin, middle);
         break;
       case WEST:
-        setTargetLocation(current_room.getNWCorner().x + radius, middle);
+        setTargetLocation(current_room.getNWCorner().x + margin, middle);
         break;
       case NORTH:
-        setTargetLocation(middle, current_room.getNWCorner().y + radius);
+        setTargetLocation(middle, current_room.getNWCorner().y + margin);
         break;
       case SOUTH:
-        setTargetLocation(middle, current_room.getSECorner().y - radius);
+        setTargetLocation(middle, current_room.getSECorner().y - margin);
         break;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + direction);
     }
   }
 
-  public void planMoveToNeighborRoom(RoomSide direction, double radius) {
+  public void planMoveToNeighborRoom(RoomSide direction, double margin) {
     RoomConnection connection = current_room.getConnectionInDirection(direction);
     double middle = (connection.min + connection.max) / 2.0;
     switch (direction) {
       case EAST:
-        setTargetLocation(current_room.getSECorner().x + radius, middle);
+        setTargetLocation(current_room.getSECorner().x + margin, middle);
         break;
       case WEST:
-        setTargetLocation(current_room.getNWCorner().x - radius, middle);
+        setTargetLocation(current_room.getNWCorner().x - margin, middle);
         break;
       case NORTH:
-        setTargetLocation(middle, current_room.getNWCorner().y - radius);
+        setTargetLocation(middle, current_room.getNWCorner().y - margin);
         break;
       case SOUTH:
-        setTargetLocation(middle, current_room.getSECorner().y + radius);
+        setTargetLocation(middle, current_room.getSECorner().y + margin);
         break;
       default:
         throw new DescentMapException("Unexpected RoomSide: " + direction);

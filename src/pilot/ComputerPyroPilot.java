@@ -83,7 +83,7 @@ public class ComputerPyroPilot extends PyroPilot {
   public static final double RESPAWN_DELAY = 5.0;
   public static final double SPAWNING_SICKNESS = Entrance.ZUNGGG_TIME - Entrance.TIME_TO_SPAWN;
   public static final double FRIENDLY_FIRE_DIRECTION_EPSILON = MapUtils.PI_OVER_FOUR;
-  public static final double SAME_DIRECTION_EPSILON = MapUtils.PI_OVER_TWO;
+  public static final double SAME_DIRECTION_EPSILON = MapUtils.PI_OVER_FOUR;
   public static final int MISSILE_SHIELD_THRESHOLD = Shot.getDamage(ObjectType.ConcussionMissile);
   public static final double MISSILE_MIN_DISTANCE2 = 4.0;
   public static final double BOMB_DROP_RADIUS = 1.0;

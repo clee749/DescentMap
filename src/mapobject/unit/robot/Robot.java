@@ -170,19 +170,21 @@ public abstract class Robot extends Unit {
     if (can_growl && growl_cooldown_left < 0.0) {
       engine.registerGrowler(this);
     }
-    MapObject object_created = super.doNextAction(engine, s_elapsed);
-    if (firing_cannon && shields >= 0) {
-      if (volley_reload_time_left < 0.0) {
-        --shots_left_in_volley;
-        if (shots_left_in_volley < 1) {
-          firing_cannon = false;
+    if (!is_exploded) {
+      if (firing_cannon && shields >= 0) {
+        if (volley_reload_time_left < 0.0) {
+          --shots_left_in_volley;
+          if (shots_left_in_volley < 1) {
+            firing_cannon = false;
+          }
+          else {
+            volley_reload_time_left = VOLLEY_RELOAD_TIME;
+          }
+          return handleFiringCannon(engine);
         }
-        else {
-          volley_reload_time_left = VOLLEY_RELOAD_TIME;
-        }
-        return handleFiringCannon(engine);
       }
     }
+    MapObject object_created = super.doNextAction(engine, s_elapsed);
     return object_created;
   }
 

@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import mapobject.MovableObject;
 import mapobject.powerup.Cloak;
 import mapobject.unit.Pyro;
 import mapobject.unit.robot.Robot;
@@ -34,6 +35,7 @@ public class RobotPilot extends UnitPilot {
   public static final double START_EXPLORE_PROB = 0.1;
   public static final double STOP_EXPLORE_PROB = 0.1;
 
+  protected double room_traversal_margin;
   protected RobotPilotState state;
   protected Room previous_exploration_room;
   protected double react_to_cloaked_pyro_time_left;
@@ -41,6 +43,12 @@ public class RobotPilot extends UnitPilot {
 
   public RobotPilot() {
     state = RobotPilotState.INACTIVE;
+  }
+
+  @Override
+  public void bindToObject(MovableObject object) {
+    super.bindToObject(object);
+    room_traversal_margin = Math.min(bound_object_diameter, 0.5);
   }
 
   @Override
@@ -62,14 +70,14 @@ public class RobotPilot extends UnitPilot {
         }
         else {
           previous_exploration_room = current_room;
-          planMoveToRoomConnection(target_room_info.getKey(), bound_object_diameter);
+          planMoveToRoomConnection(target_room_info.getKey(), room_traversal_margin);
           planTurnToTarget();
         }
         break;
       case MOVE_TO_ROOM_EXIT:
         break;
       case TURN_INTO_ROOM:
-        planMoveToNeighborRoom(target_room_info.getKey(), bound_object_diameter);
+        planMoveToNeighborRoom(target_room_info.getKey(), room_traversal_margin);
         planTurnToTarget();
         break;
       case MOVE_INTO_ROOM:
