@@ -18,6 +18,7 @@ import mapobject.powerup.ProximityPack;
 import mapobject.powerup.Shield;
 import mapobject.scenery.Entrance;
 import mapobject.scenery.Scenery;
+import mapobject.shot.MegaMissile;
 import mapobject.shot.Shot;
 import mapobject.shot.SmartMissile;
 import mapobject.unit.Pyro;
@@ -51,13 +52,14 @@ enum PyroTargetType {
 
 
 class LineOfFireAnalysis {
-  public boolean is_directly_behind_live_pyro;
+  public boolean is_another_pyro_in_room;
   public boolean is_inside_pyro;
+  public boolean is_directly_behind_live_pyro;
   public double closest_pyro_distance2;
+  public MapObject closest_target;
   public double closest_target_distance2;
   public double closest_missile_target_distance2;
   public int num_robot_counts;
-  public boolean is_another_pyro_in_room;
 
   public LineOfFireAnalysis() {
     closest_pyro_distance2 = Integer.MAX_VALUE;
@@ -83,12 +85,15 @@ public class ComputerPyroPilot extends PyroPilot {
   public static final double RESPAWN_DELAY = 5.0;
   public static final double SPAWNING_SICKNESS = Entrance.ZUNGGG_TIME - Entrance.TIME_TO_SPAWN;
   public static final double FRIENDLY_FIRE_DIRECTION_EPSILON = MapUtils.PI_OVER_FOUR;
-  public static final double SAME_DIRECTION_EPSILON = MapUtils.PI_OVER_FOUR;
-  public static final int MISSILE_SHIELD_THRESHOLD = Shot.getDamage(ObjectType.ConcussionMissile);
+  public static final double SAME_DIRECTION_EPSILON = Math.PI / 36;
+  public static final int BASIC_MISSILE_MIN_SHIELDS = Shot.getDamage(ObjectType.ConcussionMissile);
   public static final double MISSILE_MIN_DISTANCE2 = 4.0;
   public static final double BOMB_DROP_RADIUS = 1.0;
   public static final int SMART_MISSILE_ROBOT_DIVISOR = Shot.getDamage(ObjectType.SmartPlasma);
-  public static final int MIN_ROBOT_COUNTS_FOR_SMART_MISSILE = SmartMissile.NUM_SMART_PLASMAS;
+  public static final int SMART_MISSILE_MIN_ROBOT_COUNTS = SmartMissile.NUM_SMART_PLASMAS;
+  public static final int MEGA_MISSILE_MIN_SHIELDS = 48;
+  public static final double MEGA_MISSILE_MIN_DISTANCE2 = MegaMissile.SPLASH_DAMAGE_RADIUS *
+          MegaMissile.SPLASH_DAMAGE_RADIUS * 2;
 
   private final HashSet<Room> visited;
   private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
@@ -476,10 +481,13 @@ public class ComputerPyroPilot extends PyroPilot {
       }
       if (Math.abs(MapUtils.angleTo(bound_object, robot)) < DIRECTION_EPSILON) {
         double robot_distance2 = MapUtils.distance2(bound_object, robot);
-        lofa.closest_target_distance2 = Math.min(lofa.closest_target_distance2, robot_distance2);
+        if (robot_distance2 < lofa.closest_target_distance2) {
+          lofa.closest_target_distance2 = robot_distance2;
+          lofa.closest_target = robot;
+        }
         if ((!robot.isCloaked() || bound_pyro.getSelectedSecondaryCannonType().equals(
                 PyroSecondaryCannon.CONCUSSION_MISSILE)) &&
-                robot.getShields() > MISSILE_SHIELD_THRESHOLD && robot_distance2 > MISSILE_MIN_DISTANCE2) {
+                robot.getShields() >= BASIC_MISSILE_MIN_SHIELDS && robot_distance2 > MISSILE_MIN_DISTANCE2) {
           lofa.closest_missile_target_distance2 =
                   Math.min(lofa.closest_missile_target_distance2, robot_distance2);
         }
@@ -487,8 +495,11 @@ public class ComputerPyroPilot extends PyroPilot {
     }
     for (ProximityBomb bomb : current_room.getBombs()) {
       if (Math.abs(MapUtils.angleTo(bound_object, bomb)) < DIRECTION_EPSILON) {
-        lofa.closest_target_distance2 =
-                Math.min(lofa.closest_target_distance2, MapUtils.distance2(bound_object, bomb));
+        double bomb_distance2 = MapUtils.distance2(bound_object, bomb);
+        if (bomb_distance2 < lofa.closest_target_distance2) {
+          lofa.closest_target_distance2 = bomb_distance2;
+          lofa.closest_target = bomb;
+        }
       }
     }
   }
@@ -516,10 +527,14 @@ public class ComputerPyroPilot extends PyroPilot {
           if (abs_angle_to_unit < DIRECTION_EPSILON && angles_to_connection.x < neighbor_angle_to_unit &&
                   neighbor_angle_to_unit < angles_to_connection.y) {
             double robot_distance2 = MapUtils.distance2(bound_object, robot);
-            lofa.closest_target_distance2 = Math.min(lofa.closest_target_distance2, robot_distance2);
+            if (robot_distance2 < lofa.closest_target_distance2) {
+              lofa.closest_target_distance2 = robot_distance2;
+              lofa.closest_target = robot;
+            }
             if ((!robot.isCloaked() || bound_pyro.getSelectedSecondaryCannonType().equals(
                     PyroSecondaryCannon.CONCUSSION_MISSILE)) &&
-                    robot.getShields() > MISSILE_SHIELD_THRESHOLD && robot_distance2 > MISSILE_MIN_DISTANCE2) {
+                    robot.getShields() >= BASIC_MISSILE_MIN_SHIELDS &&
+                    robot_distance2 > MISSILE_MIN_DISTANCE2) {
               lofa.closest_missile_target_distance2 =
                       Math.min(lofa.closest_missile_target_distance2, robot_distance2);
             }
@@ -531,8 +546,11 @@ public class ComputerPyroPilot extends PyroPilot {
                   MapUtils.angleTo(direction_to_neighbor, bomb.getX() - src_x, bomb.getY() - src_y);
           if (abs_angle_to_unit < DIRECTION_EPSILON && angles_to_connection.x < neighbor_angle_to_bomb &&
                   neighbor_angle_to_bomb < angles_to_connection.y) {
-            lofa.closest_target_distance2 =
-                    Math.min(lofa.closest_target_distance2, MapUtils.distance2(bound_object, bomb));
+            double bomb_distance2 = MapUtils.distance2(bound_object, bomb);
+            if (bomb_distance2 < lofa.closest_target_distance2) {
+              lofa.closest_target_distance2 = bomb_distance2;
+              lofa.closest_target = bomb;
+            }
           }
         }
         break;
@@ -560,7 +578,20 @@ public class ComputerPyroPilot extends PyroPilot {
       case SMART_MISSILE:
         return lofa.closest_pyro_distance2 == Integer.MAX_VALUE &&
                 lofa.closest_target_distance2 == Integer.MAX_VALUE &&
-                lofa.num_robot_counts >= MIN_ROBOT_COUNTS_FOR_SMART_MISSILE;
+                lofa.num_robot_counts >= SMART_MISSILE_MIN_ROBOT_COUNTS;
+      case MEGA_MISSILE:
+        if (lofa.closest_target == null) {
+          return false;
+        }
+        for (Pyro pyro : lofa.closest_target.getRoom().getPyros()) {
+          if (!pyro.equals(bound_object)) {
+            return false;
+          }
+        }
+        return lofa.closest_missile_target_distance2 < lofa.closest_pyro_distance2 &&
+                lofa.closest_target_distance2 > MEGA_MISSILE_MIN_DISTANCE2 &&
+                lofa.closest_target instanceof Robot &&
+                ((Robot) lofa.closest_target).getShields() >= MEGA_MISSILE_MIN_SHIELDS;
       default:
         throw new DescentMapException("Unexpected PyroSecondaryCannon: " +
                 bound_pyro.getSelectedSecondaryCannonType());
@@ -631,6 +662,9 @@ public class ComputerPyroPilot extends PyroPilot {
       case SmartMissilePowerup:
         return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.SMART_MISSILE) < Pyro
                 .getMaxSecondaryAmmo(PyroSecondaryCannon.SMART_MISSILE);
+      case MegaMissilePowerup:
+        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE) < Pyro
+                .getMaxSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE);
       default:
         throw new DescentMapException("Unexpected Powerup: " + powerup);
     }
@@ -643,25 +677,41 @@ public class ComputerPyroPilot extends PyroPilot {
     if (preferred_energy.x <= energy && energy <= preferred_energy.y) {
       return;
     }
-    for (PyroPrimaryCannon cannon_type : PyroPrimaryCannon.values()) {
-      preferred_energy = PRIMARY_CANNON_PREFERRED_ENERGIES[cannon_type.ordinal()];
-      if (preferred_energy.x <= energy && energy <= preferred_energy.y) {
-        if (bound_pyro.switchPrimaryCannon(cannon_type, false)) {
-          break;
-        }
+    PyroPrimaryCannon[] cannon_types = PyroPrimaryCannon.values();
+    int cannon_type_index = 0;
+    while (cannon_type_index < cannon_types.length - 1) {
+      preferred_energy = PRIMARY_CANNON_PREFERRED_ENERGIES[cannon_type_index];
+      if (energy <= preferred_energy.y) {
+        break;
       }
+      ++cannon_type_index;
+    }
+    while (cannon_type_index < cannon_types.length) {
+      if (bound_pyro.switchPrimaryCannon(cannon_types[cannon_type_index], false)) {
+        break;
+      }
+      ++cannon_type_index;
     }
   }
 
   public void selectSecondaryCannon() {
+    Room target_room = target_room_info.getValue().neighbor;
+    if (bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE) > 0 && target_room.getPyros().isEmpty()) {
+      for (Robot robot : target_room.getRobots()) {
+        if (robot.getShields() >= MEGA_MISSILE_MIN_SHIELDS) {
+          bound_pyro.switchSecondaryCannon(PyroSecondaryCannon.MEGA_MISSILE, false);
+          return;
+        }
+      }
+    }
     if (bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.SMART_MISSILE) > 0) {
       int num_robot_counts = 0;
-      for (Robot robot : target_room_info.getValue().neighbor.getRobots()) {
+      for (Robot robot : target_room.getRobots()) {
         if (!robot.isCloaked()) {
           num_robot_counts += robot.getShields() / SMART_MISSILE_ROBOT_DIVISOR + 1;
         }
       }
-      if (num_robot_counts >= MIN_ROBOT_COUNTS_FOR_SMART_MISSILE) {
+      if (num_robot_counts >= SMART_MISSILE_MIN_ROBOT_COUNTS) {
         bound_pyro.switchSecondaryCannon(PyroSecondaryCannon.SMART_MISSILE, false);
         return;
       }

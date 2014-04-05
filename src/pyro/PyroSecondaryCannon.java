@@ -5,6 +5,7 @@ import mapobject.shot.Shot;
 import cannon.Cannon;
 import cannon.ConcussionMissileCannon;
 import cannon.HomingMissileCannon;
+import cannon.MegaMissileCannon;
 import cannon.ProximityBombCannon;
 import cannon.SmartMissileCannon;
 
@@ -15,7 +16,8 @@ public enum PyroSecondaryCannon {
   CONCUSSION_MISSILE,
   HOMING_MISSILE,
   PROXIMITY_BOMB,
-  SMART_MISSILE;
+  SMART_MISSILE,
+  MEGA_MISSILE;
 
   public static Cannon createCannon(PyroSecondaryCannon cannon_type) {
     switch (cannon_type) {
@@ -28,6 +30,8 @@ public enum PyroSecondaryCannon {
       case SMART_MISSILE:
         return new SmartMissileCannon(Shot.getDamage(ObjectType.SmartMissile),
                 Shot.getDamage(ObjectType.SmartPlasma), true);
+      case MEGA_MISSILE:
+        return new MegaMissileCannon(Shot.getDamage(ObjectType.MegaMissile), true);
       default:
         throw new DescentMapException("Unexpected PyroSecondaryCannon: " + cannon_type);
     }

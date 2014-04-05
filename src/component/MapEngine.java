@@ -100,8 +100,10 @@ public class MapEngine {
       created_objects.addAll(room.doNextStep(this, s_elapsed));
     }
     for (RoomChange room_change : room_changes) {
-      room_change.src_room.removeChild(room_change.object);
-      room_change.dst_room.addChild(room_change.object);
+      if (room_change.object.isInMap()) {
+        room_change.src_room.removeChild(room_change.object);
+        room_change.dst_room.addChild(room_change.object);
+      }
     }
     for (MapObject created : created_objects) {
       addObject(created);

@@ -42,8 +42,8 @@ public class MapPopulator {
           ObjectType.SecondaryLifter, ObjectType.Spider};
 
   // powerups
-  public static final ObjectType[] POWERUPS_TO_POPULATE = {ObjectType.SmartMissilePowerup,
-          ObjectType.SpreadfireCannonPowerup};
+  public static final ObjectType[] POWERUPS_TO_POPULATE = {ObjectType.MegaMissilePowerup,
+          ObjectType.SmartMissilePowerup, ObjectType.SpreadfireCannonPowerup};
 
   protected MapPopulator() {
 

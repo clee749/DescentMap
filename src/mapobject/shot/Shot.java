@@ -32,6 +32,7 @@ public abstract class Shot extends MovableObject {
     damages.put(ObjectType.SmartMissile, 16);
     damages.put(ObjectType.SmartPlasma, 35);
     damages.put(ObjectType.FusionShot, 60);
+    damages.put(ObjectType.MegaMissile, 201);
     return damages;
   }
 
@@ -39,7 +40,6 @@ public abstract class Shot extends MovableObject {
   public static final double EXPLOSION_TIME_DIVISOR = 3.0;
   public static final double EXPLOSION_MAX_RADIUS = 0.2;
   public static final double EXPLOSION_MAX_TIME = 0.5;
-  public static final double SPLASH_DAMAGE_RADIUS = 1.0;
 
   protected final int damage;
   protected final MapObject source;

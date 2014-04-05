@@ -39,6 +39,7 @@ public enum ObjectType {
   FusionShot,
   HomingMissile,
   LaserShot,
+  MegaMissile,
   PlasmaShot,
   SmartMissile,
   SmartPlasma,
@@ -54,6 +55,7 @@ public enum ObjectType {
   HomingPack,
   Invulnerability,
   LaserCannonPowerup,
+  MegaMissilePowerup,
   PlasmaCannonPowerup,
   ProximityPack,
   QuadLasers,
@@ -77,10 +79,10 @@ public enum ObjectType {
           MiniBoss, PlatformLaser, PlatformMissile, SecondaryLifter, Spider};
 
   public static final ObjectType[] SHOTS = {ConcussionMissile, FireballShot, FusionShot, HomingMissile,
-          LaserShot, PlasmaShot, SmartMissile, SmartPlasma, SpreadfireShot};
+          LaserShot, MegaMissile, PlasmaShot, SmartMissile, SmartPlasma, SpreadfireShot};
 
   public static final ObjectType[] POWERUPS = {Cloak, ConcussionMissilePowerup, ConcussionPack, Energy,
           FusionCannonPowerup, HomingMissilePowerup, HomingPack, Invulnerability, LaserCannonPowerup,
-          PlasmaCannonPowerup, ProximityPack, QuadLasers, Shield, SmartMissilePowerup,
+          MegaMissilePowerup, PlasmaCannonPowerup, ProximityPack, QuadLasers, Shield, SmartMissilePowerup,
           SpreadfireCannonPowerup};
 }

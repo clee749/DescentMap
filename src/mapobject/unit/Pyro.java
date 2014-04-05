@@ -74,6 +74,7 @@ public class Pyro extends Unit {
     times[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] = 0.6;
     times[PyroSecondaryCannon.PROXIMITY_BOMB.ordinal()] = 0.3;
     times[PyroSecondaryCannon.SMART_MISSILE.ordinal()] = 0.6;
+    times[PyroSecondaryCannon.MEGA_MISSILE.ordinal()] = 0.6;
     return times;
   }
 
@@ -83,6 +84,7 @@ public class Pyro extends Unit {
     maxes[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] = 10;
     maxes[PyroSecondaryCannon.PROXIMITY_BOMB.ordinal()] = 10;
     maxes[PyroSecondaryCannon.SMART_MISSILE.ordinal()] = 5;
+    maxes[PyroSecondaryCannon.MEGA_MISSILE.ordinal()] = 5;
     return maxes;
   }
 
@@ -103,6 +105,7 @@ public class Pyro extends Unit {
     texts[PyroSecondaryCannon.HOMING_MISSILE.ordinal()] = "Homing Missile: ";
     texts[PyroSecondaryCannon.PROXIMITY_BOMB.ordinal()] = "Proxim. Bomb: ";
     texts[PyroSecondaryCannon.SMART_MISSILE.ordinal()] = "Smart Missile: ";
+    texts[PyroSecondaryCannon.MEGA_MISSILE.ordinal()] = "Mega Missile: ";
     return texts;
   }
 
@@ -136,7 +139,7 @@ public class Pyro extends Unit {
   public static final double CANNON_SWITCH_TIME = 1.0;
   public static final int PROXIMITY_BOMB_ORDINAL = PyroSecondaryCannon.PROXIMITY_BOMB.ordinal();
   public static final double BOMB_RELOAD_TIME = SECONDARY_RELOAD_TIMES[PROXIMITY_BOMB_ORDINAL];
-  public static final double SPREADFIRE_DIRECTION_DELTA = Math.PI / 12;
+  public static final double SPREADFIRE_DIRECTION_DELTA = Math.PI / 36;
 
   // collisions
   public static final double MIN_WALL_COLLISION_SPEED_FOR_DAMAGE = 0.9;
@@ -230,6 +233,7 @@ public class Pyro extends Unit {
     has_quad_lasers = false;
     death_spin_started = false;
     secondary_ammo[PyroSecondaryCannon.SMART_MISSILE.ordinal()] = 1;
+    secondary_ammo[PyroSecondaryCannon.MEGA_MISSILE.ordinal()] = 1;
   }
 
   public void spawn(Room room, double x_loc, double y_loc, double direction) {
@@ -263,6 +267,8 @@ public class Pyro extends Unit {
       ((PyroPilot) pilot).newLevel();
       secondary_ammo[PyroSecondaryCannon.SMART_MISSILE.ordinal()] =
               Math.max(secondary_ammo[PyroSecondaryCannon.SMART_MISSILE.ordinal()], 1);
+      secondary_ammo[PyroSecondaryCannon.MEGA_MISSILE.ordinal()] =
+              Math.max(secondary_ammo[PyroSecondaryCannon.MEGA_MISSILE.ordinal()], 1);
     }
     pilot.updateCurrentRoom(room);
     ((PyroPilot) pilot).startPilot();
@@ -755,6 +761,9 @@ public class Pyro extends Unit {
     if (getSecondaryAmmo(PyroSecondaryCannon.SMART_MISSILE) > 0) {
       powerups.addObject(PowerupFactory
               .newReleasedPowerup(ObjectType.SmartMissilePowerup, room, x_loc, y_loc));
+    }
+    if (getSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE) > 0) {
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.MegaMissilePowerup, room, x_loc, y_loc));
     }
     return powerups;
   }
