@@ -3,15 +3,18 @@ package pilot;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import mapobject.MovableObject;
 import structure.RoomConnection;
 
 import common.RoomSide;
 
 public class LargeRobotPilot extends RobotPilot {
-  private final int min_room_dim;
+  private int min_room_dim;
 
-  public LargeRobotPilot(int min_room_dim) {
-    this.min_room_dim = min_room_dim;
+  @Override
+  public void bindToObject(MovableObject object) {
+    super.bindToObject(object);
+    min_room_dim = (int) Math.ceil(bound_object_diameter);
   }
 
   @Override

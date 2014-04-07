@@ -677,21 +677,18 @@ public class ComputerPyroPilot extends PyroPilot {
     if (preferred_energy.x <= energy && energy <= preferred_energy.y) {
       return;
     }
-    PyroPrimaryCannon[] cannon_types = PyroPrimaryCannon.values();
-    int cannon_type_index = 0;
-    while (cannon_type_index < cannon_types.length - 1) {
-      preferred_energy = PRIMARY_CANNON_PREFERRED_ENERGIES[cannon_type_index];
+    PyroPrimaryCannon preferred_cannon_type = null;
+    for (PyroPrimaryCannon cannon_type : PyroPrimaryCannon.values()) {
+      if (!bound_pyro.hasPrimaryCannon(cannon_type)) {
+        continue;
+      }
+      preferred_cannon_type = cannon_type;
+      preferred_energy = PRIMARY_CANNON_PREFERRED_ENERGIES[cannon_type.ordinal()];
       if (energy <= preferred_energy.y) {
         break;
       }
-      ++cannon_type_index;
     }
-    while (cannon_type_index < cannon_types.length) {
-      if (bound_pyro.switchPrimaryCannon(cannon_types[cannon_type_index], false)) {
-        break;
-      }
-      ++cannon_type_index;
-    }
+    bound_pyro.switchPrimaryCannon(preferred_cannon_type, false);
   }
 
   public void selectSecondaryCannon() {

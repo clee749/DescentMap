@@ -14,4 +14,14 @@ public class MeleeRobotPilot extends RobotPilot {
     return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
             bound_object.getDirection(), target_x - bound_object.getX(), target_y - bound_object.getY())));
   }
+
+  @Override
+  public void updateReactToCloakedPyroState(double s_elapsed) {
+    if (Math.abs(target_x - bound_object.getX()) < bound_object_radius &&
+            Math.abs(target_y - bound_object.getY()) < bound_object_radius) {
+      initState(RobotPilotState.MOVE_TO_ROOM_INTERIOR);
+      return;
+    }
+    super.updateReactToCloakedPyroState(s_elapsed);
+  }
 }

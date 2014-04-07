@@ -11,10 +11,8 @@ import cannon.FusionCannon;
 import common.ObjectType;
 
 public class MiniBoss extends Robot {
-  public static final int MIN_ROOM_SIZE = 2;
-
   public MiniBoss(Room room, double x_loc, double y_loc, double direction) {
-    super(Unit.getRadius(ObjectType.MiniBoss), new LargeRobotPilot(MIN_ROOM_SIZE), new FusionCannon(
+    super(Unit.getRadius(ObjectType.MiniBoss), new LargeRobotPilot(), new FusionCannon(
             Shot.getDamage(ObjectType.FusionShot), false), room, x_loc, y_loc, direction);
   }
 
