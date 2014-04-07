@@ -8,6 +8,9 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Stack;
 
+import pyro.PyroPrimaryCannon;
+import pyro.PyroSecondaryCannon;
+
 import mapobject.MapObject;
 import mapobject.ProximityBomb;
 import mapobject.powerup.ConcussionPack;
@@ -24,8 +27,6 @@ import mapobject.shot.SmartMissile;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
 import mapobject.unit.robot.Robot;
-import pyro.PyroPrimaryCannon;
-import pyro.PyroSecondaryCannon;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;

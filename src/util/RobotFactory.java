@@ -6,6 +6,7 @@ import mapobject.unit.robot.Bomber;
 import mapobject.unit.robot.Class1Drone;
 import mapobject.unit.robot.Class2Drone;
 import mapobject.unit.robot.DefenseRobot;
+import mapobject.unit.robot.Gopher;
 import mapobject.unit.robot.HeavyDriller;
 import mapobject.unit.robot.HeavyHulk;
 import mapobject.unit.robot.LightHulk;
@@ -42,6 +43,8 @@ public class RobotFactory {
         return new Class2Drone(room, x_loc, y_loc, direction);
       case DefenseRobot:
         return new DefenseRobot(room, x_loc, y_loc, direction);
+      case Gopher:
+        return new Gopher(room, x_loc, y_loc, direction);
       case HeavyDriller:
         return new HeavyDriller(room, x_loc, y_loc, direction);
       case HeavyHulk:

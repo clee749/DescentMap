@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.HashMap;
 
 import mapobject.MapObject;
+import mapobject.MultipleObject;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
 import pilot.Pilot;
@@ -44,6 +45,7 @@ public abstract class Robot extends Unit {
     times.put(ObjectType.MediumHulkCloaked, 3.0);
     times.put(ObjectType.PlatformMissile, 4.0);
     times.put(ObjectType.Bomber, 5.0);
+    times.put(ObjectType.Gopher, 5.0);
     times.put(ObjectType.MiniBoss, 5.0);
     return times;
   }
@@ -51,6 +53,7 @@ public abstract class Robot extends Unit {
   private static HashMap<ObjectType, Integer> getShotsPerVolleys() {
     HashMap<ObjectType, Integer> shots = new HashMap<ObjectType, Integer>();
     shots.put(ObjectType.Bomber, 1);
+    shots.put(ObjectType.Gopher, 1);
     shots.put(ObjectType.HeavyHulk, 1);
     shots.put(ObjectType.BabySpider, 2);
     shots.put(ObjectType.Class1Drone, 2);
@@ -76,6 +79,7 @@ public abstract class Robot extends Unit {
     keys.put(ObjectType.Class1Drone, "enemies/robot01.wav");
     keys.put(ObjectType.Class2Drone, "enemies/robot11.wav");
     keys.put(ObjectType.DefenseRobot, "enemies/robot21.wav");
+    keys.put(ObjectType.Gopher, "enemies/robot34.wav");
     keys.put(ObjectType.HeavyDriller, "enemies/robot27.wav");
     keys.put(ObjectType.HeavyHulk, "enemies/robot07.wav");
     keys.put(ObjectType.LightHulk, "enemies/robot04.wav");
@@ -170,6 +174,7 @@ public abstract class Robot extends Unit {
     if (can_growl && growl_cooldown_left < 0.0) {
       engine.registerGrowler(this);
     }
+    MultipleObject created_objects = new MultipleObject();
     if (!is_exploded) {
       if (firing_cannon && shields >= 0) {
         if (volley_reload_time_left < 0.0) {
@@ -180,12 +185,12 @@ public abstract class Robot extends Unit {
           else {
             volley_reload_time_left = VOLLEY_RELOAD_TIME;
           }
-          return handleFiringCannon(engine);
+          created_objects.addObject(handleFiringCannon(engine));
         }
       }
     }
-    MapObject object_created = super.doNextAction(engine, s_elapsed);
-    return object_created;
+    created_objects.addObject(super.doNextAction(engine, s_elapsed));
+    return created_objects;
   }
 
   @Override

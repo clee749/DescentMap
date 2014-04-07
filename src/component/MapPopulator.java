@@ -28,18 +28,19 @@ public class MapPopulator {
   public static final int NUM_ROOMS_PER_ROBOT_GENERATOR = 10;
   public static final int MIN_ROOM_DIMENSION_FOR_ROBOT_GENERATOR = 3;
   public static final ObjectType[] ROBOT_GENERATOR_TYPES = {ObjectType.AdvancedLifter, ObjectType.Bomber,
-          ObjectType.Class2Drone, ObjectType.DefenseRobot, ObjectType.LightHulk, ObjectType.MediumLifter,
-          ObjectType.PlatformLaser, ObjectType.SecondaryLifter};
+          ObjectType.Class2Drone, ObjectType.DefenseRobot, ObjectType.Gopher, ObjectType.LightHulk,
+          ObjectType.MediumLifter, ObjectType.PlatformLaser, ObjectType.SecondaryLifter};
 
   // robots
   public static final int ALL_ROBOTS_MIN_ROOM_AREA = 50;
   public static final double ROBOT_PLACEMENT_PROB = 0.5;
   public static final double MIN_ROBOT_DISTANCE_FROM_ENTRANCE = 2.0;
-  public static final ObjectType[] ROBOTS_TO_POPULATE = {ObjectType.AdvancedLifter, ObjectType.Bomber,
-          ObjectType.Class1Drone, ObjectType.Class2Drone, ObjectType.DefenseRobot, ObjectType.HeavyDriller,
-          ObjectType.HeavyHulk, ObjectType.LightHulk, ObjectType.MediumHulk, ObjectType.MediumHulkCloaked,
-          ObjectType.MediumLifter, ObjectType.MiniBoss, ObjectType.PlatformLaser, ObjectType.PlatformMissile,
-          ObjectType.SecondaryLifter, ObjectType.Spider};
+  public static final ObjectType[] ROBOTS_TO_POPULATE =
+          {ObjectType.AdvancedLifter, ObjectType.Bomber, ObjectType.Class1Drone, ObjectType.Class2Drone,
+                  ObjectType.DefenseRobot, ObjectType.Gopher, ObjectType.HeavyDriller, ObjectType.HeavyHulk,
+                  ObjectType.LightHulk, ObjectType.MediumHulk, ObjectType.MediumHulkCloaked,
+                  ObjectType.MediumLifter, ObjectType.MiniBoss, ObjectType.PlatformLaser,
+                  ObjectType.PlatformMissile, ObjectType.SecondaryLifter, ObjectType.Spider};
 
   // powerups
   public static final ObjectType[] POWERUPS_TO_POPULATE = {ObjectType.MegaMissilePowerup,

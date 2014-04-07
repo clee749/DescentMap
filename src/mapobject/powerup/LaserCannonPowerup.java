@@ -1,7 +1,7 @@
 package mapobject.powerup;
 
-import mapobject.unit.Pyro;
 import pyro.PyroPrimaryCannon;
+import mapobject.unit.Pyro;
 import structure.Room;
 
 import common.ObjectType;

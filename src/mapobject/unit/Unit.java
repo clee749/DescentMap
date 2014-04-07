@@ -37,6 +37,7 @@ public abstract class Unit extends MovableObject {
     radii.put(ObjectType.BabySpider, 0.12);
     radii.put(ObjectType.Bomber, 0.15);
     radii.put(ObjectType.Class1Drone, 0.15);
+    radii.put(ObjectType.Gopher, 0.15);
     radii.put(ObjectType.Class2Drone, 0.2);
     radii.put(ObjectType.SecondaryLifter, 0.2);
     radii.put(ObjectType.Pyro, 0.25);
@@ -60,6 +61,7 @@ public abstract class Unit extends MovableObject {
     offsets.put(ObjectType.BabySpider, 0.0);
     offsets.put(ObjectType.Bomber, 0.0);
     offsets.put(ObjectType.Class2Drone, 0.0);
+    offsets.put(ObjectType.Gopher, 0.0);
     offsets.put(ObjectType.PlatformLaser, 0.0);
     offsets.put(ObjectType.PlatformMissile, 0.0);
     offsets.put(ObjectType.Spider, 0.13);
@@ -91,6 +93,7 @@ public abstract class Unit extends MovableObject {
     shields.put(ObjectType.MediumHulk, 32);
     shields.put(ObjectType.MediumHulkCloaked, 32);
     shields.put(ObjectType.Spider, 35);
+    shields.put(ObjectType.Gopher, 44);
     shields.put(ObjectType.HeavyDriller, 47);
     shields.put(ObjectType.PlatformMissile, 47);
     shields.put(ObjectType.HeavyHulk, 98);

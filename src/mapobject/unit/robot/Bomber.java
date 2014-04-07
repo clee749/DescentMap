@@ -23,10 +23,11 @@ public class Bomber extends Robot {
 
   @Override
   public MapObject releasePowerups() {
-    if (Math.random() < 0.1) {
+    double rand = Math.random();
+    if (rand < 0.1) {
       return PowerupFactory.newReleasedPowerup(ObjectType.Energy, room, x_loc, y_loc);
     }
-    if (Math.random() < 0.2) {
+    if (rand < 0.2) {
       return PowerupFactory.newReleasedPowerup(ObjectType.ProximityPack, room, x_loc, y_loc);
     }
     return null;

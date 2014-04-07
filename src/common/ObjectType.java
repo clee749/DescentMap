@@ -21,6 +21,7 @@ public enum ObjectType {
   Class1Drone,
   Class2Drone,
   DefenseRobot,
+  Gopher,
   HeavyDriller,
   HeavyHulk,
   LightHulk,
@@ -75,8 +76,8 @@ public enum ObjectType {
   public static final ObjectType[] SCENERIES = {Barrier, EnergyCenter, Entrance, Exit, RobotGenerator};
 
   public static final ObjectType[] ROBOTS = {AdvancedLifter, BabySpider, Bomber, Class1Drone, Class2Drone,
-          DefenseRobot, HeavyDriller, HeavyHulk, LightHulk, MediumHulk, MediumHulkCloaked, MediumLifter,
-          MiniBoss, PlatformLaser, PlatformMissile, SecondaryLifter, Spider};
+          DefenseRobot, Gopher, HeavyDriller, HeavyHulk, LightHulk, MediumHulk, MediumHulkCloaked,
+          MediumLifter, MiniBoss, PlatformLaser, PlatformMissile, SecondaryLifter, Spider};
 
   public static final ObjectType[] SHOTS = {ConcussionMissile, FireballShot, FusionShot, HomingMissile,
           LaserShot, MegaMissile, PlasmaShot, SmartMissile, SmartPlasma, SpreadfireShot};
