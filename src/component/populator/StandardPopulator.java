@@ -1,4 +1,4 @@
-package component;
+package component.populator;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
@@ -20,7 +20,7 @@ import common.DescentMapException;
 import common.ObjectType;
 import common.RoomSide;
 
-public class MapPopulator {
+public class StandardPopulator extends MapPopulator {
   // sceneries
   public static final int NUM_ROOMS_PER_ENERGY_CENTER = 20;
   public static final int MAX_ROOM_AREA_FOR_ENERGY_CENTER = 10;
@@ -46,23 +46,24 @@ public class MapPopulator {
   public static final ObjectType[] POWERUPS_TO_POPULATE = {ObjectType.MegaMissilePowerup,
           ObjectType.SmartMissilePowerup, ObjectType.SpreadfireCannonPowerup};
 
-  protected MapPopulator() {
-
+  public StandardPopulator(DescentMap map) {
+    super(map);
   }
 
-  public static void populateMap(DescentMap map) {
+  @Override
+  public void populateMap() {
     HashSet<Room> special_rooms = new HashSet<Room>();
     special_rooms.add(map.getExitRoom());
     special_rooms.add(map.getExteriorRoom());
-    Entrance entrance = placeEntrance(map);
-    placeExit(map);
-    placeEnergyCenters(map, special_rooms);
-    placeRobotGenerators(map, special_rooms);
-    placeRobots(map, special_rooms, entrance);
-    placePowerups(map, special_rooms);
+    Entrance entrance = placeEntrance();
+    placeExit();
+    placeEnergyCenters(special_rooms);
+    placeRobotGenerators(special_rooms);
+    placeRobots(special_rooms, entrance);
+    placePowerups(special_rooms);
   }
 
-  public static Entrance placeEntrance(DescentMap map) {
+  public Entrance placeEntrance() {
     Room entrance_room = map.getEntranceRoom();
     RoomSide entrance_side = map.getEntranceSide();
     Point nw_corner = entrance_room.getNWCorner();
@@ -96,7 +97,7 @@ public class MapPopulator {
     return entrance;
   }
 
-  public static Exit placeExit(DescentMap map) {
+  public Exit placeExit() {
     Room exit_room = map.getExitRoom();
     Point nw_corner = exit_room.getNWCorner();
     Point se_corner = exit_room.getSECorner();
@@ -127,12 +128,12 @@ public class MapPopulator {
     return exit;
   }
 
-  public static void placeEnergyCenters(DescentMap map, HashSet<Room> restricted_rooms) {
+  public void placeEnergyCenters(HashSet<Room> restricted_rooms) {
     ArrayList<Room> all_rooms = map.getAllRooms();
     int num_energy_centers = Math.max(all_rooms.size() / NUM_ROOMS_PER_ENERGY_CENTER, 1);
     ArrayList<Room> possible_rooms = new ArrayList<Room>();
     for (Room room : all_rooms) {
-      if (restricted_rooms.contains(room) || !room.getSceneries().isEmpty()) {
+      if (!room.getSceneries().isEmpty() || restricted_rooms.contains(room)) {
         continue;
       }
       int height = room.getHeight();
@@ -142,49 +143,56 @@ public class MapPopulator {
       }
     }
     for (int count = 0; count < num_energy_centers && !possible_rooms.isEmpty(); ++count) {
-      Room room = possible_rooms.remove((int) (Math.random() * possible_rooms.size()));
-      Point nw_corner = room.getNWCorner();
-      Point se_corner = room.getSECorner();
-      double center_x = (int) (Math.random() * (se_corner.x - nw_corner.x)) + nw_corner.x + 0.5;
-      double center_y = (int) (Math.random() * (se_corner.y - nw_corner.y)) + nw_corner.y + 0.5;
-      for (int dx = -ENERGY_CENTER_PLACEMENT_RADIUS; dx <= ENERGY_CENTER_PLACEMENT_RADIUS; ++dx) {
-        for (int dy = -ENERGY_CENTER_PLACEMENT_RADIUS; dy <= ENERGY_CENTER_PLACEMENT_RADIUS; ++dy) {
-          double x_loc = center_x + dx;
-          double y_loc = center_y + dy;
-          if (nw_corner.x < x_loc && x_loc < se_corner.x && nw_corner.y < y_loc && y_loc < se_corner.y) {
-            room.addChild(new EnergyCenter(room, x_loc, y_loc));
-          }
+      placeEnergyCenters(possible_rooms.remove((int) (Math.random() * possible_rooms.size())));
+    }
+  }
+
+  public void placeEnergyCenters(Room room) {
+    Point nw_corner = room.getNWCorner();
+    Point se_corner = room.getSECorner();
+    double center_x = (int) (Math.random() * (se_corner.x - nw_corner.x)) + nw_corner.x + 0.5;
+    double center_y = (int) (Math.random() * (se_corner.y - nw_corner.y)) + nw_corner.y + 0.5;
+    for (int dx = -ENERGY_CENTER_PLACEMENT_RADIUS; dx <= ENERGY_CENTER_PLACEMENT_RADIUS; ++dx) {
+      for (int dy = -ENERGY_CENTER_PLACEMENT_RADIUS; dy <= ENERGY_CENTER_PLACEMENT_RADIUS; ++dy) {
+        double x_loc = center_x + dx;
+        double y_loc = center_y + dy;
+        if (nw_corner.x < x_loc && x_loc < se_corner.x && nw_corner.y < y_loc && y_loc < se_corner.y) {
+          room.addChild(new EnergyCenter(room, x_loc, y_loc));
         }
       }
     }
   }
 
-  public static void placeRobotGenerators(DescentMap map, HashSet<Room> restricted_rooms) {
+  public void placeRobotGenerators(HashSet<Room> restricted_rooms) {
     ArrayList<Room> all_rooms = map.getAllRooms();
     int num_robot_generators = Math.max(all_rooms.size() / NUM_ROOMS_PER_ROBOT_GENERATOR, 1);
     ArrayList<Room> possible_rooms = new ArrayList<Room>();
     for (Room room : all_rooms) {
-      if (restricted_rooms.contains(room) || !room.getSceneries().isEmpty()) {
-        continue;
-      }
-      if (room.getHeight() >= MIN_ROOM_DIMENSION_FOR_ROBOT_GENERATOR &&
-              room.getWidth() >= MIN_ROOM_DIMENSION_FOR_ROBOT_GENERATOR) {
+      if (canPlaceRobotGenerator(room, restricted_rooms)) {
         possible_rooms.add(room);
       }
     }
     for (int count = 0; count < num_robot_generators && !possible_rooms.isEmpty(); ++count) {
-      Room room = possible_rooms.remove((int) (Math.random() * possible_rooms.size()));
-      Point nw_corner = room.getNWCorner();
-      Point se_corner = room.getSECorner();
-      double x_loc = (int) (Math.random() * (se_corner.x - nw_corner.x - 2)) + nw_corner.x + 1.5;
-      double y_loc = (int) (Math.random() * (se_corner.y - nw_corner.y - 2)) + nw_corner.y + 1.5;
-      room.addChild(new RobotGenerator(room, x_loc, y_loc,
-              ROBOT_GENERATOR_TYPES[(int) (Math.random() * ROBOT_GENERATOR_TYPES.length)],
-              RoomSide.values()[(int) (Math.random() * RoomSide.values().length)]));
+      placeRobotGenerator(possible_rooms.remove((int) (Math.random() * possible_rooms.size())));
     }
   }
 
-  public static void placeRobots(DescentMap map, HashSet<Room> restricted_rooms, Entrance entrance) {
+  public boolean canPlaceRobotGenerator(Room room, HashSet<Room> restricted_rooms) {
+    return room.getSceneries().isEmpty() && !restricted_rooms.contains(room) &&
+            room.getHeight() >= MIN_ROOM_DIMENSION_FOR_ROBOT_GENERATOR &&
+            room.getWidth() >= MIN_ROOM_DIMENSION_FOR_ROBOT_GENERATOR;
+  }
+
+  public void placeRobotGenerator(Room room) {
+    Point nw_corner = room.getNWCorner();
+    double x_loc = (int) (Math.random() * (room.getWidth() - 2)) + nw_corner.x + 1.5;
+    double y_loc = (int) (Math.random() * (room.getHeight() - 2)) + nw_corner.y + 1.5;
+    room.addChild(new RobotGenerator(room, x_loc, y_loc,
+            ROBOT_GENERATOR_TYPES[(int) (Math.random() * ROBOT_GENERATOR_TYPES.length)],
+            RoomSide.values()[(int) (Math.random() * RoomSide.values().length)]));
+  }
+
+  public void placeRobots(HashSet<Room> restricted_rooms, Entrance entrance) {
     Room entrance_room = map.getEntranceRoom();
     for (Room room : map.getAllRooms()) {
       if (restricted_rooms.contains(room)) {
@@ -194,7 +202,7 @@ public class MapPopulator {
     }
   }
 
-  public static void placeRobotsInRoom(Room room, Entrance entrance) {
+  public void placeRobotsInRoom(Room room, Entrance entrance) {
     int room_area = room.getHeight() * room.getWidth();
     for (ObjectType type : ROBOTS_TO_POPULATE) {
       if (Math.random() < ROBOT_PLACEMENT_PROB &&
@@ -204,7 +212,7 @@ public class MapPopulator {
     }
   }
 
-  public static void placeRobotInRoom(Room room, ObjectType type, Entrance entrance) {
+  public void placeRobotInRoom(Room room, ObjectType type, Entrance entrance) {
     Point2D.Double location =
             MapUtils.randomInternalPoint(room.getNWCorner(), room.getSECorner(), Unit.getRadius(type));
     if (entrance == null || Math.abs(location.x - entrance.getX()) > MIN_ROBOT_DISTANCE_FROM_ENTRANCE ||
@@ -213,13 +221,12 @@ public class MapPopulator {
     }
   }
 
-  public static void placePowerups(DescentMap map, HashSet<Room> restricted_rooms) {
+  public void placePowerups(HashSet<Room> restricted_rooms) {
     ArrayList<Room> possible_rooms = new ArrayList<Room>();
     for (Room room : map.getAllRooms()) {
-      if (restricted_rooms.contains(room) || !room.getSceneries().isEmpty()) {
-        continue;
+      if (!restricted_rooms.contains(room)) {
+        possible_rooms.add(room);
       }
-      possible_rooms.add(room);
     }
     for (ObjectType type : POWERUPS_TO_POPULATE) {
       Room room = possible_rooms.get((int) (Math.random() * possible_rooms.size()));

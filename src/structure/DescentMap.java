@@ -7,7 +7,7 @@ import mapobject.scenery.Entrance;
 import mapobject.unit.Pyro;
 
 import common.RoomSide;
-import component.MapBuilder;
+import component.builder.MapBuilder;
 
 public class DescentMap {
   private final MapBuilder builder;
@@ -18,8 +18,8 @@ public class DescentMap {
   private MapObject center_object;
   private Entrance entrance;
 
-  public DescentMap(int max_room_size) {
-    builder = new MapBuilder(max_room_size);
+  public DescentMap(MapBuilder builder) {
+    this.builder = builder;
     all_rooms = builder.getAllRooms();
   }
 
@@ -67,10 +67,6 @@ public class DescentMap {
     return exterior_room;
   }
 
-  public void addRoom() {
-    builder.addRoom();
-  }
-
   public MapObject getCenterObject() {
     return center_object;
   }
@@ -81,6 +77,14 @@ public class DescentMap {
 
   public void setEntrance(Entrance entrance) {
     this.entrance = entrance;
+  }
+
+  public boolean isReadyToFinishBuilding() {
+    return builder.isReadyToFinish();
+  }
+
+  public void addRoom() {
+    builder.addRoom();
   }
 
   public void finishBuildingMap() {

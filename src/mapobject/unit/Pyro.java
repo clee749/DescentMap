@@ -232,8 +232,6 @@ public class Pyro extends Unit {
     secondary_reload_time = SECONDARY_RELOAD_TIMES[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()];
     has_quad_lasers = false;
     death_spin_started = false;
-    secondary_ammo[PyroSecondaryCannon.SMART_MISSILE.ordinal()] = 1;
-    secondary_ammo[PyroSecondaryCannon.MEGA_MISSILE.ordinal()] = 1;
   }
 
   public void spawn(Room room, double x_loc, double y_loc, double direction) {
@@ -265,10 +263,6 @@ public class Pyro extends Unit {
               Math.max(secondary_ammo[PyroSecondaryCannon.CONCUSSION_MISSILE.ordinal()],
                       MIN_STARTING_CONCUSSION_MISSILES);
       ((PyroPilot) pilot).newLevel();
-      secondary_ammo[PyroSecondaryCannon.SMART_MISSILE.ordinal()] =
-              Math.max(secondary_ammo[PyroSecondaryCannon.SMART_MISSILE.ordinal()], 1);
-      secondary_ammo[PyroSecondaryCannon.MEGA_MISSILE.ordinal()] =
-              Math.max(secondary_ammo[PyroSecondaryCannon.MEGA_MISSILE.ordinal()], 1);
     }
     pilot.updateCurrentRoom(room);
     ((PyroPilot) pilot).startPilot();
@@ -376,7 +370,7 @@ public class Pyro extends Unit {
             MapUtils.coordsToPixel(((UnitPilot) pilot).getTargetX(), ((UnitPilot) pilot).getTargetY(),
                     ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     g.setColor(Color.yellow);
-    g.drawRect(target_pixel.x - 1, target_pixel.y - 1, 2, 2);
+    g.drawRect(target_pixel.x, target_pixel.y, 0, 0);
   }
 
   public void paintShield(Graphics2D g, Point ref_cell, Point ref_cell_nw_pixel, int pixels_per_cell) {

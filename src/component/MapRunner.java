@@ -10,6 +10,12 @@ import mapobject.unit.Pyro;
 import structure.DescentMap;
 
 import common.DescentMapException;
+import component.builder.MapBuilder;
+import component.builder.MazeBuilder;
+import component.builder.StandardBuilder;
+import component.populator.MapPopulator;
+import component.populator.MazePopulator;
+import component.populator.StandardPopulator;
 
 enum RunnerState {
   BUILD_MAP,
@@ -21,11 +27,46 @@ enum RunnerState {
 }
 
 
-public class MapRunner {
+enum MapType {
+  STANDARD,
+  MAZE;
+  // GAUNTLET,
+  // BOSS_CHAMBERS,
+  // LEVEL_26;
+
   public static final int MAX_ROOM_SIZE = 10;
-  public static final int MAX_NUM_ROOMS = 10;
+  public static final int STANDARD_NUM_ROOMS = 10;
+  public static final int MAZE_TOTAL_ROOM_AREA = 100 * MazeBuilder.HALLWAY_WIDTH;
+
+  public static MapBuilder getBuilder(MapType type) {
+    switch (type) {
+      case STANDARD:
+        return new StandardBuilder(MAX_ROOM_SIZE, STANDARD_NUM_ROOMS);
+      case MAZE:
+        return new MazeBuilder(MAX_ROOM_SIZE, MAZE_TOTAL_ROOM_AREA);
+      default:
+        throw new DescentMapException("Unexpected MapType: " + type);
+    }
+  }
+
+  public static MapPopulator getPopulator(MapType type, DescentMap map) {
+    switch (type) {
+      case STANDARD:
+        return new StandardPopulator(map);
+      case MAZE:
+        return new MazePopulator(map);
+      default:
+        throw new DescentMapException("Unexpected MapType: " + type);
+    }
+  }
+}
+
+
+public class MapRunner {
   public static final int NUM_LEVELS = 5;
   public static final int NUM_PYROS = 3;
+  public static final double STANDARD_MAP_PROB = 0.5;
+  public static final double EACH_NON_STANDARD_MAP_PROB = 1.0 / (MapType.values().length - 1);
   public static final long BUILD_SLEEP = 100;
   public static final long PAUSE_AFTER_BUILD_SLEEP = 1000;
   public static final long PAUSE_BEFORE_PLAY_SLEEP = 1000;
@@ -33,20 +74,20 @@ public class MapRunner {
   public static final long PLAY_MAX_SLEEP = 11 * PLAY_MIN_SLEEP / 10;
   public static final long PAUSE_AFTER_PLAY_SLEEP = 1000;
 
-  private final MapDisplayer displayer;
   private final LinkedList<Pyro> pyros;
+  private final MapDisplayer displayer;
   private final MapEngine engine;
+  private MapType map_type;
   private DescentMap map;
   private RunnerState state;
   private long target_sleep_ms;
   private long last_update_time;
-  private int num_build_steps;
   private boolean is_paused;
 
   public MapRunner() {
+    pyros = new LinkedList<Pyro>();
     displayer = new MapDisplayer(this);
     engine = new MapEngine();
-    pyros = new LinkedList<Pyro>();
   }
 
   public MapDisplayer getDisplayer() {
@@ -55,6 +96,10 @@ public class MapRunner {
 
   public MapEngine getEngine() {
     return engine;
+  }
+
+  public MapType getMapType() {
+    return map_type;
   }
 
   public DescentMap getMap() {
@@ -70,12 +115,24 @@ public class MapRunner {
   }
 
   public void newLevel() {
-    map = new DescentMap(MAX_ROOM_SIZE);
+    if (Math.random() < STANDARD_MAP_PROB) {
+      map_type = MapType.STANDARD;
+    }
+    else {
+      double rand = Math.random() - EACH_NON_STANDARD_MAP_PROB;
+      MapType[] types = MapType.values();
+      for (int index = 1; index < types.length; ++index) {
+        if (rand < 0.0) {
+          map_type = types[index];
+          break;
+        }
+      }
+    }
+    map = new DescentMap(MapType.getBuilder(map_type));
     displayer.newMap();
     state = RunnerState.BUILD_MAP;
     target_sleep_ms = BUILD_SLEEP;
     last_update_time = 0L;
-    num_build_steps = 0;
   }
 
   public void sleepAfterStep() throws InterruptedException {
@@ -114,13 +171,12 @@ public class MapRunner {
   }
 
   public void doBuildStep() {
-    if (num_build_steps < MAX_NUM_ROOMS) {
+    if (!map.isReadyToFinishBuilding()) {
       map.addRoom();
-      ++num_build_steps;
     }
     else {
       map.finishBuildingMap();
-      MapPopulator.populateMap(map);
+      MapType.getPopulator(map_type, map).populateMap();
       engine.newMap(map);
       int pyro_count = 0;
       while (pyro_count < pyros.size()) {
@@ -180,8 +236,8 @@ public class MapRunner {
     frame.addKeyListener(panel);
 
     for (int level = 1; level <= NUM_LEVELS; ++level) {
-      System.out.print(String.format("Mine MN%04d: ", panel.playMusic()));
       runner.newLevel();
+      System.out.print(String.format("Mine %s%04d: ", runner.getMapType(), panel.playMusic()));
       do {
         if (runner.doNextStep()) {
           panel.repaint();

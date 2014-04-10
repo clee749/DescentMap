@@ -154,7 +154,7 @@ public abstract class Robot extends Unit {
             MapUtils.coordsToPixel(((UnitPilot) pilot).getTargetX(), ((UnitPilot) pilot).getTargetY(),
                     ref_cell, ref_cell_nw_pixel, pixels_per_cell);
     g.setColor(Color.orange);
-    g.drawRect(target_pixel.x - 1, target_pixel.y - 1, 2, 2);
+    g.drawRect(target_pixel.x, target_pixel.y, 0, 0);
   }
 
   @Override
