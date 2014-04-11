@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import structure.MineExteriorRoom;
 import structure.Room;
+import structure.RoomConnection;
 import util.MapUtils;
 
 import common.RoomSide;
@@ -103,6 +104,16 @@ public abstract class MapBuilder {
       }
     }
     return true;
+  }
+
+  public void finalizeRoom(Room base_room, RoomSide base_to_new_direction,
+          RoomConnection base_to_new_connection) {
+    Room new_room = base_to_new_connection.neighbor;
+    base_room.addNeighbor(base_to_new_direction, base_to_new_connection);
+    all_rooms.add(new_room);
+    RoomSide opposite_direction = RoomSide.opposite(base_to_new_direction);
+    new_room.addNeighbor(opposite_direction, new RoomConnection(new_room, base_room, opposite_direction));
+    updateMapRanges(new_room);
   }
 
   public void updateMapRanges(Room new_room) {

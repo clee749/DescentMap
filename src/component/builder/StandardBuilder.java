@@ -25,12 +25,6 @@ public class StandardBuilder extends MapBuilder {
     return all_rooms.size() >= target_value;
   }
 
-  /**
-   * Choose a random room to build off from the list of available rooms. Choose a random direction,
-   * size, and connection location for the new room. If the room fits, use it. Else, increment the
-   * direction enum, select a new random connection location, and try again with another random
-   * room. If all available directions fail, then take the room off the list of available rooms.
-   */
   @Override
   public boolean addRoom() {
     if (all_rooms.isEmpty()) {
@@ -41,6 +35,20 @@ public class StandardBuilder extends MapBuilder {
       available_rooms.addAll(all_rooms);
       return false;
     }
+    return addRandomRoom();
+  }
+
+  public void addFirstRoom() {
+    available_rooms.add(addFirstRoom(randomRoomDim(), randomRoomDim()));
+  }
+
+  /**
+   * Choose a random room to build off from the list of available rooms. Choose a random direction,
+   * size, and connection location for the new room. If the room fits, use it. Else, increment the
+   * direction enum, select a new random connection location, and try again with another random
+   * room. If all available directions fail, then take the room off the list of available rooms.
+   */
+  public boolean addRandomRoom() {
     int room_index = (int) (Math.random() * available_rooms.size());
     Room base_room = available_rooms.get(room_index);
     ArrayList<RoomSide> possible_directions = base_room.findUnconnectedSides();
@@ -61,18 +69,8 @@ public class StandardBuilder extends MapBuilder {
       available_rooms.remove(room_index);
       return false;
     }
-    Room new_room = connection.neighbor;
-    base_room.addNeighbor(direction, connection);
-    all_rooms.add(new_room);
-    available_rooms.add(new_room);
-    RoomSide opposite_direction = RoomSide.opposite(direction);
-    new_room.addNeighbor(opposite_direction, new RoomConnection(new_room, base_room, opposite_direction));
-    updateMapRanges(new_room);
+    finalizeRoom(base_room, direction, connection);
     return true;
-  }
-
-  public void addFirstRoom() {
-    available_rooms.add(addFirstRoom(randomRoomDim(), randomRoomDim()));
   }
 
   public int randomRoomDim() {
@@ -119,6 +117,13 @@ public class StandardBuilder extends MapBuilder {
 
   public int chooseNewCornerOffset(int base_dim, int new_dim) {
     return (int) (Math.random() * (base_dim + new_dim - 1)) - new_dim + 1;
+  }
+
+  @Override
+  public void finalizeRoom(Room base_room, RoomSide base_to_new_direction,
+          RoomConnection base_to_new_connection) {
+    super.finalizeRoom(base_room, base_to_new_direction, base_to_new_connection);
+    available_rooms.add(base_to_new_connection.neighbor);
   }
 
   @Override
@@ -171,9 +176,7 @@ public class StandardBuilder extends MapBuilder {
     else {
       exterior_nw_corner = exit_room.getSWCorner();
     }
-    exterior_room =
-            new MineExteriorRoom(exterior_nw_corner, new Point(exterior_nw_corner.x + 1,
-                    exterior_nw_corner.y + 1));
+    exterior_room = new MineExteriorRoom(exterior_nw_corner);
     exit_room.addNeighbor(direction, new RoomConnection(exit_room, exterior_room, direction));
     exterior_room.addNeighbor(opposite_direction, new RoomConnection(exterior_room, exit_room,
             opposite_direction));

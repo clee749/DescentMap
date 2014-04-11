@@ -10,9 +10,12 @@ import mapobject.unit.Pyro;
 import structure.DescentMap;
 
 import common.DescentMapException;
+import common.ObjectType;
+import component.builder.GauntletBuilder;
 import component.builder.MapBuilder;
 import component.builder.MazeBuilder;
 import component.builder.StandardBuilder;
+import component.populator.GauntletPopulator;
 import component.populator.MapPopulator;
 import component.populator.MazePopulator;
 import component.populator.StandardPopulator;
@@ -29,21 +32,24 @@ enum RunnerState {
 
 enum MapType {
   STANDARD,
-  MAZE;
-  // GAUNTLET,
-  // BOSS_CHAMBERS,
-  // LEVEL_26;
+  MAZE,
+  GAUNTLET;
+  // BOSS_CHAMBERS;
 
   public static final int MAX_ROOM_SIZE = 10;
   public static final int STANDARD_NUM_ROOMS = 10;
-  public static final int MAZE_TOTAL_ROOM_AREA = 100 * MazeBuilder.HALLWAY_WIDTH;
+  public static final int MAZE_MIN_TOTAL_ROOM_AREA = 100 * MazeBuilder.HALLWAY_WIDTH;
+  public static final int GAUNTLET_NUM_GENERATOR_ROOMS = (int) Math.ceil(ObjectType.ROBOTS.length /
+          (MAX_ROOM_SIZE / 3.0 * 2));
 
   public static MapBuilder getBuilder(MapType type) {
     switch (type) {
       case STANDARD:
         return new StandardBuilder(MAX_ROOM_SIZE, STANDARD_NUM_ROOMS);
       case MAZE:
-        return new MazeBuilder(MAX_ROOM_SIZE, MAZE_TOTAL_ROOM_AREA);
+        return new MazeBuilder(MAX_ROOM_SIZE, MAZE_MIN_TOTAL_ROOM_AREA);
+      case GAUNTLET:
+        return new GauntletBuilder(MAX_ROOM_SIZE, GAUNTLET_NUM_GENERATOR_ROOMS);
       default:
         throw new DescentMapException("Unexpected MapType: " + type);
     }
@@ -55,6 +61,8 @@ enum MapType {
         return new StandardPopulator(map);
       case MAZE:
         return new MazePopulator(map);
+      case GAUNTLET:
+        return new GauntletPopulator(map);
       default:
         throw new DescentMapException("Unexpected MapType: " + type);
     }
@@ -119,13 +127,18 @@ public class MapRunner {
       map_type = MapType.STANDARD;
     }
     else {
+      map_type = null;
       double rand = Math.random() - EACH_NON_STANDARD_MAP_PROB;
       MapType[] types = MapType.values();
-      for (int index = 1; index < types.length; ++index) {
+      for (int index = 1; index < types.length; ++index, rand -= EACH_NON_STANDARD_MAP_PROB) {
         if (rand < 0.0) {
           map_type = types[index];
           break;
         }
+      }
+      // for double precision errors
+      if (map_type == null) {
+        map_type = types[types.length - 1];
       }
     }
     map = new DescentMap(MapType.getBuilder(map_type));

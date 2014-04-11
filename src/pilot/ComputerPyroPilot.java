@@ -8,9 +8,6 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Stack;
 
-import pyro.PyroPrimaryCannon;
-import pyro.PyroSecondaryCannon;
-
 import mapobject.MapObject;
 import mapobject.ProximityBomb;
 import mapobject.powerup.ConcussionPack;
@@ -27,6 +24,8 @@ import mapobject.shot.SmartMissile;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
 import mapobject.unit.robot.Robot;
+import pyro.PyroPrimaryCannon;
+import pyro.PyroSecondaryCannon;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
@@ -97,6 +96,7 @@ public class ComputerPyroPilot extends PyroPilot {
           MegaMissile.SPLASH_DAMAGE_RADIUS * 2;
 
   private final HashSet<Room> visited;
+  private final LinkedList<Scenery> target_sceneries;
   private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
   private PyroPilotState state;
   private MapObject target_object;
@@ -106,10 +106,10 @@ public class ComputerPyroPilot extends PyroPilot {
   private TurnDirection previous_turn_to_target;
   private double respawn_delay_left;
   private double inactive_time_left;
-  private Scenery target_scenery;
 
   public ComputerPyroPilot() {
     visited = new HashSet<Room>();
+    target_sceneries = new LinkedList<Scenery>();
     current_path = new LinkedList<Entry<RoomSide, RoomConnection>>();
     state = PyroPilotState.INACTIVE;
   }
@@ -153,11 +153,10 @@ public class ComputerPyroPilot extends PyroPilot {
   public void updateCurrentRoom(Room room) {
     super.updateCurrentRoom(room);
     visitRoom(room);
-    target_scenery = null;
+    target_sceneries.clear();
     for (Scenery scenery : room.getSceneries()) {
       if (scenery.getType().equals(ObjectType.RobotGenerator)) {
-        target_scenery = scenery;
-        break;
+        target_sceneries.add(scenery);
       }
     }
     if (bound_pyro.getShields() >= 0) {
@@ -600,9 +599,16 @@ public class ComputerPyroPilot extends PyroPilot {
   }
 
   public boolean shouldDropBomb(LineOfFireAnalysis lofa) {
-    return target_scenery != null && !lofa.is_another_pyro_in_room &&
-            Math.abs(target_scenery.getX() - bound_object.getX()) < BOMB_DROP_RADIUS &&
-            Math.abs(target_scenery.getY() - bound_object.getY()) < BOMB_DROP_RADIUS;
+    if (lofa.is_another_pyro_in_room) {
+      return false;
+    }
+    for (Scenery scenery : target_sceneries) {
+      if (Math.abs(scenery.getX() - bound_object.getX()) < BOMB_DROP_RADIUS &&
+              Math.abs(scenery.getY() - bound_object.getY()) < BOMB_DROP_RADIUS) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public MapObject findNextTargetObject() {

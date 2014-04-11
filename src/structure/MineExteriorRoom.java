@@ -5,10 +5,9 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.LinkedList;
 
-import resource.ImageHandler;
-
 import mapobject.MapObject;
 import mapobject.unit.Pyro;
+import resource.ImageHandler;
 
 import component.MapEngine;
 
@@ -18,8 +17,8 @@ import component.MapEngine;
 public class MineExteriorRoom extends Room {
   private static final Color WALL_COLOR = Color.cyan;
 
-  public MineExteriorRoom(Point nw_corner, Point se_corner) {
-    super(nw_corner, se_corner);
+  public MineExteriorRoom(Point nw_corner) {
+    super(nw_corner, 1, 1);
   }
 
   @Override

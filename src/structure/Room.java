@@ -59,6 +59,10 @@ public class Room {
     misc_objects = new HashSet<MapObject>();
   }
 
+  public Room(Point nw_corner, int width, int height) {
+    this(nw_corner, new Point(nw_corner.x + width, nw_corner.y + height));
+  }
+
   public Point getNWCorner() {
     return nw_corner;
   }
