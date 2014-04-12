@@ -72,17 +72,19 @@ public class GauntletPopulator extends MapPopulator {
       room = all_rooms.get(room_index);
       Point nw_corner = room.getNWCorner();
       for (int count = 0; count < num_generators_per_side; ++count) {
-        room.addChild(new RobotGenerator(room, nw_corner.x + 1.5 + count * 3, nw_corner.y + 1.5,
-                ObjectType.ROBOTS[(int) (Math.random() * (ObjectType.ROBOTS.length - 1))], RoomSide.SOUTH));
-        room.addChild(new RobotGenerator(room, nw_corner.x + 1.5 + count * 3, nw_corner.y + south_row_dy,
-                ObjectType.ROBOTS[(int) (Math.random() * (ObjectType.ROBOTS.length - 1))], RoomSide.NORTH));
-        room.addChild(PowerupFactory.newStationaryPowerup(
-                GENERATOR_ROOM_POWERUPS[(int) (Math.random() * GENERATOR_ROOM_POWERUPS.length)], room,
-                nw_corner.x + 1.5 + count * 3, nw_corner.y + 1.5));
-        room.addChild(PowerupFactory.newStationaryPowerup(
-                GENERATOR_ROOM_POWERUPS[(int) (Math.random() * GENERATOR_ROOM_POWERUPS.length)], room,
-                nw_corner.x + 1.5 + count * 3, nw_corner.y + south_row_dy));
+        populateGeneratorRoomLocation(room, nw_corner.x + 1.5 + count * 3, nw_corner.y + 1.5, RoomSide.SOUTH);
+        populateGeneratorRoomLocation(room, nw_corner.x + 1.5 + count * 3, nw_corner.y + south_row_dy,
+                RoomSide.NORTH);
       }
     }
+  }
+
+  public void populateGeneratorRoomLocation(Room room, double x_loc, double y_loc,
+          RoomSide generator_direction) {
+    room.addChild(new RobotGenerator(room, x_loc, y_loc,
+            ObjectType.ROBOTS[(int) (Math.random() * (ObjectType.ROBOTS.length - 1))], generator_direction));
+    room.addChild(PowerupFactory.newStationaryPowerup(
+            GENERATOR_ROOM_POWERUPS[(int) (Math.random() * GENERATOR_ROOM_POWERUPS.length)], room, x_loc,
+            y_loc));
   }
 }

@@ -14,12 +14,10 @@ public class GauntletBuilder extends MapBuilder {
   public static final int GENERATOR_ROOM_WIDTH = 5;
 
   private final int min_num_generator_rooms;
-  private final int generator_room_length;
 
   public GauntletBuilder(int max_room_size, int min_num_generator_rooms) {
-    super(max_room_size);
+    super(max_room_size / 3 * 3);
     this.min_num_generator_rooms = min_num_generator_rooms;
-    generator_room_length = max_room_size / 3 * 3;
   }
 
   @Override
@@ -50,21 +48,20 @@ public class GauntletBuilder extends MapBuilder {
     Point entrance_ne_corner = entrance_room.getNECorner();
     Room new_room =
             new Room(new Point(entrance_ne_corner.x, entrance_ne_corner.y -
-                    (GENERATOR_ROOM_WIDTH - ENTRANCE_ROOM_HEIGHT) / 2), generator_room_length,
-                    GENERATOR_ROOM_WIDTH);
+                    (GENERATOR_ROOM_WIDTH - ENTRANCE_ROOM_HEIGHT) / 2), max_room_size, GENERATOR_ROOM_WIDTH);
     RoomConnection connection = new RoomConnection(entrance_room, new_room, RoomSide.EAST);
     finalizeRoom(entrance_room, RoomSide.EAST, connection);
   }
 
   public void addGeneralGeneratorRoom() {
     Room base_room = all_rooms.get(all_rooms.size() - 1);
-    Room new_room = new Room(new Point(base_room.getNECorner()), generator_room_length, GENERATOR_ROOM_WIDTH);
+    Room new_room = new Room(new Point(base_room.getNECorner()), max_room_size, GENERATOR_ROOM_WIDTH);
     RoomConnection connection = new RoomConnection(base_room, new_room, RoomSide.EAST);
     finalizeRoom(base_room, RoomSide.EAST, connection);
   }
 
   @Override
-  public void placeEntranceAndExitRooms() {
+  public void finish() {
     entrance_edge_room = new EdgeRoom(RoomSide.WEST, westmost_room);
 
     Point pre_exit_ne_corner = eastmost_room.getNECorner();

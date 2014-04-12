@@ -127,7 +127,7 @@ public class StandardBuilder extends MapBuilder {
   }
 
   @Override
-  public void placeEntranceAndExitRooms() {
+  public void finish() {
     ArrayList<EdgeRoom> edge_rooms = new ArrayList<EdgeRoom>();
     edge_rooms.add(new EdgeRoom(RoomSide.EAST, eastmost_room));
     edge_rooms.add(new EdgeRoom(RoomSide.NORTH, northmost_room));

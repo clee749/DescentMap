@@ -88,7 +88,7 @@ public class DescentMap {
   }
 
   public void finishBuildingMap() {
-    builder.placeEntranceAndExitRooms();
+    builder.finish();
     entrance_room = builder.getEntranceRoom();
     exit_room = builder.getExitRoom();
     exterior_room = builder.getExteriorRoom();

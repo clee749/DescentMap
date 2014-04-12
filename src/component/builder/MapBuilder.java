@@ -137,5 +137,5 @@ public abstract class MapBuilder {
 
   public abstract boolean addRoom();
 
-  public abstract void placeEntranceAndExitRooms();
+  public abstract void finish();
 }
