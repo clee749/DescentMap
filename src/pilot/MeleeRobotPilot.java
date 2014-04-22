@@ -17,8 +17,7 @@ public class MeleeRobotPilot extends RobotPilot {
 
   @Override
   public void updateReactToCloakedPyroState(double s_elapsed) {
-    if (Math.abs(target_x - bound_object.getX()) < bound_object_radius &&
-            Math.abs(target_y - bound_object.getY()) < bound_object_radius) {
+    if (MapUtils.isPointInObject(bound_object, target_x, target_y)) {
       initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
       return;
     }

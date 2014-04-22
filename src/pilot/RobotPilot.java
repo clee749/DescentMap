@@ -232,8 +232,7 @@ public class RobotPilot extends UnitPilot {
             if (robot.equals(bound_object)) {
               continue;
             }
-            if (Math.abs(robot.getX() - bound_object.getX()) < bound_object_diameter &&
-                    Math.abs(robot.getY() - bound_object.getY()) < bound_object_diameter &&
+            if (MapUtils.objectsIntersect(bound_object, robot, bound_object_diameter) &&
                     Math.random() / s_elapsed < EVASIVE_START_EXPLORE_PROB) {
               initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
             }
@@ -247,8 +246,7 @@ public class RobotPilot extends UnitPilot {
         }
         break;
       case MOVE_TO_ROOM_EXIT:
-        if (Math.abs(target_x - bound_object.getX()) < bound_object_radius &&
-                Math.abs(target_y - bound_object.getY()) < bound_object_radius) {
+        if (MapUtils.isPointInObject(bound_object, target_x, target_y)) {
           initState(RobotPilotState.TURN_INTO_ROOM);
         }
         break;
@@ -267,9 +265,8 @@ public class RobotPilot extends UnitPilot {
         }
         break;
       case MOVE_TO_ROOM_INTERIOR:
-        if (Math.abs(target_x - bound_object.getX()) < bound_object_radius &&
-                Math.abs(target_y - bound_object.getY()) < bound_object_radius) {
-          if (Math.random() / s_elapsed < STOP_EXPLORE_PROB) {
+        if (MapUtils.isPointInObject(bound_object, target_x, target_y)) {
+          if (Math.random() < STOP_EXPLORE_PROB) {
             initState(RobotPilotState.INACTIVE);
           }
           else {

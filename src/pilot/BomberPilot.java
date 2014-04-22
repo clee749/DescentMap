@@ -36,9 +36,7 @@ public class BomberPilot extends RobotPilot {
 
   @Override
   public void updateReactToPyroState(double s_elapsed) {
-    if ((Math.abs(target_x - bound_object.getX()) < bound_object_radius && Math.abs(target_y -
-            bound_object.getY()) < bound_object_radius) ||
-            reaction_target_time_left < 0.0) {
+    if (MapUtils.isPointInObject(bound_object, target_x, target_y) || reaction_target_time_left < 0.0) {
       findRandomTargetLocation();
       return;
     }
@@ -48,9 +46,7 @@ public class BomberPilot extends RobotPilot {
 
   @Override
   public void updateReactToCloakedPyroState(double s_elapsed) {
-    if ((Math.abs(target_x - bound_object.getX()) < bound_object_radius && Math.abs(target_y -
-            bound_object.getY()) < bound_object_radius) ||
-            reaction_target_time_left < 0.0) {
+    if (MapUtils.isPointInObject(bound_object, target_x, target_y) || reaction_target_time_left < 0.0) {
       findRandomTargetLocation();
       return;
     }

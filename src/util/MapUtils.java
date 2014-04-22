@@ -93,23 +93,23 @@ public class MapUtils {
   /**
    * 
    * @param src_object any MovableObject with location and direction
-   * @param dst_object any MapObject
-   * @return smallest angle from src_object's direction to dst_object
-   */
-  public static double angleTo(MovableObject src_object, MapObject dst_object) {
-    return angleTo(src_object.getDirection(), dst_object.getX() - src_object.getX(), dst_object.getY() -
-            src_object.getY());
-  }
-
-  /**
-   * 
-   * @param src_object any MovableObject with location and direction
    * @param dst_x x-coordinate of destination point
    * @param dst_y y-coordinate of destination point
    * @return smallest angle from src_object's direction to the destination point
    */
   public static double angleTo(MovableObject src_object, double dst_x, double dst_y) {
     return angleTo(src_object.getDirection(), dst_x - src_object.getX(), dst_y - src_object.getY());
+  }
+
+  /**
+   * 
+   * @param src_object any MovableObject with location and direction
+   * @param dst_object any MapObject
+   * @return smallest angle from src_object's direction to dst_object
+   */
+  public static double angleTo(MovableObject src_object, MapObject dst_object) {
+    return angleTo(src_object.getDirection(), dst_object.getX() - src_object.getX(), dst_object.getY() -
+            src_object.getY());
   }
 
   /**
@@ -162,6 +162,40 @@ public class MapUtils {
           Point se_corner2) {
     return se_corner1.x >= nw_corner2.x && nw_corner1.x <= se_corner2.x && se_corner1.y >= nw_corner2.y &&
             nw_corner1.y <= se_corner2.y;
+  }
+
+  /**
+   * 
+   * @param obj any MapObject
+   * @param x_coord x-coordinate of any point
+   * @param y_coord y-coordinate of any point
+   * @return true if the point is inside obj's square radius, false otherwise
+   */
+  public static boolean isPointInObject(MapObject obj, double x_coord, double y_coord) {
+    double radius = obj.getRadius();
+    return Math.abs(x_coord - obj.getX()) < radius && Math.abs(y_coord - obj.getY()) < radius;
+  }
+
+  /**
+   * 
+   * @param obj1 any MapObject
+   * @param obj2 any MapObject
+   * @param combined_radius custom square radius within which the objects will intersect
+   * @return true if the two objects are considered intersecting, false otherwise
+   */
+  public static boolean objectsIntersect(MapObject obj1, MapObject obj2, double combined_radius) {
+    return Math.abs(obj2.getX() - obj1.getX()) < combined_radius &&
+            Math.abs(obj2.getY() - obj1.getY()) < combined_radius;
+  }
+
+  /**
+   * 
+   * @param obj1 any MapObject
+   * @param obj2 any MapObject
+   * @return true if the two objects are considered intersecting, false otherwise
+   */
+  public static boolean objectsIntersect(MapObject obj1, MapObject obj2) {
+    return objectsIntersect(obj1, obj2, obj1.getRadius() + obj2.getRadius());
   }
 
   /**

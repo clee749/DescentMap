@@ -11,6 +11,7 @@ import mapobject.unit.robot.Robot;
 import pilot.Pilot;
 import pilot.ShotPilot;
 import structure.Room;
+import util.MapUtils;
 
 import common.ObjectType;
 import component.MapEngine;
@@ -99,8 +100,7 @@ public abstract class Shot extends MovableObject {
   }
 
   public boolean hitsUnit(Unit unit) {
-    return !unit.equals(source) && Math.abs(x_loc - unit.getX()) < unit.getRadius() &&
-            Math.abs(y_loc - unit.getY()) < unit.getRadius();
+    return !unit.equals(source) && MapUtils.objectsIntersect(this, unit, unit.getRadius());
   }
 
   public MapObject handleUnitCollision(MapEngine engine, Unit hit_unit) {

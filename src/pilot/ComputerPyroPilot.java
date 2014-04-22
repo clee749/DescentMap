@@ -271,14 +271,12 @@ public class ComputerPyroPilot extends PyroPilot {
         }
         break;
       case MOVE_TO_ROOM_CONNECTION:
-        if (Math.abs(target_x - bound_object.getX()) < bound_object_radius &&
-                Math.abs(target_y - bound_object.getY()) < bound_object_radius) {
+        if (MapUtils.isPointInObject(bound_object, target_x, target_y)) {
           initState(PyroPilotState.MOVE_TO_NEIGHBOR_ROOM);
         }
         break;
       case MOVE_TO_NEIGHBOR_ROOM:
-        if (Math.abs(target_x - bound_object.getX()) < bound_object_radius &&
-                Math.abs(target_y - bound_object.getY()) < bound_object_radius) {
+        if (MapUtils.isPointInObject(bound_object, target_x, target_y)) {
           updateCurrentRoom(target_room_info.getValue().neighbor);
           initState(PyroPilotState.REACT_TO_OBJECT);
         }
@@ -433,8 +431,7 @@ public class ComputerPyroPilot extends PyroPilot {
       }
       lofa.is_another_pyro_in_room = true;
       double abs_angle_to_pyro = Math.abs(MapUtils.angleTo(bound_object, pyro));
-      if (Math.abs(pyro.getX() - bound_object.getX()) < bound_object_diameter &&
-              Math.abs(pyro.getY() - bound_object.getY()) < bound_object_diameter) {
+      if (MapUtils.objectsIntersect(bound_object, pyro, bound_object_diameter)) {
         lofa.is_inside_pyro = true;
         if (pyro.getShields() >= 0 && abs_angle_to_pyro < MapUtils.PI_OVER_TWO &&
                 Math.abs(pyro.getDirection() - bound_object.getDirection()) < SAME_DIRECTION_EPSILON) {
@@ -597,8 +594,7 @@ public class ComputerPyroPilot extends PyroPilot {
       return false;
     }
     for (Scenery scenery : target_sceneries) {
-      if (Math.abs(scenery.getX() - bound_object.getX()) < BOMB_DROP_RADIUS &&
-              Math.abs(scenery.getY() - bound_object.getY()) < BOMB_DROP_RADIUS) {
+      if (MapUtils.objectsIntersect(bound_object, scenery, BOMB_DROP_RADIUS)) {
         return true;
       }
     }

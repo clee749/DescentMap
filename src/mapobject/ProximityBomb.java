@@ -83,12 +83,12 @@ public class ProximityBomb extends MapObject {
     }
 
     for (Pyro pyro : room.getPyros()) {
-      if ((is_fully_armed || !pyro.equals(source)) && isObjectInRange(pyro)) {
+      if ((is_fully_armed || !pyro.equals(source)) && MapUtils.objectsIntersect(this, pyro)) {
         return handleDetonation(engine, pyro);
       }
     }
     for (Robot robot : room.getRobots()) {
-      if (!robot.equals(source) && isObjectInRange(robot)) {
+      if (!robot.equals(source) && MapUtils.objectsIntersect(this, robot)) {
         return handleDetonation(engine, robot);
       }
     }
@@ -97,19 +97,13 @@ public class ProximityBomb extends MapObject {
             Math.abs(source.getX() - x_loc) > source_combined_radius ||
                     Math.abs(source.getY() - y_loc) > source_combined_radius;
     for (Shot shot : room.getShots()) {
-      if ((is_outside_source || !shot.getSource().equals(source)) && isObjectInRange(shot)) {
+      if ((is_outside_source || !shot.getSource().equals(source)) && MapUtils.objectsIntersect(this, shot)) {
         shot.detonate();
         return handleDetonation(engine, null);
       }
     }
 
     return null;
-  }
-
-  public boolean isObjectInRange(MapObject object) {
-    double combined_radius = object.getRadius() + radius;
-    return Math.abs(object.getX() - x_loc) < combined_radius &&
-            Math.abs(object.getY() - y_loc) < combined_radius;
   }
 
   public MapObject handleDetonation(MapEngine engine, Unit hit_unit) {
