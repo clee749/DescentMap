@@ -30,12 +30,15 @@ enum RobotPilotState {
 
 public class RobotPilot extends UnitPilot {
   public static final double TARGET_DIRECTION_EPSILON = MapUtils.PI_OVER_TWO;
-  public static final double MIN_DISTANCE_TO_PYRO2 = 1.0;
-  public static final double MAX_DISTANCE_TO_PYRO2 = Math.pow(1.1, 2);
+  public static final double MIN_DISTANCE_TO_PYRO = 1.0;
+  public static final double PREFERRED_DISTANCE_TO_PYRO_RANGE = 0.1;
   public static final double START_EXPLORE_PROB = 0.1;
   public static final double STOP_EXPLORE_PROB = 0.1;
+  public static final double EVASIVE_START_EXPLORE_PROB = 0.5;
 
   protected double room_traversal_margin;
+  protected double min_distance_to_pyro2;
+  protected double max_distance_to_pyro2;
   protected RobotPilotState state;
   protected Room previous_exploration_room;
   protected double react_to_cloaked_pyro_time_left;
@@ -49,6 +52,9 @@ public class RobotPilot extends UnitPilot {
   public void bindToObject(MovableObject object) {
     super.bindToObject(object);
     room_traversal_margin = Math.min(bound_object_diameter, 0.5);
+    double min_distance_to_pyro = Math.max(bound_object_diameter, MIN_DISTANCE_TO_PYRO);
+    min_distance_to_pyro2 = Math.pow(min_distance_to_pyro, 2);
+    max_distance_to_pyro2 = Math.pow(min_distance_to_pyro + PREFERRED_DISTANCE_TO_PYRO_RANGE, 2);
   }
 
   @Override
@@ -131,7 +137,7 @@ public class RobotPilot extends UnitPilot {
                 target_direction)));
       case MOVE_TO_ROOM_EXIT:
         return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
-                bound_object.getDirection(), target_x - bound_object.getX(), target_y - bound_object.getY())));
+                bound_object, target_x, target_y)));
       case TURN_INTO_ROOM:
         return new PilotAction(strafe, angleToTurnDirection(MapUtils.angleTo(bound_object.getDirection(),
                 target_direction)));
@@ -142,7 +148,7 @@ public class RobotPilot extends UnitPilot {
                 target_direction)));
       case MOVE_TO_ROOM_INTERIOR:
         return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
-                bound_object.getDirection(), target_x - bound_object.getX(), target_y - bound_object.getY())));
+                bound_object, target_x, target_y)));
       case REACT_TO_PYRO:
         return findReactToPyroAction(strafe);
       case REACT_TO_CLOAKED_PYRO:
@@ -154,47 +160,52 @@ public class RobotPilot extends UnitPilot {
   }
 
   public PilotAction findReactToPyroAction(StrafeDirection strafe) {
-    double distance_to_target2 = MapUtils.distance2(bound_object, target_unit);
+    return findReactToTargetAction(strafe, target_unit.getX(), target_unit.getY());
+  }
+
+  public PilotAction findReactToCloakedPyroAction(StrafeDirection strafe) {
+    return findReactToTargetAction(strafe, target_x, target_y);
+  }
+
+  public PilotAction findReactToTargetAction(StrafeDirection strafe, double target_x, double target_y) {
+    double angle_to_target = MapUtils.angleTo(bound_object, target_x, target_y);
+    double abs_angle_to_target = Math.abs(angle_to_target);
+    if (abs_angle_to_target > TARGET_DIRECTION_EPSILON) {
+      return new PilotAction(strafe, angleToTurnDirection(angle_to_target));
+    }
+    double distance_to_target2 = MapUtils.distance2(bound_object, target_x, target_y);
     MoveDirection move;
-    if (distance_to_target2 > MAX_DISTANCE_TO_PYRO2) {
+    if (distance_to_target2 > max_distance_to_pyro2) {
       move = MoveDirection.FORWARD;
     }
-    else if (distance_to_target2 < MIN_DISTANCE_TO_PYRO2) {
+    else if (distance_to_target2 < min_distance_to_pyro2) {
       move = MoveDirection.BACKWARD;
     }
     else {
       move = MoveDirection.NONE;
     }
-    double angle_to_target = MapUtils.angleTo(bound_object, target_unit);
-    double abs_angle_to_target = Math.abs(angle_to_target);
-    if (abs_angle_to_target < TARGET_DIRECTION_EPSILON) {
-      return new PilotAction(move, strafe, angleToTurnDirection(angle_to_target),
-              abs_angle_to_target < DIRECTION_EPSILON);
-    }
-    return new PilotAction(strafe, angleToTurnDirection(angle_to_target));
-  }
-
-  public PilotAction findReactToCloakedPyroAction(StrafeDirection strafe) {
-    double dx = target_x - bound_object.getX();
-    double dy = target_y - bound_object.getY();
-    double angle_to_target = MapUtils.angleTo(bound_object.getDirection(), dx, dy);
-    double abs_angle_to_target = Math.abs(angle_to_target);
-    if (abs_angle_to_target < TARGET_DIRECTION_EPSILON) {
-      return new PilotAction(strafe, angleToTurnDirection(angle_to_target),
-              abs_angle_to_target < DIRECTION_EPSILON);
-    }
-    return new PilotAction(strafe, angleToTurnDirection(angle_to_target));
+    return new PilotAction(move, strafe, angleToTurnDirection(angle_to_target),
+            abs_angle_to_target < DIRECTION_EPSILON);
   }
 
   public void updateState(double s_elapsed) {
     // reacting to a Pyro takes precedence over all other states
     if (!state.equals(RobotPilotState.REACT_TO_PYRO)) {
       // look for a Pyro in the same Room
+      Pyro target_pyro = null;
+      double smallest_angle_to_pyro = Math.PI;
       for (Pyro pyro : current_room.getPyros()) {
         if (pyro.isVisible()) {
-          markPyroAsTarget(pyro);
-          return;
+          double abs_angle_to_pyro = Math.abs(MapUtils.angleTo(bound_object, pyro));
+          if (abs_angle_to_pyro < smallest_angle_to_pyro) {
+            target_pyro = pyro;
+            smallest_angle_to_pyro = abs_angle_to_pyro;
+          }
         }
+      }
+      if (target_pyro != null) {
+        markPyroAsTarget(target_pyro);
+        return;
       }
 
       // look for a visible Pyro in a neighbor Room
@@ -215,6 +226,18 @@ public class RobotPilot extends UnitPilot {
       case INACTIVE:
         if (Math.random() / s_elapsed < START_EXPLORE_PROB) {
           initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
+        }
+        else {
+          for (Robot robot : current_room.getRobots()) {
+            if (robot.equals(bound_object)) {
+              continue;
+            }
+            if (Math.abs(robot.getX() - bound_object.getX()) < bound_object_diameter &&
+                    Math.abs(robot.getY() - bound_object.getY()) < bound_object_diameter &&
+                    Math.random() / s_elapsed < EVASIVE_START_EXPLORE_PROB) {
+              initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
+            }
+          }
         }
         break;
       case TURN_TO_ROOM_EXIT:

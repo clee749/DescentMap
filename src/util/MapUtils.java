@@ -103,6 +103,17 @@ public class MapUtils {
 
   /**
    * 
+   * @param src_object any MovableObject with location and direction
+   * @param dst_x x-coordinate of destination point
+   * @param dst_y y-coordinate of destination point
+   * @return smallest angle from src_object's direction to the destination point
+   */
+  public static double angleTo(MovableObject src_object, double dst_x, double dst_y) {
+    return angleTo(src_object.getDirection(), dst_x - src_object.getX(), dst_y - src_object.getY());
+  }
+
+  /**
+   * 
    * @param src_direction direction of source vector
    * @param dst_direction direction of destination vector
    * @return smallest angle from source vector to destination vector
@@ -196,8 +207,19 @@ public class MapUtils {
    * @return squared distance between the two MapObjects
    */
   public static double distance2(MapObject obj1, MapObject obj2) {
-    double dx = obj2.getX() - obj1.getX();
-    double dy = obj2.getY() - obj1.getY();
+    return distance2(obj1, obj2.getX(), obj2.getY());
+  }
+
+  /**
+   * 
+   * @param obj any MapObject
+   * @param dst_x x-coordinate of any point
+   * @param dst_y y-coordinate of any point
+   * @return squared distance between src and the point
+   */
+  public static double distance2(MapObject obj, double dst_x, double dst_y) {
+    double dx = dst_x - obj.getX();
+    double dy = dst_y - obj.getY();
     return dx * dx + dy * dy;
   }
 

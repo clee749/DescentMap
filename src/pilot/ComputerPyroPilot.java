@@ -230,15 +230,11 @@ public class ComputerPyroPilot extends PyroPilot {
         inactive_time_left -= s_elapsed;
         return PilotAction.NO_ACTION;
       case MOVE_TO_ROOM_CONNECTION:
-        return new PilotAction(move, strafe,
-                angleToTurnDirection(MapUtils.angleTo(bound_object.getDirection(),
-                        target_x - bound_object.getX(), target_y - bound_object.getY())), fire_primary,
-                fire_secondary, drop_bomb);
+        return new PilotAction(move, strafe, angleToTurnDirection(MapUtils.angleTo(bound_object, target_x,
+                target_y)), fire_primary, fire_secondary, drop_bomb);
       case MOVE_TO_NEIGHBOR_ROOM:
-        return new PilotAction(move, strafe,
-                angleToTurnDirection(MapUtils.angleTo(bound_object.getDirection(),
-                        target_x - bound_object.getX(), target_y - bound_object.getY())), fire_primary,
-                fire_secondary, drop_bomb);
+        return new PilotAction(move, strafe, angleToTurnDirection(MapUtils.angleTo(bound_object, target_x,
+                target_y)), fire_primary, fire_secondary, drop_bomb);
       case REACT_TO_OBJECT:
         TurnDirection turn = angleToTurnDirection(MapUtils.angleTo(bound_object, target_object));
         if (!turn.equals(TurnDirection.NONE) && turn.equals(previous_turn_to_target)) {
@@ -256,9 +252,7 @@ public class ComputerPyroPilot extends PyroPilot {
         if (target_unit.isVisible()) {
           setTargetLocation(target_unit);
         }
-        double angle_to_target =
-                MapUtils.angleTo(bound_object.getDirection(), target_x - bound_object.getX(), target_y -
-                        bound_object.getY());
+        double angle_to_target = MapUtils.angleTo(bound_object, target_x, target_y);
         if (!fire_primary && !target_unit.isVisible() && Math.abs(angle_to_target) < DIRECTION_EPSILON) {
           fire_primary = true;
         }

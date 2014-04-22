@@ -55,7 +55,7 @@ public class RobotGenerator extends Scenery {
     this.robot_type = robot_type;
     this.spawn_direction = RoomSide.directionToRadians(spawn_direction);
     ignored_pyros = new HashSet<Pyro>();
-    spawn_radius_required = Math.min(Unit.getRadius(ObjectType.Pyro) + Unit.getRadius(robot_type), radius);
+    spawn_radius_required = Unit.getRadius(ObjectType.Pyro) + Unit.getRadius(robot_type);
     num_spawn_volleys_left = NUM_SPAWN_VOLLEYS;
     state = RobotGeneratorState.WAIT_FOR_TRIGGER;
   }
@@ -151,8 +151,9 @@ public class RobotGenerator extends Scenery {
         }
         next_attack_costs_robot = !next_attack_costs_robot;
         double pyro_radius = pyro.getRadius();
-        return new Explosion(room, x_loc + dx - pyro_radius + Math.random() * (radius - dx), y_loc + dy -
-                pyro_radius + Math.random() * (radius - dy), ATTACK_EXPLOSION_RADIUS, ATTACK_EXPLOSION_TIME);
+        return new Explosion(room, x_loc + dx - pyro_radius + Math.random() * (spawn_radius_required - dx),
+                y_loc + dy - pyro_radius + Math.random() * (spawn_radius_required - dy),
+                ATTACK_EXPLOSION_RADIUS, ATTACK_EXPLOSION_TIME);
       }
     }
     state = RobotGeneratorState.SPAWN;

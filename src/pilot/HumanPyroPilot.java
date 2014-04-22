@@ -120,6 +120,9 @@ public class HumanPyroPilot extends PyroPilot {
         case KeyEvent.VK_0:
           bound_pyro.switchSecondaryCannon(PyroSecondaryCannon.MEGA_MISSILE, true);
           break;
+        case KeyEvent.VK_B:
+          is_dropping_bomb = true;
+          break;
       }
     }
   }
@@ -153,9 +156,6 @@ public class HumanPyroPilot extends PyroPilot {
         break;
       case KeyEvent.VK_SPACE:
         is_firing_secondary = value;
-        break;
-      case KeyEvent.VK_B:
-        is_dropping_bomb = value;
         break;
       default:
         return false;

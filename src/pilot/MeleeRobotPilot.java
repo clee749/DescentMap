@@ -11,8 +11,8 @@ public class MeleeRobotPilot extends RobotPilot {
 
   @Override
   public PilotAction findReactToCloakedPyroAction(StrafeDirection strafe) {
-    return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(
-            bound_object.getDirection(), target_x - bound_object.getX(), target_y - bound_object.getY())));
+    return new PilotAction(MoveDirection.FORWARD, strafe, angleToTurnDirection(MapUtils.angleTo(bound_object,
+            target_x, target_y)));
   }
 
   @Override

@@ -25,9 +25,8 @@ public class BomberPilot extends RobotPilot {
 
   @Override
   public PilotAction findReactToPyroAction(StrafeDirection strafe) {
-    return new PilotAction(MoveDirection.FORWARD, angleToTurnDirection(MapUtils.angleTo(
-            bound_object.getDirection(), target_x - bound_object.getX(), target_y - bound_object.getY())),
-            true);
+    return new PilotAction(MoveDirection.FORWARD, angleToTurnDirection(MapUtils.angleTo(bound_object,
+            target_x, target_y)), true);
   }
 
   @Override
