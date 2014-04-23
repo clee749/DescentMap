@@ -144,6 +144,8 @@ public class Pyro extends Unit {
   // collisions
   public static final double MIN_WALL_COLLISION_SPEED_FOR_DAMAGE = 0.9;
   public static final int MIN_SHIELDS_AFTER_WALL_COLLISION = 10;
+  public static final double ROBOT_COLLISION_ROOM_MARGIN = Unit.LARGEST_UNIT_RADIUS +
+          Unit.getRadius(ObjectType.Pyro);
 
   // death spin
   public static final double DEATH_SPIN_TIME = 5.0;
@@ -509,6 +511,17 @@ public class Pyro extends Unit {
   @Override
   public void applyMovementActions(MapEngine engine, double s_elapsed) {
     super.applyMovementActions(engine, s_elapsed);
+    checkForRobotCollisions(room);
+    RoomSide close_neighbor_side = MapUtils.findRoomBorderSide(this, ROBOT_COLLISION_ROOM_MARGIN);
+    if (close_neighbor_side != null) {
+      Room neighbor = room.getNeighborInDirection(close_neighbor_side);
+      if (neighbor != null) {
+        checkForRobotCollisions(neighbor);
+      }
+    }
+  }
+
+  public void checkForRobotCollisions(Room room) {
     for (Robot robot : room.getRobots()) {
       if (robot.isExploded()) {
         continue;

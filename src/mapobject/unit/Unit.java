@@ -102,6 +102,7 @@ public abstract class Unit extends MovableObject {
     return shields;
   }
 
+  public static final double LARGEST_UNIT_RADIUS = RADII.get(ObjectType.MiniBoss);
   public static final double DAMAGED_EXPLOSION_RADIUS = 0.1;
   public static final double DAMAGED_EXPLOSION_TIME = 1.0;
   public static final double MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS = 0.5;

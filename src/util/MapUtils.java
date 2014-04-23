@@ -333,6 +333,33 @@ public class MapUtils {
 
   /**
    * 
+   * @param obj any MapObject
+   * @param radius margin around obj that should be checked
+   * @return which RoomSide obj is closer than radius to the edge, or null if none
+   */
+  public static RoomSide findRoomBorderSide(MapObject obj, double radius) {
+    double obj_x = obj.getX();
+    double obj_y = obj.getY();
+    Room room = obj.getRoom();
+    Point nw_corner = room.getNWCorner();
+    Point se_corner = room.getSECorner();
+    if (obj_y - nw_corner.y < radius) {
+      return RoomSide.NORTH;
+    }
+    if (se_corner.y - obj_y < radius) {
+      return RoomSide.SOUTH;
+    }
+    if (obj_x - nw_corner.x < radius) {
+      return RoomSide.WEST;
+    }
+    if (se_corner.x - obj_x < radius) {
+      return RoomSide.EAST;
+    }
+    return null;
+  }
+
+  /**
+   * 
    * @param x_coord x-coordinate of point
    * @param y_coord y-coordinate of point
    * @param line_info standard form info of line

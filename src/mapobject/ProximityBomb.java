@@ -14,6 +14,7 @@ import structure.Room;
 import util.MapUtils;
 
 import common.ObjectType;
+import common.RoomSide;
 import component.MapEngine;
 
 public class ProximityBomb extends MapObject {
@@ -82,6 +83,26 @@ public class ProximityBomb extends MapObject {
       }
     }
 
+    boolean is_outside_source =
+            Math.abs(source.getX() - x_loc) > source_combined_radius ||
+                    Math.abs(source.getY() - y_loc) > source_combined_radius;
+    MapObject created_object = handleAnyCollisions(engine, room, is_outside_source);
+    if (created_object != null) {
+      return created_object;
+    }
+
+    RoomSide close_neighbor_side = MapUtils.findRoomBorderSide(this, Unit.LARGEST_UNIT_RADIUS);
+    if (close_neighbor_side != null) {
+      Room neighbor = room.getNeighborInDirection(close_neighbor_side);
+      if (neighbor != null) {
+        return handleAnyCollisions(engine, neighbor, is_outside_source);
+      }
+    }
+
+    return null;
+  }
+
+  public MapObject handleAnyCollisions(MapEngine engine, Room room, boolean is_outside_source) {
     for (Pyro pyro : room.getPyros()) {
       if ((is_fully_armed || !pyro.equals(source)) && MapUtils.objectsIntersect(this, pyro)) {
         return handleDetonation(engine, pyro);
@@ -92,17 +113,12 @@ public class ProximityBomb extends MapObject {
         return handleDetonation(engine, robot);
       }
     }
-
-    boolean is_outside_source =
-            Math.abs(source.getX() - x_loc) > source_combined_radius ||
-                    Math.abs(source.getY() - y_loc) > source_combined_radius;
     for (Shot shot : room.getShots()) {
       if ((is_outside_source || !shot.getSource().equals(source)) && MapUtils.objectsIntersect(this, shot)) {
         shot.detonate();
         return handleDetonation(engine, null);
       }
     }
-
     return null;
   }
 

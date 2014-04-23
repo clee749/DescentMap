@@ -14,6 +14,7 @@ import structure.Room;
 import util.MapUtils;
 
 import common.ObjectType;
+import common.RoomSide;
 import component.MapEngine;
 
 public abstract class Shot extends MovableObject {
@@ -86,6 +87,23 @@ public abstract class Shot extends MovableObject {
   }
 
   public Unit checkForUnitCollisions() {
+    Unit hit_unit = checkForUnitCollisions(room);
+    if (hit_unit != null) {
+      return hit_unit;
+    }
+
+    RoomSide close_neighbor_side = MapUtils.findRoomBorderSide(this, Unit.LARGEST_UNIT_RADIUS);
+    if (close_neighbor_side != null) {
+      Room neighbor = room.getNeighborInDirection(close_neighbor_side);
+      if (neighbor != null) {
+        hit_unit = checkForUnitCollisions(neighbor);
+      }
+    }
+
+    return hit_unit;
+  }
+
+  public Unit checkForUnitCollisions(Room room) {
     for (Pyro pyro : room.getPyros()) {
       if (hitsUnit(pyro)) {
         return pyro;

@@ -8,6 +8,7 @@ import mapobject.unit.Pyro;
 import pilot.PowerupPilot;
 import resource.ImageHandler;
 import structure.Room;
+import structure.RoomConnection;
 import util.MapUtils;
 
 import common.RoomSide;
@@ -51,6 +52,18 @@ public abstract class Powerup extends MovableObject {
       move_speed = Math.max(move_speed - MOVE_SPEED_DECELERATION * s_elapsed, 0.0);
     }
 
+    if (!checkForAcquisition(engine, room)) {
+      for (RoomConnection connection : room.getNeighbors().values()) {
+        if (checkForAcquisition(engine, connection.neighbor)) {
+          break;
+        }
+      }
+    }
+
+    return created_object;
+  }
+
+  public boolean checkForAcquisition(MapEngine engine, Room room) {
     for (Pyro pyro : room.getPyros()) {
       if (pyro.getShields() >= 0 && MapUtils.objectsIntersect(this, pyro, pyro.getRadius()) &&
               beAcquired(pyro)) {
@@ -58,10 +71,10 @@ public abstract class Powerup extends MovableObject {
         if (play_acquired_sound) {
           playSound(engine, ACQUIRED_SOUND);
         }
-        break;
+        return true;
       }
     }
-    return created_object;
+    return false;
   }
 
   @Override
