@@ -81,6 +81,7 @@ public class ComputerPyroPilot extends PyroPilot {
     return energies;
   }
 
+  public static final double MAX_TIME_IN_STATE = 60.0;
   public static final double TIME_TURNING_UNTIL_STOP = 5.0;
   public static final double RESPAWN_DELAY = 5.0;
   public static final double SPAWNING_SICKNESS = Entrance.ZUNGGG_TIME - Entrance.TIME_TO_SPAWN;
@@ -94,11 +95,15 @@ public class ComputerPyroPilot extends PyroPilot {
   public static final int MEGA_MISSILE_MIN_SHIELDS = 48;
   public static final double MEGA_MISSILE_MIN_DISTANCE2 = MegaMissile.SPLASH_DAMAGE_RADIUS *
           MegaMissile.SPLASH_DAMAGE_RADIUS * 2;
+  public static final double TARGET_ROBOT_MIN_DISTANCE2 = 1.0;
+  public static final double TARGET_ROBOT_MAX_DISTANCE2 = Math.pow(1.1, 2);
+  public static final double CLOSE_ROBOT_DIRECTION_EPSILON = MapUtils.PI_OVER_FOUR;
 
   private final HashSet<Room> visited;
   private final LinkedList<Scenery> target_sceneries;
   private LinkedList<Entry<RoomSide, RoomConnection>> current_path;
   private PyroPilotState state;
+  private double state_time_left;
   private MapObject target_object;
   private PyroTargetType target_type;
   private Powerup target_powerup;
@@ -212,10 +217,12 @@ public class ComputerPyroPilot extends PyroPilot {
         throw new DescentMapException("Unexpected PyroPilotState: " + state);
     }
     state = next_state;
+    state_time_left = MAX_TIME_IN_STATE;
   }
 
   @Override
   public PilotAction findNextAction(double s_elapsed) {
+    state_time_left -= s_elapsed;
     updateState();
 
     LineOfFireAnalysis lofa = analyzeLineOfFire();
@@ -236,6 +243,16 @@ public class ComputerPyroPilot extends PyroPilot {
         return new PilotAction(move, strafe, angleToTurnDirection(MapUtils.angleTo(bound_object, target_x,
                 target_y)), fire_primary, fire_secondary, drop_bomb);
       case REACT_TO_OBJECT:
+        if (target_type.equals(PyroTargetType.UNIT) && move.equals(MoveDirection.FORWARD) &&
+                !lofa.is_inside_pyro) {
+          double target_distance = MapUtils.distance2(bound_object, target_object);
+          if (target_distance < TARGET_ROBOT_MIN_DISTANCE2) {
+            move = MoveDirection.BACKWARD;
+          }
+          else if (target_distance < TARGET_ROBOT_MAX_DISTANCE2) {
+            move = MoveDirection.NONE;
+          }
+        }
         TurnDirection turn = angleToTurnDirection(MapUtils.angleTo(bound_object, target_object));
         if (!turn.equals(TurnDirection.NONE) && turn.equals(previous_turn_to_target)) {
           time_turning_to_target += s_elapsed;
@@ -264,6 +281,11 @@ public class ComputerPyroPilot extends PyroPilot {
   }
 
   public void updateState() {
+    if (state_time_left < 0.0) {
+      initState(PyroPilotState.MOVE_TO_ROOM_CONNECTION);
+      return;
+    }
+
     switch (state) {
       case INACTIVE:
         if (inactive_time_left < 0.0) {
@@ -470,7 +492,10 @@ public class ComputerPyroPilot extends PyroPilot {
       if (!robot.isCloaked()) {
         lofa.num_robot_counts += robot.getShields() / SMART_MISSILE_ROBOT_DIVISOR + 1;
       }
-      if (Math.abs(MapUtils.angleTo(bound_object, robot)) < DIRECTION_EPSILON) {
+      double abs_angle_to_robot = Math.abs(MapUtils.angleTo(bound_object, robot));
+      if (abs_angle_to_robot < DIRECTION_EPSILON ||
+              (abs_angle_to_robot < CLOSE_ROBOT_DIRECTION_EPSILON && MapUtils.objectsIntersect(bound_object,
+                      robot, bound_object_diameter + robot.getRadius()))) {
         double robot_distance2 = MapUtils.distance2(bound_object, robot);
         if (robot_distance2 < lofa.closest_target_distance2) {
           lofa.closest_target_distance2 = robot_distance2;
