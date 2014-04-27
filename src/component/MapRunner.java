@@ -83,16 +83,17 @@ public class MapRunner {
   public static final int NUM_PYROS = 3;
   public static final double STANDARD_MAP_PROB = 0.5;
   public static final double EACH_NON_STANDARD_MAP_PROB = 1.0 / (MapType.values().length - 1);
-  public static final long BUILD_SLEEP = 100;
-  public static final long PAUSE_AFTER_BUILD_SLEEP = 1000;
-  public static final long PAUSE_BEFORE_PLAY_SLEEP = 1000;
-  public static final long PLAY_MIN_SLEEP = 50;
-  public static final long PLAY_MAX_SLEEP = 11 * PLAY_MIN_SLEEP / 10;
-  public static final long PAUSE_AFTER_PLAY_SLEEP = 1000;
+  public static final long BUILD_SLEEP = 100L;
+  public static final long PAUSE_AFTER_BUILD_SLEEP = 1000L;
+  public static final long PAUSE_BEFORE_PLAY_SLEEP = 1000L;
+  public static final long PLAY_MIN_SLEEP = 50L;
+  public static final long PLAY_MAX_SLEEP = 100L;
+  public static final long PAUSE_AFTER_PLAY_SLEEP = 1000L;
 
   private final LinkedList<Pyro> pyros;
   private final MapDisplayer displayer;
   private final MapEngine engine;
+  private final long play_min_sleep;
   private MapType map_type;
   private DescentMap map;
   private RunnerState state;
@@ -100,10 +101,11 @@ public class MapRunner {
   private long last_update_time;
   private boolean is_paused;
 
-  public MapRunner() {
+  public MapRunner(long play_min_sleep) {
     pyros = new LinkedList<Pyro>();
     displayer = new MapDisplayer(this);
     engine = new MapEngine();
+    this.play_min_sleep = play_min_sleep;
   }
 
   public MapDisplayer getDisplayer() {
@@ -221,7 +223,7 @@ public class MapRunner {
 
   public void doPauseBeforePlayStep() {
     state = RunnerState.PLAY_MAP;
-    target_sleep_ms = PLAY_MIN_SLEEP;
+    target_sleep_ms = play_min_sleep;
   }
 
   public void doPlayStep(double s_elapsed) {
@@ -243,7 +245,7 @@ public class MapRunner {
   }
 
   public static void main(String[] args) throws InterruptedException {
-    MapRunner runner = new MapRunner();
+    MapRunner runner = new MapRunner(PLAY_MIN_SLEEP);
     JFrame frame = new JFrame();
     MapPanel panel = new MapPanel(runner);
     Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();

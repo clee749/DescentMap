@@ -5,6 +5,7 @@ import java.awt.Image;
 import java.awt.Point;
 
 import mapobject.ephemeral.Explosion;
+import mapobject.powerup.Powerup;
 import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
@@ -19,7 +20,7 @@ import component.MapEngine;
 
 public class ProximityBomb extends MapObject {
   public static final double RADIUS = 0.12;
-  public static final double SECONDS_PER_FRAME = 0.03;
+  public static final double SECONDS_PER_FRAME = Powerup.SECONDS_PER_FRAME;
   public static final int DAMAGE = 27;
   public static final double SPLASH_DAMAGE_RADIUS = 1.0;
   public static final double EXPLOSION_RADIUS = RADIUS * 2;

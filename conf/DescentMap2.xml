@@ -21,23 +21,30 @@ USA
 -->
 
 <!--
-  - xscreensaver-style configuration file for DescentMap screensaver.
+  - xscreensaver-style configuration file for DescentMap2 screensaver.
   -
   - For details about the file format of this file, see the hacks/config/README
   - file in the xscreensaver distribution, copied here for convenience:
   - https://jdic.dev.java.net/documentation/incubator/screensaver/xscreensaver-config.txt
   -->
-<screensaver name="DescentMap" _label="DescentMap">
+<screensaver name="DescentMap2" _label="DescentMap2">
 
   <command arg="-root"/>
   
-  <command arg="-jar descentmap.jar"/>
+  <command arg="-jar DescentMap2.jar"/>
   
-  <command arg="-class MapScreensaver"/>
+  <command arg="-class component.MapScreensaver"/>
   
   <file id="jdkhome" _label="Java Home (blank=auto)" arg="-jdkhome %" />
   
-  <boolean id="checkbox" _label="Checkbox" arg-set="-checkbox"/>
+  <number
+          type="spinbutton"
+          arg="-min-ms-per-frame %"
+          _label="Min ms Per Frame"
+          low="10"
+          high="50"
+          default="30"
+          />
 
 	<_description>Description</_description>
 

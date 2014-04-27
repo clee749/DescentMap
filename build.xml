@@ -21,13 +21,13 @@ USA
 -->
 
 <!--
-  - Main build file for DescentMap.
+  - Main build file for DescentMap2.
   - 
   - Generated with SaverBeans SDK Startup Kit
   - http://jdic.dev.java.net/
   -->
 
-<project basedir="." default="dist" name="DescentMap">
+<project basedir="." default="dist" name="DescentMap2">
 
   <target name="properties">
     <property file="build.properties" />
@@ -36,12 +36,12 @@ USA
     <property name="build" value="build" />
     <property name="dist" value="dist" />
     <property name="src" value="src" />
-    <property name="screensaver" value="DescentMap" />
+    <property name="screensaver" value="DescentMap2" />
     <property name="screensaver.class" 
         value="component.MapScreensaver" />
 
     <!-- Values for the Windows installer -->
-    <property name="productName" value="DescentMap Screensaver" />
+    <property name="productName" value="DescentMap2 Screensaver" />
     <property name="productVersion" value="1.0" />
     <property name="productPublisher" value="Sun Microsystems, Inc." />
     <property name="productWebSite" 
