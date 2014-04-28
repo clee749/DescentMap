@@ -16,7 +16,7 @@ import component.MapEngine;
 
 public abstract class Powerup extends MovableObject {
   public static final double RADIUS = 0.12;
-  public static final double SECONDS_PER_FRAME = 0.05;
+  public static final double SECONDS_PER_FRAME = 0.04;
   public static final double MOVE_SPEED_DECELERATION = 0.5;
   public static final String ACQUIRED_SOUND = "effects/power03.wav";
 

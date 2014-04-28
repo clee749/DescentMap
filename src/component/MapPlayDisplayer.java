@@ -27,8 +27,8 @@ public class MapPlayDisplayer {
   private DescentMap map;
   private int pixels_per_cell;
   private Point center_pixel;
-  private int num_cols;
-  private int num_rows;
+  private int max_col_offset;
+  private int max_row_offset;
 
   public MapPlayDisplayer(ImageHandler images, int sight_radius) {
     this.images = images;
@@ -62,8 +62,8 @@ public class MapPlayDisplayer {
     int sight_diameter = 2 * sight_radius + 1;
     pixels_per_cell = Math.min(dims.width / sight_diameter, dims.height / sight_diameter);
     center_pixel = new Point(dims.width / 2, dims.height / 2);
-    num_cols = (int) ((double) dims.width / pixels_per_cell) + 2;
-    num_rows = (int) ((double) dims.height / pixels_per_cell) + 2;
+    max_col_offset = (int) Math.ceil((double) center_pixel.x / pixels_per_cell) + 1;
+    max_row_offset = (int) Math.ceil((double) center_pixel.y / pixels_per_cell) + 1;
   }
 
   public void paintMap(Graphics2D g) {
@@ -75,10 +75,10 @@ public class MapPlayDisplayer {
     Point center_cell_nw_pixel =
             new Point(center_pixel.x - (int) ((center_x - center_cell.x) * pixels_per_cell), center_pixel.y -
                     (int) ((center_y - center_cell.y) * pixels_per_cell));
-    int min_x = center_cell.x - num_cols / 2 - 1;
-    int min_y = center_cell.y - num_rows / 2 - 1;
+    int min_x = center_cell.x - max_col_offset;
+    int min_y = center_cell.y - max_row_offset;
     Point nw_corner = new Point(min_x, min_y);
-    Point se_corner = new Point(min_x + num_cols, min_y + num_rows);
+    Point se_corner = new Point(min_x + max_col_offset * 2, min_y + max_row_offset * 2);
     for (Room room : map.getAllRooms()) {
       if (MapUtils.rectanglesIntersect(nw_corner, se_corner, room.getNWCorner(), room.getSECorner())) {
         room.paintSceneries(g, images, center_cell, center_cell_nw_pixel, pixels_per_cell);
