@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import mapobject.MovableObject;
 import mapobject.powerup.Cloak;
+import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.robot.Robot;
 import structure.Room;
@@ -157,6 +158,19 @@ public class RobotPilot extends UnitPilot {
       default:
         throw new DescentMapException("Unexpected RobotPilotState: " + state);
     }
+  }
+
+  public StrafeDirection reactToShots() {
+    for (Shot shot : current_room.getShots()) {
+      if (shot.getSource().equals(bound_object)) {
+        continue;
+      }
+      StrafeDirection strafe = findReactionToShot(shot);
+      if (!strafe.equals(StrafeDirection.NONE)) {
+        return strafe;
+      }
+    }
+    return StrafeDirection.NONE;
   }
 
   public PilotAction findReactToPyroAction(StrafeDirection strafe) {

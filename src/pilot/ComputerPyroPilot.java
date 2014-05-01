@@ -51,7 +51,7 @@ enum PyroTargetType {
 }
 
 
-class LineOfFireAnalysis {
+class RoomAnalysis {
   public boolean is_another_pyro_in_room;
   public boolean is_inside_pyro;
   public boolean is_directly_behind_live_pyro;
@@ -60,11 +60,13 @@ class LineOfFireAnalysis {
   public double closest_target_distance2;
   public double closest_missile_target_distance2;
   public int num_robot_counts;
+  public StrafeDirection shot_reaction;
+  public boolean is_close_behind_mega;
 
-  public LineOfFireAnalysis() {
-    closest_pyro_distance2 = Integer.MAX_VALUE;
-    closest_target_distance2 = Integer.MAX_VALUE;
-    closest_missile_target_distance2 = Integer.MAX_VALUE;
+  public RoomAnalysis() {
+    closest_pyro_distance2 = Double.MAX_VALUE;
+    closest_target_distance2 = Double.MAX_VALUE;
+    closest_missile_target_distance2 = Double.MAX_VALUE;
   }
 }
 
@@ -87,17 +89,17 @@ public class ComputerPyroPilot extends PyroPilot {
   public static final double SPAWNING_SICKNESS = Entrance.ZUNGGG_TIME - Entrance.TIME_TO_SPAWN;
   public static final double FRIENDLY_FIRE_DIRECTION_EPSILON = MapUtils.PI_OVER_FOUR;
   public static final double SAME_DIRECTION_EPSILON = Math.PI / 36;
+  public static final double TARGET_ROBOT_MIN_DISTANCE2 = 1.0;
+  public static final double TARGET_ROBOT_MAX_DISTANCE2 = Math.pow(1.1, 2);
+  public static final double CLOSE_ROBOT_DIRECTION_EPSILON = MapUtils.PI_OVER_FOUR;
+  public static final double TARGET_ROBOT_WHEN_CLOAKED_PROB = 0.5;
   public static final int BASIC_MISSILE_MIN_SHIELDS = Shot.getDamage(ObjectType.ConcussionMissile);
   public static final double MISSILE_MIN_DISTANCE2 = 4.0;
   public static final double BOMB_DROP_RADIUS = 1.0;
   public static final int SMART_MISSILE_ROBOT_DIVISOR = Shot.getDamage(ObjectType.SmartPlasma);
   public static final int SMART_MISSILE_MIN_ROBOT_COUNTS = SmartMissile.NUM_SMART_PLASMAS;
   public static final int MEGA_MISSILE_MIN_SHIELDS = 48;
-  public static final double MEGA_MISSILE_MIN_DISTANCE2 = MegaMissile.SPLASH_DAMAGE_RADIUS *
-          MegaMissile.SPLASH_DAMAGE_RADIUS * 2;
-  public static final double TARGET_ROBOT_MIN_DISTANCE2 = 1.0;
-  public static final double TARGET_ROBOT_MAX_DISTANCE2 = Math.pow(1.1, 2);
-  public static final double CLOSE_ROBOT_DIRECTION_EPSILON = MapUtils.PI_OVER_FOUR;
+  public static final double MEGA_MISSILE_MIN_DISTANCE2 = Math.pow(MegaMissile.SPLASH_DAMAGE_RADIUS, 2);
 
   private final HashSet<Room> visited;
   private final LinkedList<Scenery> target_sceneries;
@@ -225,12 +227,15 @@ public class ComputerPyroPilot extends PyroPilot {
     state_time_left -= s_elapsed;
     updateState();
 
-    LineOfFireAnalysis lofa = analyzeLineOfFire();
-    boolean fire_primary = shouldFirePrimary(lofa);
-    boolean fire_secondary = shouldFireSecondary(lofa);
-    boolean drop_bomb = shouldDropBomb(lofa);
-    MoveDirection move = (lofa.is_directly_behind_live_pyro ? MoveDirection.BACKWARD : MoveDirection.FORWARD);
-    StrafeDirection strafe = reactToShots();
+    RoomAnalysis ra = analyzeRoom();
+    boolean fire_primary = shouldFirePrimary(ra);
+    boolean fire_secondary = shouldFireSecondary(ra);
+    boolean drop_bomb = shouldDropBomb(ra);
+    MoveDirection move =
+            (ra.is_directly_behind_live_pyro || ra.is_close_behind_mega
+                    ? MoveDirection.BACKWARD
+                    : MoveDirection.FORWARD);
+    StrafeDirection strafe = ra.shot_reaction;
 
     switch (state) {
       case INACTIVE:
@@ -244,7 +249,7 @@ public class ComputerPyroPilot extends PyroPilot {
                 target_y)), fire_primary, fire_secondary, drop_bomb);
       case REACT_TO_OBJECT:
         if (target_type.equals(PyroTargetType.UNIT) && move.equals(MoveDirection.FORWARD) &&
-                !lofa.is_inside_pyro) {
+                !ra.is_inside_pyro) {
           double target_distance = MapUtils.distance2(bound_object, target_object);
           if (target_distance < TARGET_ROBOT_MIN_DISTANCE2) {
             move = MoveDirection.BACKWARD;
@@ -436,37 +441,38 @@ public class ComputerPyroPilot extends PyroPilot {
     return paths;
   }
 
-  public LineOfFireAnalysis analyzeLineOfFire() {
-    LineOfFireAnalysis lofa = new LineOfFireAnalysis();
-    analyzePyros(lofa);
-    analyzeCurrentRoomTargets(lofa);
-    if (lofa.closest_target_distance2 == Integer.MAX_VALUE) {
-      analyzeNeighborRoomTargets(lofa);
+  public RoomAnalysis analyzeRoom() {
+    RoomAnalysis ra = new RoomAnalysis();
+    analyzePyros(ra);
+    analyzeCurrentRoomTargets(ra);
+    if (ra.closest_target_distance2 == Double.MAX_VALUE) {
+      analyzeNeighborRoomTargets(ra);
     }
-    return lofa;
+    analyzeShots(ra);
+    return ra;
   }
 
-  public void analyzePyros(LineOfFireAnalysis lofa) {
+  public void analyzePyros(RoomAnalysis ra) {
     for (Pyro pyro : current_room.getPyros()) {
       if (pyro.equals(bound_object) || !pyro.isVisible()) {
         continue;
       }
-      lofa.is_another_pyro_in_room = true;
+      ra.is_another_pyro_in_room = true;
       double abs_angle_to_pyro = Math.abs(MapUtils.angleTo(bound_object, pyro));
       if (MapUtils.objectsIntersect(bound_object, pyro, bound_object_diameter)) {
-        lofa.is_inside_pyro = true;
+        ra.is_inside_pyro = true;
         if (pyro.getShields() >= 0 && abs_angle_to_pyro < MapUtils.PI_OVER_TWO &&
                 Math.abs(pyro.getDirection() - bound_object.getDirection()) < SAME_DIRECTION_EPSILON) {
-          lofa.is_directly_behind_live_pyro = true;
+          ra.is_directly_behind_live_pyro = true;
         }
       }
       if (abs_angle_to_pyro < FRIENDLY_FIRE_DIRECTION_EPSILON) {
-        lofa.closest_pyro_distance2 =
-                Math.min(lofa.closest_pyro_distance2, MapUtils.distance2(bound_object, pyro));
+        ra.closest_pyro_distance2 =
+                Math.min(ra.closest_pyro_distance2, MapUtils.distance2(bound_object, pyro));
       }
     }
 
-    if (lofa.closest_pyro_distance2 == Integer.MAX_VALUE &&
+    if (ra.closest_pyro_distance2 == Double.MAX_VALUE &&
             (state.equals(PyroPilotState.MOVE_TO_ROOM_CONNECTION) || state
                     .equals(PyroPilotState.MOVE_TO_NEIGHBOR_ROOM))) {
       RoomConnection connection = target_room_info.getValue();
@@ -477,50 +483,50 @@ public class ComputerPyroPilot extends PyroPilot {
         double abs_angle_to_unit = Math.abs(MapUtils.angleTo(bound_object, pyro));
         if (abs_angle_to_unit < FRIENDLY_FIRE_DIRECTION_EPSILON &&
                 MapUtils.canSeeObjectInNeighborRoom(bound_object, pyro, target_room_info.getKey())) {
-          lofa.closest_pyro_distance2 =
-                  Math.min(lofa.closest_pyro_distance2, MapUtils.distance2(bound_object, pyro));
+          ra.closest_pyro_distance2 =
+                  Math.min(ra.closest_pyro_distance2, MapUtils.distance2(bound_object, pyro));
         }
       }
     }
   }
 
-  public void analyzeCurrentRoomTargets(LineOfFireAnalysis lofa) {
+  public void analyzeCurrentRoomTargets(RoomAnalysis ra) {
     for (Robot robot : current_room.getRobots()) {
       if (!robot.isVisible()) {
         continue;
       }
       if (!robot.isCloaked()) {
-        lofa.num_robot_counts += robot.getShields() / SMART_MISSILE_ROBOT_DIVISOR + 1;
+        ra.num_robot_counts += robot.getShields() / SMART_MISSILE_ROBOT_DIVISOR + 1;
       }
       double abs_angle_to_robot = Math.abs(MapUtils.angleTo(bound_object, robot));
       if (abs_angle_to_robot < DIRECTION_EPSILON ||
               (abs_angle_to_robot < CLOSE_ROBOT_DIRECTION_EPSILON && MapUtils.objectsIntersect(bound_object,
                       robot, bound_object_diameter + robot.getRadius()))) {
         double robot_distance2 = MapUtils.distance2(bound_object, robot);
-        if (robot_distance2 < lofa.closest_target_distance2) {
-          lofa.closest_target_distance2 = robot_distance2;
-          lofa.closest_target = robot;
+        if (robot_distance2 < ra.closest_target_distance2) {
+          ra.closest_target_distance2 = robot_distance2;
+          ra.closest_target = robot;
         }
         if ((!robot.isCloaked() || bound_pyro.getSelectedSecondaryCannonType().equals(
                 PyroSecondaryCannon.CONCUSSION_MISSILE)) &&
                 robot.getShields() >= BASIC_MISSILE_MIN_SHIELDS && robot_distance2 > MISSILE_MIN_DISTANCE2) {
-          lofa.closest_missile_target_distance2 =
-                  Math.min(lofa.closest_missile_target_distance2, robot_distance2);
+          ra.closest_missile_target_distance2 =
+                  Math.min(ra.closest_missile_target_distance2, robot_distance2);
         }
       }
     }
     for (ProximityBomb bomb : current_room.getBombs()) {
       if (Math.abs(MapUtils.angleTo(bound_object, bomb)) < DIRECTION_EPSILON) {
         double bomb_distance2 = MapUtils.distance2(bound_object, bomb);
-        if (bomb_distance2 < lofa.closest_target_distance2) {
-          lofa.closest_target_distance2 = bomb_distance2;
-          lofa.closest_target = bomb;
+        if (bomb_distance2 < ra.closest_target_distance2) {
+          ra.closest_target_distance2 = bomb_distance2;
+          ra.closest_target = bomb;
         }
       }
     }
   }
 
-  public void analyzeNeighborRoomTargets(LineOfFireAnalysis lofa) {
+  public void analyzeNeighborRoomTargets(RoomAnalysis ra) {
     double src_x = bound_object.getX();
     double src_y = bound_object.getY();
     double src_direction = bound_object.getDirection();
@@ -543,16 +549,16 @@ public class ComputerPyroPilot extends PyroPilot {
           if (abs_angle_to_unit < DIRECTION_EPSILON && angles_to_connection.x < neighbor_angle_to_unit &&
                   neighbor_angle_to_unit < angles_to_connection.y) {
             double robot_distance2 = MapUtils.distance2(bound_object, robot);
-            if (robot_distance2 < lofa.closest_target_distance2) {
-              lofa.closest_target_distance2 = robot_distance2;
-              lofa.closest_target = robot;
+            if (robot_distance2 < ra.closest_target_distance2) {
+              ra.closest_target_distance2 = robot_distance2;
+              ra.closest_target = robot;
             }
             if ((!robot.isCloaked() || bound_pyro.getSelectedSecondaryCannonType().equals(
                     PyroSecondaryCannon.CONCUSSION_MISSILE)) &&
                     robot.getShields() >= BASIC_MISSILE_MIN_SHIELDS &&
                     robot_distance2 > MISSILE_MIN_DISTANCE2) {
-              lofa.closest_missile_target_distance2 =
-                      Math.min(lofa.closest_missile_target_distance2, robot_distance2);
+              ra.closest_missile_target_distance2 =
+                      Math.min(ra.closest_missile_target_distance2, robot_distance2);
             }
           }
         }
@@ -563,9 +569,9 @@ public class ComputerPyroPilot extends PyroPilot {
           if (abs_angle_to_unit < DIRECTION_EPSILON && angles_to_connection.x < neighbor_angle_to_bomb &&
                   neighbor_angle_to_bomb < angles_to_connection.y) {
             double bomb_distance2 = MapUtils.distance2(bound_object, bomb);
-            if (bomb_distance2 < lofa.closest_target_distance2) {
-              lofa.closest_target_distance2 = bomb_distance2;
-              lofa.closest_target = bomb;
+            if (bomb_distance2 < ra.closest_target_distance2) {
+              ra.closest_target_distance2 = bomb_distance2;
+              ra.closest_target = bomb;
             }
           }
         }
@@ -574,12 +580,32 @@ public class ComputerPyroPilot extends PyroPilot {
     }
   }
 
-  public boolean shouldFirePrimary(LineOfFireAnalysis lofa) {
-    return !lofa.is_inside_pyro && lofa.closest_target_distance2 < lofa.closest_pyro_distance2;
+  public void analyzeShots(RoomAnalysis ra) {
+    double closest_shot_distance2 = Double.MAX_VALUE;
+    for (Shot shot : current_room.getShots()) {
+      double shot_distance2 = MapUtils.distance2(bound_object, shot);
+      if (shot.getType().equals(ObjectType.MegaMissile) &&
+              MapUtils.distance2(bound_object, shot) < MEGA_MISSILE_MIN_DISTANCE2 &&
+              Math.abs(MapUtils.angleTo(bound_object, shot)) < MapUtils.PI_OVER_TWO) {
+        ra.is_close_behind_mega = true;
+      }
+      if (shot.getSource().equals(bound_object) || shot_distance2 > closest_shot_distance2) {
+        continue;
+      }
+      StrafeDirection strafe = findReactionToShot(shot);
+      if (!strafe.equals(StrafeDirection.NONE)) {
+        ra.shot_reaction = strafe;
+        closest_shot_distance2 = MapUtils.distance2(bound_object, shot);
+      }
+    }
   }
 
-  public boolean shouldFireSecondary(LineOfFireAnalysis lofa) {
-    if (lofa.is_inside_pyro) {
+  public boolean shouldFirePrimary(RoomAnalysis ra) {
+    return !ra.is_inside_pyro && ra.closest_target_distance2 < ra.closest_pyro_distance2;
+  }
+
+  public boolean shouldFireSecondary(RoomAnalysis ra) {
+    if (ra.is_inside_pyro) {
       return false;
     }
 
@@ -587,35 +613,35 @@ public class ComputerPyroPilot extends PyroPilot {
       case CONCUSSION_MISSILE:
         // fall through
       case HOMING_MISSILE:
-        return lofa.closest_missile_target_distance2 < lofa.closest_pyro_distance2 &&
-                lofa.closest_target_distance2 > MISSILE_MIN_DISTANCE2;
+        return ra.closest_missile_target_distance2 < ra.closest_pyro_distance2 &&
+                ra.closest_target_distance2 > MISSILE_MIN_DISTANCE2;
       case PROXIMITY_BOMB:
         return false;
       case SMART_MISSILE:
-        return lofa.closest_pyro_distance2 == Integer.MAX_VALUE &&
-                lofa.closest_target_distance2 == Integer.MAX_VALUE &&
-                lofa.num_robot_counts >= SMART_MISSILE_MIN_ROBOT_COUNTS;
+        return ra.closest_pyro_distance2 == Double.MAX_VALUE &&
+                ra.closest_target_distance2 == Double.MAX_VALUE &&
+                ra.num_robot_counts >= SMART_MISSILE_MIN_ROBOT_COUNTS;
       case MEGA_MISSILE:
-        if (lofa.closest_target == null) {
+        if (ra.closest_target == null) {
           return false;
         }
-        for (Pyro pyro : lofa.closest_target.getRoom().getPyros()) {
-          if (!pyro.equals(bound_object)) {
+        for (Pyro pyro : ra.closest_target.getRoom().getPyros()) {
+          if (MapUtils.distance2(pyro, ra.closest_target) < MEGA_MISSILE_MIN_DISTANCE2) {
             return false;
           }
         }
-        return lofa.closest_missile_target_distance2 < lofa.closest_pyro_distance2 &&
-                lofa.closest_target_distance2 > MEGA_MISSILE_MIN_DISTANCE2 &&
-                lofa.closest_target instanceof Robot &&
-                ((Robot) lofa.closest_target).getShields() >= MEGA_MISSILE_MIN_SHIELDS;
+        return ra.closest_missile_target_distance2 < ra.closest_pyro_distance2 &&
+                ra.closest_target_distance2 > MEGA_MISSILE_MIN_DISTANCE2 &&
+                ra.closest_target instanceof Robot &&
+                ((Robot) ra.closest_target).getShields() >= MEGA_MISSILE_MIN_SHIELDS;
       default:
         throw new DescentMapException("Unexpected PyroSecondaryCannon: " +
                 bound_pyro.getSelectedSecondaryCannonType());
     }
   }
 
-  public boolean shouldDropBomb(LineOfFireAnalysis lofa) {
-    if (lofa.is_another_pyro_in_room) {
+  public boolean shouldDropBomb(RoomAnalysis ra) {
+    if (ra.is_another_pyro_in_room) {
       return false;
     }
     for (Scenery scenery : target_sceneries) {
@@ -627,11 +653,10 @@ public class ComputerPyroPilot extends PyroPilot {
   }
 
   public MapObject findNextTargetObject() {
-    if (!bound_pyro.isCloaked()) {
-      for (Robot robot : current_room.getRobots()) {
-        if (robot.isVisible() && shouldTargetObject(robot)) {
-          return robot;
-        }
+    for (Robot robot : current_room.getRobots()) {
+      if (robot.isVisible() && shouldTargetObject(robot) &&
+              (!bound_pyro.isCloaked() || Math.random() < TARGET_ROBOT_WHEN_CLOAKED_PROB)) {
+        return robot;
       }
     }
     for (Powerup powerup : current_room.getPowerups()) {
@@ -715,7 +740,7 @@ public class ComputerPyroPilot extends PyroPilot {
 
   public void selectSecondaryCannon() {
     Room target_room = target_room_info.getValue().neighbor;
-    if (bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE) > 0 && target_room.getPyros().isEmpty()) {
+    if (bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE) > 0) {
       for (Robot robot : target_room.getRobots()) {
         if (robot.getShields() >= MEGA_MISSILE_MIN_SHIELDS) {
           bound_pyro.switchSecondaryCannon(PyroSecondaryCannon.MEGA_MISSILE, false);

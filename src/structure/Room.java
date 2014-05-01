@@ -335,11 +335,11 @@ public class Room {
   }
 
   public void doSplashDamage(MapObject src_object, int max_damage, double damage_radius, Unit already_damaged) {
-    doSplashDamage(src_object, max_damage, damage_radius, null, already_damaged);
+    doSplashDamage(src_object, max_damage, damage_radius, already_damaged, null);
   }
 
   public void doSplashDamage(MapObject src_object, int max_damage, double damage_radius,
-          RoomSide which_neighbor, Unit already_damaged) {
+          Unit already_damaged, RoomSide which_neighbor) {
     for (Pyro pyro : pyros) {
       if (!pyro.equals(already_damaged)) {
         applySplashDamage(pyro, src_object, max_damage, damage_radius, which_neighbor);
@@ -357,31 +357,31 @@ public class Room {
     if (which_neighbor == null) {
       // north neighbor
       if (nw_corner.y - src_y < damage_radius) {
-        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, RoomSide.NORTH);
+        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, already_damaged, RoomSide.NORTH);
       }
 
       // south neighbor
       if (src_y - se_corner.y < damage_radius) {
-        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, RoomSide.SOUTH);
+        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, already_damaged, RoomSide.SOUTH);
       }
 
       // west neighbor
       if (nw_corner.x - src_x < damage_radius) {
-        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, RoomSide.WEST);
+        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, already_damaged, RoomSide.WEST);
       }
 
       // east neighbor
       if (src_x - se_corner.x < damage_radius) {
-        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, RoomSide.EAST);
+        doSplashDamageInNeighbor(src_object, max_damage, damage_radius, already_damaged, RoomSide.EAST);
       }
     }
   }
 
   public void doSplashDamageInNeighbor(MapObject src_object, int max_damage, double damage_radius,
-          RoomSide direction) {
+          Unit already_damaged, RoomSide direction) {
     Room neighbor = getNeighborInDirection(direction);
     if (neighbor != null) {
-      neighbor.doSplashDamage(src_object, max_damage, damage_radius, direction, null);
+      neighbor.doSplashDamage(src_object, max_damage, damage_radius, already_damaged, direction);
     }
   }
 

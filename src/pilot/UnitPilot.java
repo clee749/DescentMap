@@ -95,18 +95,13 @@ public abstract class UnitPilot extends Pilot {
     setTargetDirection(MapUtils.absoluteAngleTo(bound_object.getX(), bound_object.getY(), target_x, target_y));
   }
 
-  public StrafeDirection reactToShots() {
-    for (Shot shot : current_room.getShots()) {
-      if (shot.getSource().equals(bound_object)) {
-        continue;
+  public StrafeDirection findReactionToShot(Shot shot) {
+    double angle_to_object = MapUtils.angleTo(shot, bound_object);
+    if (Math.abs(angle_to_object) < SHOT_EVASION_THRESHOLD) {
+      if (Math.abs(MapUtils.angleTo(shot.getDirection(), bound_object.getDirection())) < MapUtils.PI_OVER_TWO) {
+        angle_to_object *= -1;
       }
-      double angle_to_object = MapUtils.angleTo(shot, bound_object);
-      if (Math.abs(angle_to_object) < SHOT_EVASION_THRESHOLD) {
-        if (Math.abs(MapUtils.angleTo(shot.getDirection(), bound_object.getDirection())) < MapUtils.PI_OVER_TWO) {
-          angle_to_object *= -1;
-        }
-        return (angle_to_object < 0 ? StrafeDirection.LEFT : StrafeDirection.RIGHT);
-      }
+      return (angle_to_object < 0 ? StrafeDirection.LEFT : StrafeDirection.RIGHT);
     }
     return StrafeDirection.NONE;
   }
