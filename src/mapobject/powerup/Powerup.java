@@ -80,12 +80,7 @@ public abstract class Powerup extends MovableObject {
   @Override
   public void handleHittingWall(RoomSide wall_side) {
     super.handleHittingWall(wall_side);
-    if (wall_side.equals(RoomSide.NORTH) || wall_side.equals(RoomSide.SOUTH)) {
-      direction += 2 * (Math.PI - direction);
-    }
-    else {
-      direction = MapUtils.normalizeAngle(Math.PI - direction);
-    }
+    bounceOffWall(wall_side);
   }
 
   public abstract boolean beAcquired(Pyro pyro);

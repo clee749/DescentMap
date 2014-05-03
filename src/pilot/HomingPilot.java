@@ -4,7 +4,6 @@ import java.awt.geom.Point2D;
 import java.util.Map.Entry;
 
 import mapobject.MapObject;
-import mapobject.MovableObject;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
 import mapobject.unit.robot.Robot;
@@ -43,8 +42,7 @@ public class HomingPilot extends Pilot {
   }
 
   @Override
-  public void bindToObject(MovableObject object) {
-    super.bindToObject(object);
+  public void startPilot() {
     updateTarget();
   }
 

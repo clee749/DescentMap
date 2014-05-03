@@ -73,13 +73,13 @@ public abstract class MovableObject extends MapObject {
     speeds.put(ObjectType.MediumHulkCloaked, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.PlatformLaser, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.Spider, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.HomingMissile, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.MegaMissile, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.SmartPlasma, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.AdvancedLifter, Math.PI);
     speeds.put(ObjectType.BabySpider, Math.PI);
     speeds.put(ObjectType.MediumLifter, Math.PI);
     speeds.put(ObjectType.SecondaryLifter, Math.PI);
-    speeds.put(ObjectType.HomingMissile, Math.PI);
-    speeds.put(ObjectType.MegaMissile, Math.PI);
-    speeds.put(ObjectType.SmartPlasma, Math.PI);
     return speeds;
   }
 
@@ -343,6 +343,15 @@ public abstract class MovableObject extends MapObject {
               Math.min(Math.max(y_loc, connection_to_neighbor.min + radius), connection_to_neighbor.max -
                       radius);
       return unbounded_y_loc == y_loc;
+    }
+  }
+
+  public void bounceOffWall(RoomSide wall_side) {
+    if (wall_side.equals(RoomSide.NORTH) || wall_side.equals(RoomSide.SOUTH)) {
+      direction += 2 * (Math.PI - direction);
+    }
+    else {
+      direction = MapUtils.normalizeAngle(Math.PI - direction);
     }
   }
 }

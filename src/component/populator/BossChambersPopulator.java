@@ -82,7 +82,7 @@ public class BossChambersPopulator extends MapPopulator {
   public void populateBossChamberRoomLocation(Room room, double x_loc, double y_loc,
           RoomSide generator_direction1, RoomSide generator_direction2) {
     room.addChild(new RobotGenerator(room, x_loc, y_loc,
-            ObjectType.ROBOTS[(int) (Math.random() * (ObjectType.ROBOTS.length - 1))], (Math.random() < 0.5
+            ObjectType.ROBOTS[(int) (Math.random() * ObjectType.ROBOTS.length)], (Math.random() < 0.5
                     ? generator_direction1
                     : generator_direction2)));
     room.addChild(PowerupFactory.newStationaryPowerup(

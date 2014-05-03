@@ -267,18 +267,12 @@ public class Pyro extends Unit {
       ((PyroPilot) pilot).newLevel();
     }
     pilot.updateCurrentRoom(room);
-    ((PyroPilot) pilot).startPilot();
+    pilot.startPilot();
   }
 
   @Override
   public ObjectType getType() {
     return ObjectType.Pyro;
-  }
-
-  @Override
-  public void setPilot(Pilot pilot) {
-    super.setPilot(pilot);
-    ((PyroPilot) pilot).startPilot();
   }
 
   public void setEngine(MapEngine engine) {

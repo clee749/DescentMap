@@ -1,6 +1,7 @@
 package mapobject.shot;
 
 import mapobject.MapObject;
+import mapobject.MultipleObject;
 import mapobject.unit.Unit;
 import pilot.Pilot;
 import structure.Room;
@@ -21,7 +22,10 @@ public abstract class ExplosiveShot extends Shot {
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     MapObject created_object = super.doNextAction(engine, s_elapsed);
     if (is_detonated) {
-      return createExplosion();
+      MultipleObject created_objects = new MultipleObject();
+      created_objects.addObject(created_object);
+      created_objects.addObject(createExplosion());
+      return created_objects;
     }
     return created_object;
   }

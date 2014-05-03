@@ -350,11 +350,15 @@ public class Room {
         applySplashDamage(robot, src_object, max_damage, damage_radius, which_neighbor);
       }
     }
+    for (ProximityBomb bomb : bombs) {
+      applySplashDamage(bomb, src_object, max_damage, damage_radius, which_neighbor);
+    }
 
     // check in neighbor Rooms
-    double src_x = src_object.getX();
-    double src_y = src_object.getY();
     if (which_neighbor == null) {
+      double src_x = src_object.getX();
+      double src_y = src_object.getY();
+
       // north neighbor
       if (nw_corner.y - src_y < damage_radius) {
         doSplashDamageInNeighbor(src_object, max_damage, damage_radius, already_damaged, RoomSide.NORTH);
@@ -394,6 +398,19 @@ public class Room {
     if (distance < damage_radius &&
             (which_neighbor == null || MapUtils.canSeeObjectInNeighborRoom(src_object, unit, which_neighbor))) {
       unit.beDamaged(null, (int) (max_damage * (1 - distance / damage_radius)), false);
+    }
+  }
+
+  public void applySplashDamage(ProximityBomb bomb, MapObject src_object, int max_damage,
+          double damage_radius, RoomSide which_neighbor) {
+    double distance =
+            Math.max(
+                    Math.hypot(bomb.getX() - src_object.getX(), bomb.getY() - src_object.getY()) -
+                            bomb.getRadius(), 0.0);
+    if (distance < damage_radius &&
+            (which_neighbor == null || MapUtils.canSeeObjectInNeighborRoom(src_object, bomb, which_neighbor))) {
+      bomb.handleSplashDamage((int) (max_damage * (1 - distance / damage_radius)),
+              MapUtils.absoluteAngleTo(src_object.getX(), src_object.getY(), bomb.getX(), bomb.getY()));
     }
   }
 }

@@ -16,6 +16,11 @@ public abstract class Pilot {
     current_room = object.getRoom();
     bound_object_radius = object.getRadius();
     bound_object_diameter = 2 * bound_object_radius;
+    startPilot();
+  }
+
+  public void startPilot() {
+
   }
 
   public void updateCurrentRoom(Room room) {

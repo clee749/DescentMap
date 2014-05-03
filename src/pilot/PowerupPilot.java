@@ -11,7 +11,8 @@ enum PowerupPilotState {
 public class PowerupPilot extends Pilot {
   private PowerupPilotState state;
 
-  public PowerupPilot() {
+  @Override
+  public void startPilot() {
     state = PowerupPilotState.DRIFT;
   }
 

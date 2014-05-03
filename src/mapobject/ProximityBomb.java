@@ -1,8 +1,6 @@
 package mapobject;
 
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Point;
 
 import mapobject.ephemeral.Explosion;
 import mapobject.powerup.Powerup;
@@ -10,6 +8,7 @@ import mapobject.shot.Shot;
 import mapobject.unit.Pyro;
 import mapobject.unit.Unit;
 import mapobject.unit.robot.Robot;
+import pilot.PowerupPilot;
 import resource.ImageHandler;
 import structure.Room;
 import util.MapUtils;
@@ -18,7 +17,7 @@ import common.ObjectType;
 import common.RoomSide;
 import component.MapEngine;
 
-public class ProximityBomb extends MapObject {
+public class ProximityBomb extends MovableObject {
   public static final double RADIUS = 0.12;
   public static final double SECONDS_PER_FRAME = Powerup.SECONDS_PER_FRAME;
   public static final int DAMAGE = 27;
@@ -26,6 +25,8 @@ public class ProximityBomb extends MapObject {
   public static final double EXPLOSION_RADIUS = RADIUS * 2;
   public static final double EXPLOSION_TIME = 0.75;
   public static final double TIME_TO_FULLY_ARM = 5.0;
+  public static final double MOVE_SPEED_INCREASE_PER_DAMAGE = 0.1;
+  public static final double MOVE_SPEED_DECELERATION = Powerup.MOVE_SPEED_DECELERATION;
 
   private final MapObject source;
   private final int damage;
@@ -36,7 +37,7 @@ public class ProximityBomb extends MapObject {
   private double time_until_fully_armed;
 
   public ProximityBomb(MapObject source, int damage, Room room, double x_loc, double y_loc) {
-    super(RADIUS, room, x_loc, y_loc);
+    super(RADIUS, new PowerupPilot(), room, x_loc, y_loc, 0.0, 0.0, 0.0);
     this.source = source;
     this.damage = damage;
     source_combined_radius = source.getRadius() + radius;
@@ -56,21 +57,15 @@ public class ProximityBomb extends MapObject {
   }
 
   @Override
-  public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
-          int pixels_per_cell) {
-    Point center_pixel = MapUtils.coordsToPixel(x_loc, y_loc, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
-    Image image = images.getImage(image_name, frame_num);
-    g.drawImage(image, center_pixel.x - image.getWidth(null) / 2, center_pixel.y - image.getHeight(null) / 2,
-            null);
-  }
-
-  @Override
-  public void planNextAction(double s_elapsed) {
-
+  public Image getImage(ImageHandler images) {
+    return images.getImage(image_name, frame_num);
   }
 
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
+    MultipleObject created_objects = new MultipleObject();
+    created_objects.addObject(super.doNextAction(engine, s_elapsed));
+
     frame_time_left -= s_elapsed;
     if (frame_time_left < 0.0) {
       ++frame_num;
@@ -84,23 +79,27 @@ public class ProximityBomb extends MapObject {
       }
     }
 
+    if (move_speed > 0.0) {
+      move_speed = Math.max(move_speed - MOVE_SPEED_DECELERATION * s_elapsed, 0.0);
+    }
+
     boolean is_outside_source =
             Math.abs(source.getX() - x_loc) > source_combined_radius ||
                     Math.abs(source.getY() - y_loc) > source_combined_radius;
-    MapObject created_object = handleAnyCollisions(engine, room, is_outside_source);
-    if (created_object != null) {
-      return created_object;
+    created_objects.addObject(handleAnyCollisions(engine, room, is_outside_source));
+    if (!is_in_map) {
+      return created_objects;
     }
 
     RoomSide close_neighbor_side = MapUtils.findRoomBorderSide(this, Unit.LARGEST_UNIT_RADIUS);
     if (close_neighbor_side != null) {
       Room neighbor = room.getNeighborInDirection(close_neighbor_side);
       if (neighbor != null) {
-        return handleAnyCollisions(engine, neighbor, is_outside_source);
+        created_objects.addObject(handleAnyCollisions(engine, neighbor, is_outside_source));
       }
     }
 
-    return null;
+    return created_objects;
   }
 
   public MapObject handleAnyCollisions(MapEngine engine, Room room, boolean is_outside_source) {
@@ -131,5 +130,20 @@ public class ProximityBomb extends MapObject {
     room.doSplashDamage(this, damage, SPLASH_DAMAGE_RADIUS, hit_unit);
     playSound(engine, "weapons/explode1.wav");
     return new Explosion(room, x_loc, y_loc, EXPLOSION_RADIUS, EXPLOSION_TIME);
+  }
+
+  @Override
+  public void handleHittingWall(RoomSide wall_side) {
+    super.handleHittingWall(wall_side);
+    bounceOffWall(wall_side);
+  }
+
+  public void handleSplashDamage(int amount, double direction) {
+    double new_move_speed = amount * MOVE_SPEED_INCREASE_PER_DAMAGE;
+    if (new_move_speed > move_speed) {
+      move_speed = new_move_speed;
+      this.direction = direction;
+      pilot.startPilot();
+    }
   }
 }

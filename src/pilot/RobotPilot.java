@@ -45,10 +45,6 @@ public class RobotPilot extends UnitPilot {
   protected double react_to_cloaked_pyro_time_left;
   protected boolean can_growl;
 
-  public RobotPilot() {
-    state = RobotPilotState.INACTIVE;
-  }
-
   @Override
   public void bindToObject(MovableObject object) {
     super.bindToObject(object);
@@ -56,6 +52,11 @@ public class RobotPilot extends UnitPilot {
     double min_distance_to_pyro = Math.max(bound_object_diameter, MIN_DISTANCE_TO_PYRO);
     min_distance_to_pyro2 = Math.pow(min_distance_to_pyro, 2);
     max_distance_to_pyro2 = Math.pow(min_distance_to_pyro + PREFERRED_DISTANCE_TO_PYRO_RANGE, 2);
+  }
+
+  @Override
+  public void startPilot() {
+    state = RobotPilotState.INACTIVE;
   }
 
   @Override

@@ -118,7 +118,6 @@ public class ComputerPyroPilot extends PyroPilot {
     visited = new HashSet<Room>();
     target_sceneries = new LinkedList<Scenery>();
     current_path = new LinkedList<Entry<RoomSide, RoomConnection>>();
-    state = PyroPilotState.INACTIVE;
   }
 
   @Override

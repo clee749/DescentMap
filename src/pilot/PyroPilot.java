@@ -14,8 +14,6 @@ public abstract class PyroPilot extends UnitPilot {
 
   public abstract void newLevel();
 
-  public abstract void startPilot();
-
   public abstract boolean isReadyToRespawn();
 
   public abstract void handleRespawnDelay(double s_elapsed);
