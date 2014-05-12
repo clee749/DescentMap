@@ -83,29 +83,29 @@ public class MapRunner {
   public static final int NUM_PYROS = 3;
   public static final double STANDARD_MAP_PROB = 0.5;
   public static final double EACH_NON_STANDARD_MAP_PROB = 1.0 / (MapType.values().length - 1);
-  public static final long BUILD_SLEEP = 100L;
-  public static final long PAUSE_AFTER_BUILD_SLEEP = 1000L;
-  public static final long PAUSE_BEFORE_PLAY_SLEEP = 1000L;
-  public static final long PLAY_MIN_SLEEP = 50L;
-  public static final long PLAY_MAX_SLEEP = 100L;
-  public static final long PAUSE_AFTER_PLAY_SLEEP = 1000L;
+  public static final long BUILD_FRAME_TIME = 100L;
+  public static final long PAUSE_AFTER_BUILD_FRAME_TIME = 1000L;
+  public static final long PAUSE_BEFORE_PLAY_FRAME_TIME = 1000L;
+  public static final long PLAY_MIN_FRAME_TIME = 50L;
+  public static final long PLAY_MAX_FRAME_TIME = 100L;
+  public static final long PAUSE_AFTER_PLAY_FRAME_TIME = 1000L;
 
   private final LinkedList<Pyro> pyros;
   private final MapDisplayer displayer;
   private final MapEngine engine;
-  private final long play_min_sleep;
+  private final long play_min_frame_time;
   private MapType map_type;
   private DescentMap map;
   private RunnerState state;
-  private long target_sleep_ms;
+  private long target_frame_time;
   private long last_update_time;
   private boolean is_paused;
 
-  public MapRunner(long play_min_sleep) {
+  public MapRunner(long play_min_frame_time) {
     pyros = new LinkedList<Pyro>();
     displayer = new MapDisplayer(this);
     engine = new MapEngine();
-    this.play_min_sleep = play_min_sleep;
+    this.play_min_frame_time = play_min_frame_time;
   }
 
   public MapDisplayer getDisplayer() {
@@ -154,12 +154,12 @@ public class MapRunner {
     map = new DescentMap(MapType.getBuilder(map_type));
     displayer.newMap();
     state = RunnerState.BUILD_MAP;
-    target_sleep_ms = BUILD_SLEEP;
+    target_frame_time = BUILD_FRAME_TIME;
     last_update_time = 0L;
   }
 
   public void sleepAfterStep() throws InterruptedException {
-    Thread.sleep(target_sleep_ms);
+    Thread.sleep(Math.max(target_frame_time - (System.currentTimeMillis() - last_update_time), 0L));
   }
 
   public boolean doNextStep() {
@@ -167,9 +167,10 @@ public class MapRunner {
       return false;
     }
     long ms_elapsed = System.currentTimeMillis() - last_update_time;
-    if (ms_elapsed < target_sleep_ms) {
+    if (ms_elapsed < target_frame_time) {
       return false;
     }
+    last_update_time = System.currentTimeMillis();
     switch (state) {
       case BUILD_MAP:
         doBuildStep();
@@ -181,7 +182,7 @@ public class MapRunner {
         doPauseBeforePlayStep();
         break;
       case PLAY_MAP:
-        doPlayStep(Math.min(ms_elapsed, PLAY_MAX_SLEEP) / 1000.0);
+        doPlayStep(Math.min(ms_elapsed, PLAY_MAX_FRAME_TIME) / 1000.0);
         break;
       case PAUSE_AFTER_PLAY:
         doPauseAfterPlayStep();
@@ -189,7 +190,6 @@ public class MapRunner {
       default:
         throw new DescentMapException("Unexpected RunnerState: " + state);
     }
-    last_update_time = System.currentTimeMillis();
     return true;
   }
 
@@ -211,19 +211,19 @@ public class MapRunner {
         ++pyro_count;
       }
       state = RunnerState.PAUSE_AFTER_BUILD;
-      target_sleep_ms = PAUSE_AFTER_BUILD_SLEEP;
+      target_frame_time = PAUSE_AFTER_BUILD_FRAME_TIME;
     }
   }
 
   public void doPauseAfterBuildStep() {
     displayer.finishBuildingMap();
     state = RunnerState.PAUSE_BEFORE_PLAY;
-    target_sleep_ms = PAUSE_BEFORE_PLAY_SLEEP;
+    target_frame_time = PAUSE_BEFORE_PLAY_FRAME_TIME;
   }
 
   public void doPauseBeforePlayStep() {
     state = RunnerState.PLAY_MAP;
-    target_sleep_ms = play_min_sleep;
+    target_frame_time = play_min_frame_time;
   }
 
   public void doPlayStep(double s_elapsed) {
@@ -231,7 +231,7 @@ public class MapRunner {
     engine.doNextStep(s_elapsed);
     if (engine.levelComplete()) {
       state = RunnerState.PAUSE_AFTER_PLAY;
-      target_sleep_ms = PAUSE_AFTER_PLAY_SLEEP;
+      target_frame_time = PAUSE_AFTER_PLAY_FRAME_TIME;
     }
   }
 
@@ -245,7 +245,7 @@ public class MapRunner {
   }
 
   public static void main(String[] args) throws InterruptedException {
-    MapRunner runner = new MapRunner(PLAY_MIN_SLEEP);
+    MapRunner runner = new MapRunner(PLAY_MIN_FRAME_TIME);
     JFrame frame = new JFrame();
     MapPanel panel = new MapPanel(runner);
     Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();

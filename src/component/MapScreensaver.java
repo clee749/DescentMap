@@ -14,7 +14,7 @@ public class MapScreensaver extends SimpleScreensaver {
   public void init() {
     ScreensaverSettings settings = getContext().getSettings();
     String play_min_sleep_str = settings.getProperty("min-ms-per-frame");
-    long play_min_sleep = MapRunner.PLAY_MIN_SLEEP;
+    long play_min_sleep = MapRunner.PLAY_MIN_FRAME_TIME;
     if (play_min_sleep_str != null) {
       try {
         play_min_sleep = Long.parseLong(play_min_sleep_str);
