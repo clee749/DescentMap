@@ -35,10 +35,8 @@ public class SmartMissile extends Missile {
       double placement_x_range = previous_x_loc - x_loc;
       double placement_y_range = previous_y_loc - y_loc;
       for (int count = 0; count < NUM_SMART_PLASMAS; ++count) {
-        created_objects
-                .addObject(new SmartPlasma(source, smart_plasma_damage, room, x_loc + Math.random() *
-                        placement_x_range, y_loc + Math.random() * placement_y_range, Math.random() *
-                        MapUtils.TWO_PI));
+        created_objects.addObject(new SmartPlasma(source, smart_plasma_damage, room, x_loc + Math.random() *
+                placement_x_range, y_loc + Math.random() * placement_y_range, Math.random() * MapUtils.TWO_PI));
       }
       playSound(engine, "weapons/laser06.wav");
       return created_objects;

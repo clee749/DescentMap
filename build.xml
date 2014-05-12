@@ -54,7 +54,7 @@ USA
       build.properties.sample to build.properties and
       follow the instructions in that file.
     </fail>
-    <available file="C:/saverbeans" property="saverbeans.present" />
+    <available file="${saverbeans.path}" property="saverbeans.present" />
     <fail unless="saverbeans.present">
       Property saverbeans.path is invalid.  Please set
       it to the installation path of the SaverBeans SDK.
@@ -77,10 +77,10 @@ USA
   <target name="define" description="Define custom tasks">
     <taskdef name="foreachscreensaver" 
       classname="org.jdesktop.jdic.screensaver.autogen.ForEachScreensaver"
-      classpath="C:/saverbeans/saverbeans-ant.jar" />
+      classpath="${saverbeans.path}/saverbeans-ant.jar" />
     <taskdef name="makewin32installscript" 
       classname="org.jdesktop.jdic.screensaver.autogen.NsiGeneratorTask"
-      classpath="C:/saverbeans/saverbeans-ant.jar" />
+      classpath="${saverbeans.path}/saverbeans-ant.jar" />
   </target>
     
   <target name="init" depends="properties,check,define" />
@@ -88,7 +88,7 @@ USA
   <target name="compile" depends="init" description="Compile the screensaver">
     <mkdir dir="${build}/share" />
     <javac debug="on" destdir="${build}/share" srcdir="${src}" 
-           classpath="C:/saverbeans/saverbeans-api.jar" />
+           classpath="${saverbeans.path}/saverbeans-api.jar" />
     <copy todir="${build}/share">
       <fileset dir="${src}">
         <exclude name="**/CVS" />
@@ -116,7 +116,7 @@ USA
     <!-- Create distribution for win32: -->
     <mkdir dir="${dist}/${screensaver}-win32" />
     <copy todir="${dist}/${screensaver}-win32">
-      <fileset dir="C:/saverbeans">
+      <fileset dir="${saverbeans.path}">
         <include name="saverbeans-api.jar" />
       </fileset>
       <fileset dir="${build}/jar">
@@ -138,7 +138,7 @@ USA
     <!-- Create distribution for Unix: -->
     <mkdir dir="${dist}/${screensaver}-unix" />
     <copy todir="${dist}/${screensaver}-unix">
-      <fileset dir="C:/saverbeans">
+      <fileset dir="${saverbeans.path}">
         <include name="saverbeans-api.jar" />
       </fileset>
       <fileset dir="${build}/jar">
@@ -168,7 +168,7 @@ USA
         productWebSite="${productWebSite}"
         licenseFile="${basedir}/COPYING"
         outputFilename="${screensaver}-setup.exe"
-        saverbeansSdkPath="C:/saverbeans"
+        saverbeansSdkPath="${saverbeans.path}"
         outFile="${build}/win32-installer/${screensaver}.nsi"
         jarDir="${build}/jar"
         scrDir="${build}/win32"
@@ -193,7 +193,7 @@ USA
           fork="true">
       <classpath>
         <pathelement location="${build}/share" />
-        <pathelement location="C:/saverbeans/saverbeans-api.jar" />
+        <pathelement location="${saverbeans.path}/saverbeans-api.jar" />
       </classpath>
       <jvmarg value="-Xdebug" />
       <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n" />

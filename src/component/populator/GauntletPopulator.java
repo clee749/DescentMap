@@ -14,8 +14,8 @@ import common.ObjectType;
 import common.RoomSide;
 
 public class GauntletPopulator extends MapPopulator {
-  private static final ObjectType[] GENERATOR_ROOM_POWERUPS = {ObjectType.MegaMissilePowerup,
-          ObjectType.SmartMissilePowerup};
+  private static final ObjectType[] GENERATOR_ROOM_POWERUPS =
+          {ObjectType.MegaMissilePowerup, ObjectType.SmartMissilePowerup};
 
   public GauntletPopulator(DescentMap map) {
     super(map);

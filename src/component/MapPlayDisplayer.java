@@ -62,8 +62,8 @@ public class MapPlayDisplayer {
     int sight_diameter = 2 * sight_radius + 1;
     pixels_per_cell = Math.min(dims.width / sight_diameter, dims.height / sight_diameter);
     center_pixel = new Point(dims.width / 2, dims.height / 2);
-    max_col_offset = (int) Math.ceil((double) center_pixel.x / pixels_per_cell);
-    max_row_offset = (int) Math.ceil((double) center_pixel.y / pixels_per_cell);
+    max_col_offset = (int) Math.ceil((double) center_pixel.x / pixels_per_cell) + 1;
+    max_row_offset = (int) Math.ceil((double) center_pixel.y / pixels_per_cell) + 1;
   }
 
   public void paintMap(Graphics2D g) {

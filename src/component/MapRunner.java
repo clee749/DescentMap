@@ -41,8 +41,8 @@ enum MapType {
   public static final int MAX_ROOM_SIZE = 10;
   public static final int STANDARD_NUM_ROOMS = 10;
   public static final int MAZE_MIN_TOTAL_ROOM_AREA = 100 * MazeBuilder.HALLWAY_WIDTH;
-  public static final int GAUNTLET_NUM_GENERATOR_ROOMS = (int) Math.ceil(ObjectType.ROBOTS.length /
-          (MAX_ROOM_SIZE / 3.0 * 2));
+  public static final int GAUNTLET_NUM_GENERATOR_ROOMS =
+          (int) Math.ceil(ObjectType.ROBOTS.length / (MAX_ROOM_SIZE / 3.0 * 2));
   public static final int BOSS_CHAMBERS_WIDTH = 2;
   public static final int BOSS_CHAMBERS_HEIGHT = 2;
 

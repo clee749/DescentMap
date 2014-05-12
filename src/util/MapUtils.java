@@ -314,8 +314,8 @@ public class MapUtils {
   public static boolean canSeeObjectInNeighborRoom(MapObject src, MapObject dst, RoomSide neighbor_side,
           Point2D.Double angles_to_connection) {
     double angle_to_location =
-            angleTo(RoomSide.directionToRadians(neighbor_side), dst.getX() - src.getX(),
-                    dst.getY() - src.getY());
+            angleTo(RoomSide.directionToRadians(neighbor_side), dst.getX() - src.getX(), dst.getY() -
+                    src.getY());
     return angles_to_connection.x < angle_to_location && angle_to_location < angles_to_connection.y;
   }
 
@@ -327,8 +327,8 @@ public class MapUtils {
    * @return true if src can see dst, false otherwise
    */
   public static boolean canSeeObjectInNeighborRoom(MapObject src, MapObject dst, RoomSide neighbor_side) {
-    return canSeeObjectInNeighborRoom(src, dst, neighbor_side,
-            anglesToNeighborConnectionPoints(src, neighbor_side));
+    return canSeeObjectInNeighborRoom(src, dst, neighbor_side, anglesToNeighborConnectionPoints(src,
+            neighbor_side));
   }
 
   /**

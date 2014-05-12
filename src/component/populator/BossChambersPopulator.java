@@ -14,8 +14,8 @@ import common.ObjectType;
 import common.RoomSide;
 
 public class BossChambersPopulator extends MapPopulator {
-  private static final ObjectType[] GENERATOR_POWERUPS = {ObjectType.MegaMissilePowerup,
-          ObjectType.SmartMissilePowerup};
+  private static final ObjectType[] GENERATOR_POWERUPS =
+          {ObjectType.MegaMissilePowerup, ObjectType.SmartMissilePowerup};
 
   public BossChambersPopulator(DescentMap map) {
     super(map);

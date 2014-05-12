@@ -144,8 +144,8 @@ public class Pyro extends Unit {
   // collisions
   public static final double MIN_WALL_COLLISION_SPEED_FOR_DAMAGE = 0.9;
   public static final int MIN_SHIELDS_AFTER_WALL_COLLISION = 10;
-  public static final double ROBOT_COLLISION_ROOM_MARGIN = Unit.LARGEST_UNIT_RADIUS +
-          Unit.getRadius(ObjectType.Pyro);
+  public static final double ROBOT_COLLISION_ROOM_MARGIN =
+          Unit.LARGEST_UNIT_RADIUS + Unit.getRadius(ObjectType.Pyro);
 
   // death spin
   public static final double DEATH_SPIN_TIME = 5.0;
@@ -733,12 +733,10 @@ public class Pyro extends Unit {
               y_loc));
     }
     if (hasPrimaryCannon(PyroPrimaryCannon.PLASMA)) {
-      powerups.addObject(PowerupFactory
-              .newReleasedPowerup(ObjectType.PlasmaCannonPowerup, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.PlasmaCannonPowerup, room, x_loc, y_loc));
     }
     if (hasPrimaryCannon(PyroPrimaryCannon.FUSION)) {
-      powerups.addObject(PowerupFactory
-              .newReleasedPowerup(ObjectType.FusionCannonPowerup, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.FusionCannonPowerup, room, x_loc, y_loc));
     }
     if (getSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE) >= ConcussionPack.NUM_MISSILES) {
       powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.ConcussionPack, room, x_loc, y_loc));
@@ -760,8 +758,7 @@ public class Pyro extends Unit {
       powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.ProximityPack, room, x_loc, y_loc));
     }
     if (getSecondaryAmmo(PyroSecondaryCannon.SMART_MISSILE) > 0) {
-      powerups.addObject(PowerupFactory
-              .newReleasedPowerup(ObjectType.SmartMissilePowerup, room, x_loc, y_loc));
+      powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.SmartMissilePowerup, room, x_loc, y_loc));
     }
     if (getSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE) > 0) {
       powerups.addObject(PowerupFactory.newReleasedPowerup(ObjectType.MegaMissilePowerup, room, x_loc, y_loc));

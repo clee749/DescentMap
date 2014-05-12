@@ -13,8 +13,8 @@ import common.ObjectType;
 import component.MapEngine;
 
 public class Explosion extends MapObject {
-  public static final Color[] COLORS = {Color.magenta, Color.orange, Color.pink, Color.red, Color.yellow,
-          Color.white};
+  public static final Color[] COLORS =
+          {Color.magenta, Color.orange, Color.pink, Color.red, Color.yellow, Color.white};
   public static final double DISTANCE_BETWEEN_LAYERS = 0.1;
 
   private final double total_time;

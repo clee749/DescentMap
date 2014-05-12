@@ -472,8 +472,7 @@ public class ComputerPyroPilot extends PyroPilot {
     }
 
     if (ra.closest_pyro_distance2 == Double.MAX_VALUE &&
-            (state.equals(PyroPilotState.MOVE_TO_ROOM_CONNECTION) || state
-                    .equals(PyroPilotState.MOVE_TO_NEIGHBOR_ROOM))) {
+            (state.equals(PyroPilotState.MOVE_TO_ROOM_CONNECTION) || state.equals(PyroPilotState.MOVE_TO_NEIGHBOR_ROOM))) {
       RoomConnection connection = target_room_info.getValue();
       for (Pyro pyro : connection.neighbor.getPyros()) {
         if (!pyro.isVisible()) {
@@ -690,27 +689,20 @@ public class ComputerPyroPilot extends PyroPilot {
       case FusionCannonPowerup:
         return !bound_pyro.hasPrimaryCannon(PyroPrimaryCannon.FUSION);
       case ConcussionMissilePowerup:
-        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE) < Pyro
-                .getMaxSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE);
+        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE) < Pyro.getMaxSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE);
       case ConcussionPack:
         return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE) +
-                ConcussionPack.NUM_MISSILES <= Pyro
-                  .getMaxSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE);
+                ConcussionPack.NUM_MISSILES <= Pyro.getMaxSecondaryAmmo(PyroSecondaryCannon.CONCUSSION_MISSILE);
       case HomingMissilePowerup:
-        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) < Pyro
-                .getMaxSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE);
+        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) < Pyro.getMaxSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE);
       case HomingPack:
-        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) + HomingPack.NUM_MISSILES <= Pyro
-                .getMaxSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE);
+        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE) + HomingPack.NUM_MISSILES <= Pyro.getMaxSecondaryAmmo(PyroSecondaryCannon.HOMING_MISSILE);
       case ProximityPack:
-        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.PROXIMITY_BOMB) + ProximityPack.NUM_BOMBS <= Pyro
-                .getMaxSecondaryAmmo(PyroSecondaryCannon.PROXIMITY_BOMB);
+        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.PROXIMITY_BOMB) + ProximityPack.NUM_BOMBS <= Pyro.getMaxSecondaryAmmo(PyroSecondaryCannon.PROXIMITY_BOMB);
       case SmartMissilePowerup:
-        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.SMART_MISSILE) < Pyro
-                .getMaxSecondaryAmmo(PyroSecondaryCannon.SMART_MISSILE);
+        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.SMART_MISSILE) < Pyro.getMaxSecondaryAmmo(PyroSecondaryCannon.SMART_MISSILE);
       case MegaMissilePowerup:
-        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE) < Pyro
-                .getMaxSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE);
+        return bound_pyro.getSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE) < Pyro.getMaxSecondaryAmmo(PyroSecondaryCannon.MEGA_MISSILE);
       default:
         throw new DescentMapException("Unexpected Powerup: " + powerup);
     }

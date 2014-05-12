@@ -27,9 +27,10 @@ public class StandardPopulator extends MapPopulator {
   public static final int ENERGY_CENTER_PLACEMENT_RADIUS = 2;
   public static final int NUM_ROOMS_PER_ROBOT_GENERATOR = 10;
   public static final int MIN_ROOM_DIMENSION_FOR_ROBOT_GENERATOR = 3;
-  protected static final ObjectType[] ROBOT_GENERATOR_TYPES = {ObjectType.AdvancedLifter, ObjectType.Bomber,
-          ObjectType.Class2Drone, ObjectType.DefenseRobot, ObjectType.Gopher, ObjectType.LightHulk,
-          ObjectType.MediumLifter, ObjectType.PlatformLaser, ObjectType.SecondaryLifter};
+  protected static final ObjectType[] ROBOT_GENERATOR_TYPES =
+          {ObjectType.AdvancedLifter, ObjectType.Bomber, ObjectType.Class2Drone, ObjectType.DefenseRobot,
+                  ObjectType.Gopher, ObjectType.LightHulk, ObjectType.MediumLifter, ObjectType.PlatformLaser,
+                  ObjectType.SecondaryLifter};
 
   // robots
   public static final int ALL_ROBOTS_MIN_ROOM_AREA = 50;
@@ -43,8 +44,8 @@ public class StandardPopulator extends MapPopulator {
                   ObjectType.PlatformMissile, ObjectType.SecondaryLifter, ObjectType.Spider};
 
   // powerups
-  protected static final ObjectType[] POWERUPS_TO_POPULATE = {ObjectType.MegaMissilePowerup,
-          ObjectType.SmartMissilePowerup, ObjectType.SpreadfireCannonPowerup};
+  protected static final ObjectType[] POWERUPS_TO_POPULATE =
+          {ObjectType.MegaMissilePowerup, ObjectType.SmartMissilePowerup, ObjectType.SpreadfireCannonPowerup};
 
   public StandardPopulator(DescentMap map) {
     super(map);

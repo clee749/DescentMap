@@ -43,8 +43,8 @@ public class Zunggg extends MapObject {
     int num_bolts = Math.min(pixels_per_cell / NUM_BOLTS_DIVISOR, MIN_NUM_BOLTS);
     for (int i = 0; i < num_bolts; ++i) {
       g.drawLine(center_pixel.x, center_pixel.y, center_pixel.x +
-              (int) (Math.random() * pixels_per_cell - pixels_per_half_cell),
-              center_pixel.y + (int) (Math.random() * pixels_per_cell - pixels_per_half_cell));
+              (int) (Math.random() * pixels_per_cell - pixels_per_half_cell), center_pixel.y +
+              (int) (Math.random() * pixels_per_cell - pixels_per_half_cell));
     }
   }
 
