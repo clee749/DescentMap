@@ -1,5 +1,6 @@
 package mapobject.unit;
 
+import java.awt.Image;
 import java.awt.geom.Point2D;
 import java.util.HashMap;
 
@@ -9,6 +10,8 @@ import mapobject.MultipleObject;
 import mapobject.ephemeral.Explosion;
 import pilot.Pilot;
 import pilot.PilotAction;
+import pilot.TurnDirection;
+import resource.ImageHandler;
 import structure.Room;
 import structure.RoomConnection;
 import util.MapUtils;
@@ -53,6 +56,8 @@ public abstract class Unit extends MovableObject {
     radii.put(ObjectType.HeavyDriller, 0.4);
     radii.put(ObjectType.Spider, 0.4);
     radii.put(ObjectType.MiniBoss, 0.55);
+    radii.put(ObjectType.BigGuy, 1.4);
+    radii.put(ObjectType.FinalBoss, 1.6);
     return radii;
   }
 
@@ -73,6 +78,8 @@ public abstract class Unit extends MovableObject {
     offsets.put(ObjectType.MediumHulk, 0.83);
     offsets.put(ObjectType.MediumHulkCloaked, 0.83);
     offsets.put(ObjectType.MiniBoss, 0.83);
+    offsets.put(ObjectType.BigGuy, 0.83);
+    offsets.put(ObjectType.FinalBoss, 0.83);
     offsets.put(ObjectType.DefenseRobot, 0.84);
     offsets.put(ObjectType.Class1Drone, 0.86);
     return offsets;
@@ -99,6 +106,8 @@ public abstract class Unit extends MovableObject {
     shields.put(ObjectType.HeavyHulk, 98);
     shields.put(ObjectType.Pyro, 100);
     shields.put(ObjectType.MiniBoss, 122);
+    shields.put(ObjectType.BigGuy, 999);
+    shields.put(ObjectType.FinalBoss, 999);
     return shields;
   }
 
@@ -115,6 +124,10 @@ public abstract class Unit extends MovableObject {
   public static final double EXPLOSION_MIN_TIME = 0.5;
   public static final double EXPLOSION_MAX_TIME = EXPLOSION_MIN_TIME * 2;
   public static final double EXPLOSION_TIME_DIVISOR = 3.0;
+  public static final double DEATH_SPIN_TIME = 5.0;
+  public static final double DEATH_SPIN_MOVE_SPEED_DIVISOR = 2.0;
+  public static final double DEATH_SPIN_TURN_SPEED_MULTIPLIER = 1.5;
+  public static final double MAX_DEATH_SPIN_DAMAGE_PERCENT = 0.5;
 
   protected final double cannon_offset;
   protected final int half_shields;
@@ -131,6 +144,13 @@ public abstract class Unit extends MovableObject {
   protected double visible_time_left;
   protected boolean is_exploded;
   protected double exploding_time_left;
+  protected boolean has_death_spin;
+  protected TurnDirection previous_turn;
+  protected boolean death_spin_started;
+  protected double death_spin_time_left;
+  protected double death_spin_direction;
+  protected double death_spin_delta_direction;
+  protected double max_death_spin_damage_taken;
 
   public Unit(double radius, Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(radius, pilot, room, x_loc, y_loc, direction);
@@ -139,6 +159,7 @@ public abstract class Unit extends MovableObject {
     shields = STARTING_SHIELDS.get(type);
     half_shields = shields / 2;
     is_visible = true;
+    previous_turn = TurnDirection.NONE;
   }
 
   public int getShields() {
@@ -153,18 +174,41 @@ public abstract class Unit extends MovableObject {
     return is_visible;
   }
 
+  public boolean isHomable() {
+    return !is_cloaked;
+  }
+
   public boolean isExploded() {
     return is_exploded;
   }
 
+  public void enableDeathSpin() {
+    has_death_spin = true;
+    max_death_spin_damage_taken = shields * MAX_DEATH_SPIN_DAMAGE_PERCENT;
+  }
+
+  @Override
+  public Image getImage(ImageHandler images) {
+    if (!has_death_spin || shields >= 0) {
+      return super.getImage(images);
+    }
+    return images.getImage(image_name, death_spin_direction);
+  }
+
   @Override
   public void planNextAction(double s_elapsed) {
-    if (!is_exploded) {
-      handleCooldowns(s_elapsed);
-      super.planNextAction(s_elapsed);
+    if (shields < 0) {
+      if (has_death_spin) {
+        handleCooldowns(s_elapsed);
+        next_action = PilotAction.MOVE_FORWARD;
+      }
+      else {
+        next_action = PilotAction.NO_ACTION;
+      }
     }
     else {
-      next_action = PilotAction.NO_ACTION;
+      handleCooldowns(s_elapsed);
+      super.planNextAction(s_elapsed);
     }
   }
 
@@ -174,8 +218,9 @@ public abstract class Unit extends MovableObject {
       is_visible = false;
     }
     if (shields < 0) {
-      return handleDeath(engine, s_elapsed);
+      return (has_death_spin ? doNextDeathSpinAction(engine, s_elapsed) : handleDeath(engine, s_elapsed));
     }
+    previous_turn = (next_action != null ? next_action.turn : TurnDirection.NONE);
     MultipleObject created_objects = new MultipleObject();
     int less_half_shields = half_shields - shields;
     if (less_half_shields > 0 &&
@@ -185,6 +230,39 @@ public abstract class Unit extends MovableObject {
     }
     created_objects.addObject(super.doNextAction(engine, s_elapsed));
     return created_objects;
+  }
+
+  public MapObject doNextDeathSpinAction(MapEngine engine, double s_elapsed) {
+    if (!death_spin_started) {
+      death_spin_started = true;
+      death_spin_direction = direction;
+      death_spin_time_left = DEATH_SPIN_TIME;
+      move_speed /= DEATH_SPIN_MOVE_SPEED_DIVISOR;
+      death_spin_delta_direction = turn_speed * DEATH_SPIN_TURN_SPEED_MULTIPLIER;
+      if (previous_turn.equals(TurnDirection.CLOCKWISE) ||
+              (previous_turn.equals(TurnDirection.NONE) && Math.random() < 0.5)) {
+        death_spin_delta_direction *= -1;
+      }
+    }
+    else {
+      death_spin_direction =
+              MapUtils.normalizeAngle(death_spin_direction + death_spin_delta_direction * s_elapsed);
+      if (death_spin_time_left < 0.0) {
+        MapObject created_object = handleDeath(engine, s_elapsed);
+        return created_object;
+      }
+      if (!doNextMovement(engine, s_elapsed)) {
+        death_spin_time_left = 0.0;
+      }
+      death_spin_time_left -= s_elapsed;
+    }
+    if (shields < -max_death_spin_damage_taken) {
+      death_spin_time_left = -1.0;
+    }
+    if (Math.random() * MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS < s_elapsed) {
+      playSound(engine, "effects/explode2.wav");
+    }
+    return createDamagedExplosion();
   }
 
   @Override

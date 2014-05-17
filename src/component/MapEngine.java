@@ -59,6 +59,10 @@ public class MapEngine {
     center_object = map.getCenterObject();
   }
 
+  public DescentMap getMap() {
+    return map;
+  }
+
   public LinkedList<Pyro> getCreatedPyros() {
     return created_pyros;
   }

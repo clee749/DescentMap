@@ -40,28 +40,12 @@ public class BossChambersBuilder extends MapBuilder {
       addEntranceRoom();
       return true;
     }
-    // if (all_rooms.size() < 2) {
-    // addFirstBossChamber();
-    // return true;
-    // }
     addGeneralRoom();
     return true;
   }
 
   public void addEntranceRoom() {
     current_boss_chamber = addFirstRoom(boss_chamber_size, boss_chamber_size);
-    current_x = 1;
-    current_y = 1;
-  }
-
-  public void addFirstBossChamber() {
-    Room entrance_room = all_rooms.get(0);
-    Point entrance_ne_corner = entrance_room.getNECorner();
-    current_boss_chamber =
-            new Room(new Point(entrance_ne_corner.x, entrance_ne_corner.y - connector_room_offset),
-                    boss_chamber_size, boss_chamber_size);
-    RoomConnection connection = new RoomConnection(entrance_room, current_boss_chamber, RoomSide.EAST);
-    finalizeRoom(entrance_room, RoomSide.EAST, connection);
     current_x = 1;
     current_y = 1;
   }

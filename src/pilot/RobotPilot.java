@@ -62,6 +62,10 @@ public class RobotPilot extends UnitPilot {
   @Override
   public void updateCurrentRoom(Room room) {
     super.updateCurrentRoom(room);
+    initNewRoomState();
+  }
+
+  public void initNewRoomState() {
     initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
   }
 
@@ -205,58 +209,17 @@ public class RobotPilot extends UnitPilot {
 
   public void updateState(double s_elapsed) {
     // reacting to a Pyro takes precedence over all other states
-    if (!state.equals(RobotPilotState.REACT_TO_PYRO)) {
-      // look for a Pyro in the same Room
-      Pyro target_pyro = null;
-      double smallest_angle_to_pyro = Math.PI;
-      for (Pyro pyro : current_room.getPyros()) {
-        if (pyro.isVisible()) {
-          double abs_angle_to_pyro = Math.abs(MapUtils.angleTo(bound_object, pyro));
-          if (abs_angle_to_pyro < smallest_angle_to_pyro) {
-            target_pyro = pyro;
-            smallest_angle_to_pyro = abs_angle_to_pyro;
-          }
-        }
-      }
-      if (target_pyro != null) {
-        markPyroAsTarget(target_pyro);
-        return;
-      }
-
-      // look for a visible Pyro in a neighbor Room
-      for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
-        RoomConnection connection = entry.getValue();
-        for (Pyro pyro : connection.neighbor.getPyros()) {
-          if (pyro.isVisible() && MapUtils.canSeeObjectInNeighborRoom(bound_object, pyro, entry.getKey())) {
-            markPyroAsTarget(pyro);
-            target_object_room_info = entry;
-            return;
-          }
-        }
-      }
+    if (!state.equals(RobotPilotState.REACT_TO_PYRO) && searchForPyro()) {
+      return;
     }
 
     // handle states if already reacting to Pyro or no Pyro found
     switch (state) {
       case INACTIVE:
-        if (Math.random() / s_elapsed < START_EXPLORE_PROB) {
-          initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
-        }
-        else {
-          for (Robot robot : current_room.getRobots()) {
-            if (robot.equals(bound_object)) {
-              continue;
-            }
-            if (MapUtils.objectsIntersect(bound_object, robot, bound_object_diameter) &&
-                    Math.random() / s_elapsed < EVASIVE_START_EXPLORE_PROB) {
-              initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
-            }
-          }
-        }
+        updateInactiveState(s_elapsed);
         break;
       case TURN_TO_ROOM_EXIT:
-        double difference = Math.abs(target_direction - bound_object.getDirection());
-        if (difference < DIRECTION_EPSILON || MapUtils.TWO_PI - difference < DIRECTION_EPSILON) {
+        if (MapUtils.isAngleDeltaLessThan(bound_object.getDirection(), target_direction, DIRECTION_EPSILON)) {
           initState(RobotPilotState.MOVE_TO_ROOM_EXIT);
         }
         break;
@@ -266,16 +229,14 @@ public class RobotPilot extends UnitPilot {
         }
         break;
       case TURN_INTO_ROOM:
-        difference = Math.abs(target_direction - bound_object.getDirection());
-        if (difference < DIRECTION_EPSILON || MapUtils.TWO_PI - difference < DIRECTION_EPSILON) {
+        if (MapUtils.isAngleDeltaLessThan(bound_object.getDirection(), target_direction, DIRECTION_EPSILON)) {
           initState(RobotPilotState.MOVE_INTO_ROOM);
         }
         break;
       case MOVE_INTO_ROOM:
         break;
       case TURN_TO_ROOM_INTERIOR:
-        difference = Math.abs(target_direction - bound_object.getDirection());
-        if (difference < DIRECTION_EPSILON || MapUtils.TWO_PI - difference < DIRECTION_EPSILON) {
+        if (MapUtils.isAngleDeltaLessThan(bound_object.getDirection(), target_direction, DIRECTION_EPSILON)) {
           initState(RobotPilotState.MOVE_TO_ROOM_INTERIOR);
         }
         break;
@@ -304,10 +265,60 @@ public class RobotPilot extends UnitPilot {
     }
   }
 
+  public boolean searchForPyro() {
+    // look for a Pyro in the same Room
+    Pyro target_pyro = null;
+    double smallest_angle_to_pyro = Math.PI;
+    for (Pyro pyro : current_room.getPyros()) {
+      if (pyro.isVisible()) {
+        double abs_angle_to_pyro = Math.abs(MapUtils.angleTo(bound_object, pyro));
+        if (abs_angle_to_pyro < smallest_angle_to_pyro) {
+          target_pyro = pyro;
+          smallest_angle_to_pyro = abs_angle_to_pyro;
+        }
+      }
+    }
+    if (target_pyro != null) {
+      markPyroAsTarget(target_pyro);
+      return true;
+    }
+
+    // look for a visible Pyro in a neighbor Room
+    for (Entry<RoomSide, RoomConnection> entry : current_room.getNeighbors().entrySet()) {
+      RoomConnection connection = entry.getValue();
+      for (Pyro pyro : connection.neighbor.getPyros()) {
+        if (pyro.isVisible() && MapUtils.canSeeObjectInNeighborRoom(bound_object, pyro, entry.getKey())) {
+          markPyroAsTarget(pyro);
+          target_object_room_info = entry;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   public void markPyroAsTarget(Pyro pyro) {
     target_unit = pyro;
     target_object_room = pyro.getRoom();
     initState(pyro.isCloaked() ? RobotPilotState.REACT_TO_CLOAKED_PYRO : RobotPilotState.REACT_TO_PYRO);
+  }
+
+  public void updateInactiveState(double s_elapsed) {
+    if (Math.random() / s_elapsed < START_EXPLORE_PROB) {
+      initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
+    }
+    else {
+      for (Robot robot : current_room.getRobots()) {
+        if (robot.equals(bound_object)) {
+          continue;
+        }
+        if (MapUtils.objectsIntersect(bound_object, robot, bound_object_diameter) &&
+                Math.random() / s_elapsed < EVASIVE_START_EXPLORE_PROB) {
+          initState(RobotPilotState.TURN_TO_ROOM_INTERIOR);
+          break;
+        }
+      }
+    }
   }
 
   public void updateReactToPyroState(double s_elapsed) {

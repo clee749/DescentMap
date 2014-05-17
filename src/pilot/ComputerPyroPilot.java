@@ -5,8 +5,8 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map.Entry;
 import java.util.Stack;
+import java.util.Map.Entry;
 
 import mapobject.MapObject;
 import mapobject.ProximityBomb;
@@ -89,8 +89,8 @@ public class ComputerPyroPilot extends PyroPilot {
   public static final double SPAWNING_SICKNESS = Entrance.ZUNGGG_TIME - Entrance.TIME_TO_SPAWN;
   public static final double FRIENDLY_FIRE_DIRECTION_EPSILON = MapUtils.PI_OVER_FOUR;
   public static final double SAME_DIRECTION_EPSILON = Math.PI / 36;
-  public static final double TARGET_ROBOT_MIN_DISTANCE2 = 1.0;
-  public static final double TARGET_ROBOT_MAX_DISTANCE2 = Math.pow(1.1, 2);
+  public static final double MIN_DISTANCE_TO_ROBOT = 1.0;
+  public static final double PREFERRED_DISTANCE_TO_ROBOT_RANGE = 0.1;
   public static final double CLOSE_ROBOT_DIRECTION_EPSILON = MapUtils.PI_OVER_FOUR;
   public static final double TARGET_ROBOT_WHEN_CLOAKED_PROB = 0.5;
   public static final int BASIC_MISSILE_MIN_SHIELDS = Shot.getDamage(ObjectType.ConcussionMissile);
@@ -109,6 +109,8 @@ public class ComputerPyroPilot extends PyroPilot {
   private MapObject target_object;
   private PyroTargetType target_type;
   private Powerup target_powerup;
+  private double min_distance_to_robot2;
+  private double max_distance_to_robot2;
   private double time_turning_to_target;
   private TurnDirection previous_turn_to_target;
   private double respawn_delay_left;
@@ -199,6 +201,10 @@ public class ComputerPyroPilot extends PyroPilot {
         if (target_object instanceof Unit) {
           target_unit = (Unit) target_object;
           target_type = PyroTargetType.UNIT;
+          double min_distance_to_robot =
+                  Math.max(bound_object_diameter + target_object.getRadius(), MIN_DISTANCE_TO_ROBOT);
+          min_distance_to_robot2 = Math.pow(min_distance_to_robot, 2);
+          max_distance_to_robot2 = Math.pow(min_distance_to_robot + PREFERRED_DISTANCE_TO_ROBOT_RANGE, 2);
           if (target_unit.isCloaked()) {
             initState(PyroPilotState.REACT_TO_CLOAKED_ROBOT);
             return;
@@ -250,10 +256,10 @@ public class ComputerPyroPilot extends PyroPilot {
         if (target_type.equals(PyroTargetType.UNIT) && move.equals(MoveDirection.FORWARD) &&
                 !ra.is_inside_pyro) {
           double target_distance = MapUtils.distance2(bound_object, target_object);
-          if (target_distance < TARGET_ROBOT_MIN_DISTANCE2) {
+          if (target_distance < min_distance_to_robot2) {
             move = MoveDirection.BACKWARD;
           }
-          else if (target_distance < TARGET_ROBOT_MAX_DISTANCE2) {
+          else if (target_distance < max_distance_to_robot2) {
             move = MoveDirection.NONE;
           }
         }
@@ -384,6 +390,7 @@ public class ComputerPyroPilot extends PyroPilot {
     if (paths.isEmpty()) {
       // we have already visited all reachable Rooms
       visited.clear();
+      visitRoom(current_room);
       findNextPath();
       return;
     }
@@ -584,7 +591,10 @@ public class ComputerPyroPilot extends PyroPilot {
       double shot_distance2 = MapUtils.distance2(bound_object, shot);
       if (shot.getType().equals(ObjectType.MegaMissile) &&
               MapUtils.distance2(bound_object, shot) < MEGA_MISSILE_MIN_DISTANCE2 &&
-              Math.abs(MapUtils.angleTo(bound_object, shot)) < MapUtils.PI_OVER_TWO) {
+              // Is the Pyro facing the MegaMissile?
+              Math.abs(MapUtils.angleTo(bound_object, shot)) < MapUtils.PI_OVER_TWO &&
+              // Is the MegaMissile facing away from the Pyro?
+              Math.abs(MapUtils.angleTo(shot, bound_object)) > MapUtils.PI_OVER_TWO) {
         ra.is_close_behind_mega = true;
       }
       if (shot.getSource().equals(bound_object) || shot_distance2 > closest_shot_distance2) {

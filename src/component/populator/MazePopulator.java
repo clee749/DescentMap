@@ -69,7 +69,7 @@ public class MazePopulator extends StandardPopulator {
   public void placeRobotsInRoom(Room room, Entrance entrance) {
     ObjectType type;
     do {
-      type = ObjectType.ROBOTS[(int) (Math.random() * ObjectType.ROBOTS.length)];
+      type = ObjectType.STANDARD_ROBOTS[(int) (Math.random() * ObjectType.STANDARD_ROBOTS.length)];
     } while (Unit.getRadius(type) > MAX_ROBOT_RADIUS);
     placeRobotInRoom(room, type, entrance);
   }

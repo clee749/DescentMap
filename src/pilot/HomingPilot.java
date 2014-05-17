@@ -54,7 +54,7 @@ public class HomingPilot extends Pilot {
 
   @Override
   public PilotAction findNextAction(double s_elapsed) {
-    if (target_unit == null || !target_unit.isInMap() || target_unit.isCloaked() ||
+    if (target_unit == null || !target_unit.isInMap() || !target_unit.isHomable() ||
             !target_unit.getRoom().equals(target_unit_room)) {
       updateTarget();
       return PilotAction.MOVE_FORWARD;
@@ -102,7 +102,7 @@ public class HomingPilot extends Pilot {
     switch (target_type) {
       case PYRO:
         for (Pyro pyro : current_room.getPyros()) {
-          if (pyro.isCloaked()) {
+          if (!pyro.isHomable()) {
             continue;
           }
           double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, pyro));
@@ -114,7 +114,7 @@ public class HomingPilot extends Pilot {
         break;
       case ROBOT:
         for (Robot robot : current_room.getRobots()) {
-          if (robot.isCloaked()) {
+          if (!robot.isHomable()) {
             continue;
           }
           double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, robot));
@@ -136,7 +136,7 @@ public class HomingPilot extends Pilot {
     switch (target_type) {
       case PYRO:
         for (Pyro pyro : current_room.getNeighborInDirection(neighbor_side).getPyros()) {
-          if (pyro.isCloaked()) {
+          if (!pyro.isHomable()) {
             continue;
           }
           double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, pyro));
@@ -150,7 +150,7 @@ public class HomingPilot extends Pilot {
         break;
       case ROBOT:
         for (Robot robot : current_room.getNeighborInDirection(neighbor_side).getRobots()) {
-          if (robot.isCloaked()) {
+          if (!robot.isHomable()) {
             continue;
           }
           double abs_angle_to_target = Math.abs(MapUtils.angleTo(bound_object, robot));

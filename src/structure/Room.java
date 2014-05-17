@@ -237,6 +237,10 @@ public class Room {
     neighbors.put(side, connection);
   }
 
+  public RoomConnection removeNeighbor(RoomSide side) {
+    return neighbors.remove(side);
+  }
+
   public void addChild(MapObject object) {
     if (object instanceof Shot) {
       shots.add((Shot) object);
@@ -391,9 +395,7 @@ public class Room {
 
   public void applySplashDamage(Unit unit, MapObject src_object, int max_damage, double damage_radius,
           RoomSide which_neighbor) {
-    double distance =
-            Math.max(Math.hypot(unit.getX() - src_object.getX(), unit.getY() - src_object.getY()) -
-                    unit.getRadius(), 0.0);
+    double distance = Math.hypot(unit.getX() - src_object.getX(), unit.getY() - src_object.getY());
     if (distance < damage_radius &&
             (which_neighbor == null || MapUtils.canSeeObjectInNeighborRoom(src_object, unit, which_neighbor))) {
       unit.beDamaged(null, (int) (max_damage * (1 - distance / damage_radius)), false);
@@ -402,9 +404,7 @@ public class Room {
 
   public void applySplashDamage(ProximityBomb bomb, MapObject src_object, int max_damage,
           double damage_radius, RoomSide which_neighbor) {
-    double distance =
-            Math.max(Math.hypot(bomb.getX() - src_object.getX(), bomb.getY() - src_object.getY()) -
-                    bomb.getRadius(), 0.0);
+    double distance = Math.hypot(bomb.getX() - src_object.getX(), bomb.getY() - src_object.getY());
     if (distance < damage_radius &&
             (which_neighbor == null || MapUtils.canSeeObjectInNeighborRoom(src_object, bomb, which_neighbor))) {
       bomb.handleSplashDamage((int) (max_damage * (1 - distance / damage_radius)), MapUtils.absoluteAngleTo(

@@ -2,10 +2,13 @@ package util;
 
 import mapobject.unit.robot.AdvancedLifter;
 import mapobject.unit.robot.BabySpider;
+import mapobject.unit.robot.BigGuy;
 import mapobject.unit.robot.Bomber;
+import mapobject.unit.robot.BossRobot;
 import mapobject.unit.robot.Class1Drone;
 import mapobject.unit.robot.Class2Drone;
 import mapobject.unit.robot.DefenseRobot;
+import mapobject.unit.robot.FinalBoss;
 import mapobject.unit.robot.Gopher;
 import mapobject.unit.robot.HeavyDriller;
 import mapobject.unit.robot.HeavyHulk;
@@ -19,6 +22,7 @@ import mapobject.unit.robot.PlatformMissile;
 import mapobject.unit.robot.Robot;
 import mapobject.unit.robot.SecondaryLifter;
 import mapobject.unit.robot.Spider;
+import structure.LockedDoor;
 import structure.Room;
 
 import common.DescentMapException;
@@ -77,5 +81,17 @@ public class RobotFactory {
     Robot robot = newRobot(type, room, x_loc, y_loc, direction);
     robot.tempDisable(inactive_time);
     return robot;
+  }
+
+  public static BossRobot newBossRobot(ObjectType type, LockedDoor exit_door, Room room, double x_loc,
+          double y_loc, double direction) {
+    switch (type) {
+      case BigGuy:
+        return new BigGuy(exit_door, room, x_loc, y_loc, direction);
+      case FinalBoss:
+        return new FinalBoss(exit_door, room, x_loc, y_loc, direction);
+      default:
+        throw new DescentMapException("Unexpected BossRobot type: " + type);
+    }
   }
 }

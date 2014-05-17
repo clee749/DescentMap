@@ -225,6 +225,18 @@ public class MapUtils {
 
   /**
    * 
+   * @param angle1 angle in range [0, 2 * Math.PI)
+   * @param angle2 angle in same range
+   * @param max_delta any double value
+   * @return true if the angles differ by less than max_delta, false otherwise
+   */
+  public static boolean isAngleDeltaLessThan(double angle1, double angle2, double max_delta) {
+    double difference = Math.abs(angle2 - angle1);
+    return difference < max_delta || MapUtils.TWO_PI - difference < max_delta;
+  }
+
+  /**
+   * 
    * @param magnitude magnitude of resultant vector
    * @param direction any angle
    * @return vector with magnitude magnitude and direction perpendicular to direction

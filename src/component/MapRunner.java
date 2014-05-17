@@ -17,6 +17,7 @@ import component.builder.MapBuilder;
 import component.builder.MazeBuilder;
 import component.builder.StandardBuilder;
 import component.populator.BossChambersPopulator;
+import component.populator.BossLevelPopulator;
 import component.populator.GauntletPopulator;
 import component.populator.MapPopulator;
 import component.populator.MazePopulator;
@@ -36,13 +37,14 @@ enum MapType {
   STANDARD,
   MAZE,
   GAUNTLET,
-  BOSS_CHAMBERS;
+  BOSS_CHAMBERS,
+  BOSS_LEVEL;
 
   public static final int MAX_ROOM_SIZE = 10;
   public static final int STANDARD_NUM_ROOMS = 10;
   public static final int MAZE_MIN_TOTAL_ROOM_AREA = 100 * MazeBuilder.HALLWAY_WIDTH;
   public static final int GAUNTLET_NUM_GENERATOR_ROOMS =
-          (int) Math.ceil(ObjectType.ROBOTS.length / (MAX_ROOM_SIZE / 3.0 * 2));
+          (int) Math.ceil(ObjectType.STANDARD_ROBOTS.length / (MAX_ROOM_SIZE / 3.0 * 2));
   public static final int BOSS_CHAMBERS_WIDTH = 2;
   public static final int BOSS_CHAMBERS_HEIGHT = 2;
 
@@ -55,6 +57,8 @@ enum MapType {
       case GAUNTLET:
         return new GauntletBuilder(MAX_ROOM_SIZE, GAUNTLET_NUM_GENERATOR_ROOMS);
       case BOSS_CHAMBERS:
+        return new BossChambersBuilder(MAX_ROOM_SIZE, BOSS_CHAMBERS_WIDTH, BOSS_CHAMBERS_HEIGHT);
+      case BOSS_LEVEL:
         return new BossChambersBuilder(MAX_ROOM_SIZE, BOSS_CHAMBERS_WIDTH, BOSS_CHAMBERS_HEIGHT);
       default:
         throw new DescentMapException("Unexpected MapType: " + type);
@@ -71,6 +75,8 @@ enum MapType {
         return new GauntletPopulator(map);
       case BOSS_CHAMBERS:
         return new BossChambersPopulator(map);
+      case BOSS_LEVEL:
+        return new BossLevelPopulator(map);
       default:
         throw new DescentMapException("Unexpected MapType: " + type);
     }

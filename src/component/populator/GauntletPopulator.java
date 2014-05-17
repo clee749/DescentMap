@@ -82,7 +82,8 @@ public class GauntletPopulator extends MapPopulator {
   public void populateGeneratorRoomLocation(Room room, double x_loc, double y_loc,
           RoomSide generator_direction) {
     room.addChild(new RobotGenerator(room, x_loc, y_loc,
-            ObjectType.ROBOTS[(int) (Math.random() * ObjectType.ROBOTS.length)], generator_direction));
+            ObjectType.STANDARD_ROBOTS[(int) (Math.random() * ObjectType.STANDARD_ROBOTS.length)],
+            generator_direction));
     room.addChild(PowerupFactory.newStationaryPowerup(
             GENERATOR_ROOM_POWERUPS[(int) (Math.random() * GENERATOR_ROOM_POWERUPS.length)], room, x_loc,
             y_loc));

@@ -165,11 +165,15 @@ public class ImageHandler {
         loadRotatedImages(path, type.name(), pixels_per_cell, SHOT_IMAGE_RADIUS);
       }
     }
-    for (ObjectType type : ObjectType.ROBOTS) {
+    for (ObjectType type : ObjectType.STANDARD_ROBOTS) {
       Double radius = Unit.getRadius(type);
       if (radius != null) {
         loadRotatedImages(path, type.name(), pixels_per_cell, radius);
       }
+    }
+    for (ObjectType type : ObjectType.BOSS_ROBOTS) {
+      loadRotatedImages(path, type.name(), pixels_per_cell, Unit.getRadius(type));
+      loadRotatedImages(path, type.name() + "Cloaked", pixels_per_cell, Unit.getRadius(type));
     }
     loadRotatedImages(path, "Pyro", pixels_per_cell, Unit.getRadius(ObjectType.Pyro));
     loadAnimatedGif(path, "ProximityBomb", pixels_per_cell, ProximityBomb.RADIUS);

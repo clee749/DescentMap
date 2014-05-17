@@ -14,7 +14,7 @@ import common.ObjectType;
 import common.RoomSide;
 
 public class BossChambersPopulator extends MapPopulator {
-  private static final ObjectType[] GENERATOR_POWERUPS =
+  protected static final ObjectType[] GENERATOR_POWERUPS =
           {ObjectType.MegaMissilePowerup, ObjectType.SmartMissilePowerup};
 
   public BossChambersPopulator(DescentMap map) {
@@ -82,9 +82,8 @@ public class BossChambersPopulator extends MapPopulator {
   public void populateBossChamberRoomLocation(Room room, double x_loc, double y_loc,
           RoomSide generator_direction1, RoomSide generator_direction2) {
     room.addChild(new RobotGenerator(room, x_loc, y_loc,
-            ObjectType.ROBOTS[(int) (Math.random() * ObjectType.ROBOTS.length)], (Math.random() < 0.5
-                    ? generator_direction1
-                    : generator_direction2)));
+            ObjectType.STANDARD_ROBOTS[(int) (Math.random() * ObjectType.STANDARD_ROBOTS.length)],
+            (Math.random() < 0.5 ? generator_direction1 : generator_direction2)));
     room.addChild(PowerupFactory.newStationaryPowerup(
             GENERATOR_POWERUPS[(int) (Math.random() * GENERATOR_POWERUPS.length)], room, x_loc, y_loc));
   }

@@ -16,7 +16,6 @@ import mapobject.powerup.ProximityPack;
 import mapobject.unit.robot.Robot;
 import pilot.ComputerPyroPilot;
 import pilot.Pilot;
-import pilot.PilotAction;
 import pilot.PyroPilot;
 import pilot.TurnDirection;
 import pilot.UnitPilot;
@@ -147,15 +146,9 @@ public class Pyro extends Unit {
   public static final double ROBOT_COLLISION_ROOM_MARGIN =
           Unit.LARGEST_UNIT_RADIUS + Unit.getRadius(ObjectType.Pyro);
 
-  // death spin
-  public static final double DEATH_SPIN_TIME = 5.0;
-  public static final double DEATH_SPIN_MOVE_SPEED_DIVISOR = 2.0;
-  public static final double DEATH_SPIN_TURN_SPEED_MULTIPLIER = 1.5;
-
   // death
   public static final double DEATH_SPLASH_DAMAGE_RADIUS = 1.0;
   public static final int DEATH_SPLASH_DAMAGE = 50;
-  public static final int MAX_DEATH_SPIN_DAMAGE_TAKEN = 50;
 
   // absolute Cannon offsets
   private final double outer_cannon_offset;
@@ -189,13 +182,6 @@ public class Pyro extends Unit {
   private double bomb_reload_time_left;
   private boolean dropping_bomb;
 
-  // death spin
-  private TurnDirection previous_turn;
-  private boolean death_spin_started;
-  private double death_spin_time_left;
-  private double death_spin_direction;
-  private double death_spin_delta_direction;
-
   // misc
   private final int starting_shields;
   private final double max_move_speed;
@@ -211,6 +197,7 @@ public class Pyro extends Unit {
     secondary_cannons = PyroSecondaryCannon.createCannons();
     starting_shields = shields;
     max_move_speed = move_speed;
+    enableDeathSpin();
     spawnNew();
   }
 
@@ -340,14 +327,6 @@ public class Pyro extends Unit {
   }
 
   @Override
-  public Image getImage(ImageHandler images) {
-    if (shields >= 0) {
-      return super.getImage(images);
-    }
-    return images.getImage(image_name, death_spin_direction);
-  }
-
-  @Override
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
     if (!is_cloaked) {
@@ -437,12 +416,10 @@ public class Pyro extends Unit {
   @Override
   public void planNextAction(double s_elapsed) {
     handleEnergyRechargeSound();
+    super.planNextAction(s_elapsed);
     if (shields < 0) {
-      handleCooldowns(s_elapsed);
-      next_action = PilotAction.MOVE_FORWARD;
       return;
     }
-    super.planNextAction(s_elapsed);
     if (next_action.fire_cannon && reload_time_left < 0.0 && primary_energy_cost <= energy) {
       planToFireCannon();
     }
@@ -479,26 +456,29 @@ public class Pyro extends Unit {
       is_visible = true;
       playPublicSound("effects/cloakoff.wav");
     }
-    if (shields < 0) {
-      return doNextDeathSpinAction(engine, s_elapsed);
-    }
-    previous_turn = next_action.turn;
     MultipleObject created_objects = new MultipleObject();
     if (!death_spin_started) {
-      if (firing_cannon) {
-        firing_cannon = false;
-        created_objects.addObject(fireCannon());
-      }
-      if (firing_secondary) {
-        firing_secondary = false;
-        created_objects.addObject(fireSecondary());
-      }
-      if (dropping_bomb) {
-        dropping_bomb = false;
-        created_objects.addObject(dropBomb());
+      if (!death_spin_started) {
+        if (firing_cannon) {
+          firing_cannon = false;
+          created_objects.addObject(fireCannon());
+        }
+        if (firing_secondary) {
+          firing_secondary = false;
+          created_objects.addObject(fireSecondary());
+        }
+        if (dropping_bomb) {
+          dropping_bomb = false;
+          created_objects.addObject(dropBomb());
+        }
       }
     }
     created_objects.addObject(super.doNextAction(engine, s_elapsed));
+    if (!is_in_map) {
+      room.doSplashDamage(this, DEATH_SPLASH_DAMAGE, DEATH_SPLASH_DAMAGE_RADIUS, this);
+      ((PyroPilot) pilot).prepareForRespawn();
+      engine.respawnPyroAfterDeath(this);
+    }
     return created_objects;
   }
 
@@ -574,44 +554,6 @@ public class Pyro extends Unit {
     if (death_spin_started) {
       death_spin_time_left = 0.0;
     }
-  }
-
-  public MapObject doNextDeathSpinAction(MapEngine engine, double s_elapsed) {
-    if (!death_spin_started) {
-      death_spin_started = true;
-      death_spin_direction = direction;
-      death_spin_time_left = DEATH_SPIN_TIME;
-      move_speed /= DEATH_SPIN_MOVE_SPEED_DIVISOR;
-      death_spin_delta_direction = turn_speed * DEATH_SPIN_TURN_SPEED_MULTIPLIER;
-      if (previous_turn.equals(TurnDirection.CLOCKWISE) ||
-              (previous_turn.equals(TurnDirection.NONE) && Math.random() < 0.5)) {
-        death_spin_delta_direction *= -1;
-      }
-    }
-    else {
-      death_spin_direction =
-              MapUtils.normalizeAngle(death_spin_direction + death_spin_delta_direction * s_elapsed);
-      if (death_spin_time_left < 0.0) {
-        MapObject created_object = handleDeath(engine, s_elapsed);
-        if (!is_in_map) {
-          room.doSplashDamage(this, DEATH_SPLASH_DAMAGE, DEATH_SPLASH_DAMAGE_RADIUS, this);
-          ((PyroPilot) pilot).prepareForRespawn();
-          engine.respawnPyroAfterDeath(this);
-        }
-        return created_object;
-      }
-      if (!doNextMovement(engine, s_elapsed)) {
-        death_spin_time_left = 0.0;
-      }
-      death_spin_time_left -= s_elapsed;
-    }
-    if (shields < -MAX_DEATH_SPIN_DAMAGE_TAKEN) {
-      death_spin_time_left = -1.0;
-    }
-    if (Math.random() * MIN_TIME_BETWEEN_DAMAGED_EXPLOSIONS < s_elapsed) {
-      playPublicSound("effects/explode2.wav");
-    }
-    return createDamagedExplosion();
   }
 
   @Override

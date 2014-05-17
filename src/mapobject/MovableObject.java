@@ -76,6 +76,8 @@ public abstract class MovableObject extends MapObject {
     speeds.put(ObjectType.HomingMissile, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.MegaMissile, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.SmartPlasma, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.BigGuy, MapUtils.PI_OVER_TWO);
+    speeds.put(ObjectType.FinalBoss, MapUtils.PI_OVER_TWO);
     speeds.put(ObjectType.AdvancedLifter, Math.PI);
     speeds.put(ObjectType.BabySpider, Math.PI);
     speeds.put(ObjectType.MediumLifter, Math.PI);
@@ -101,7 +103,8 @@ public abstract class MovableObject extends MapObject {
 
   public MovableObject(double radius, Pilot pilot, Room room, double x_loc, double y_loc, double direction) {
     super(radius, room, x_loc, y_loc);
-    move_speed = MAX_MOVE_SPEEDS.get(type);
+    Double raw_move_speed = MAX_MOVE_SPEEDS.get(type);
+    move_speed = (raw_move_speed != null ? raw_move_speed : 0.0);
     Double raw_turn_speed = MAX_TURN_SPEEDS.get(type);
     turn_speed = (raw_turn_speed != null ? raw_turn_speed : 0.0);
     this.pilot = pilot;

@@ -47,6 +47,8 @@ public abstract class Robot extends Unit {
     times.put(ObjectType.Bomber, 5.0);
     times.put(ObjectType.Gopher, 5.0);
     times.put(ObjectType.MiniBoss, 5.0);
+    times.put(ObjectType.BigGuy, 6.0);
+    times.put(ObjectType.FinalBoss, 6.0);
     return times;
   }
 
@@ -63,6 +65,8 @@ public abstract class Robot extends Unit {
     shots.put(ObjectType.MediumHulkCloaked, 2);
     shots.put(ObjectType.MiniBoss, 2);
     shots.put(ObjectType.SecondaryLifter, 2);
+    shots.put(ObjectType.BigGuy, 2);
+    shots.put(ObjectType.FinalBoss, 2);
     shots.put(ObjectType.HeavyDriller, 3);
     shots.put(ObjectType.PlatformMissile, 3);
     shots.put(ObjectType.Spider, 3);
@@ -91,6 +95,8 @@ public abstract class Robot extends Unit {
     keys.put(ObjectType.PlatformMissile, "enemies/robot16.wav");
     keys.put(ObjectType.SecondaryLifter, "enemies/robot25.wav");
     keys.put(ObjectType.Spider, "enemies/robot14.wav");
+    keys.put(ObjectType.BigGuy, "enemies/boss01.wav");
+    keys.put(ObjectType.FinalBoss, "enemies/boss02.wav");
     return keys;
   }
 
@@ -210,12 +216,16 @@ public abstract class Robot extends Unit {
   @Override
   public void beDamaged(MapEngine engine, int amount, boolean play_weapon_hit_sound) {
     super.beDamaged(engine, amount, play_weapon_hit_sound);
-    tempDisable(amount * DISABLE_TIME_PER_DAMAGE);
+    tempDisableAfterDamage(amount);
   }
 
   @Override
   public void playWeaponHitSound(MapEngine engine) {
     playSound(engine, "weapons/explode1.wav");
+  }
+
+  public void tempDisableAfterDamage(int amount) {
+    tempDisable(amount * DISABLE_TIME_PER_DAMAGE);
   }
 
   public void tempDisable(double inactive_time) {
