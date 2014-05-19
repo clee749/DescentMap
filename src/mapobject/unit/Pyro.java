@@ -474,7 +474,7 @@ public class Pyro extends Unit {
       }
     }
     created_objects.addObject(super.doNextAction(engine, s_elapsed));
-    if (!is_in_map) {
+    if (!is_in_map && shields < 0) {
       room.doSplashDamage(this, DEATH_SPLASH_DAMAGE, DEATH_SPLASH_DAMAGE_RADIUS, this);
       ((PyroPilot) pilot).prepareForRespawn();
       engine.respawnPyroAfterDeath(this);

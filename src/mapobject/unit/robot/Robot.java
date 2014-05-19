@@ -249,9 +249,14 @@ public abstract class Robot extends Unit {
   }
 
   public void handlePyroCollision(MapEngine engine, Pyro pyro, double dx, double dy, double distance) {
-    bePushed(engine, dx / distance, dy / distance);
+    double pyro_radius = pyro.getRadius();
+    double radius_sum = radius + pyro_radius;
+    double x_normalized = dx / distance;
+    double y_normalized = dy / distance;
+    bePushed(engine, x_normalized * pyro_radius / radius_sum, y_normalized * pyro_radius / radius_sum);
     setZeroVelocity();
     beDamaged(engine, HOSTILE_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
+    pyro.bePushed(engine, -x_normalized * radius / radius_sum, -y_normalized * radius / radius_sum);
     pyro.setZeroVelocity();
     pyro.beDamaged(engine, HOSTILE_COLLISION_BASE_DAMAGE + (int) (Math.random() * 2), false);
     pyro.playPublicSound("effects/ramfast.wav");

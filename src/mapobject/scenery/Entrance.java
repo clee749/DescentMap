@@ -1,5 +1,6 @@
 package mapobject.scenery;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import mapobject.MapObject;
@@ -37,6 +38,7 @@ public class Entrance extends Scenery {
 
   private final double spawn_direction;
   private final LinkedList<SpawningPyro> spawn_queue;
+  private SpawningPyro current_spawning_pyro;
   private EntranceState state;
   private double state_time_left;
 
@@ -66,12 +68,14 @@ public class Entrance extends Scenery {
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     switch (state) {
       case INACTIVE:
-        if (!spawn_queue.isEmpty()) {
-          SpawningPyro spawning_pyro = spawn_queue.peek();
+        for (Iterator<SpawningPyro> it = spawn_queue.iterator(); it.hasNext();) {
+          SpawningPyro spawning_pyro = it.next();
           if (spawning_pyro.pyro == null || spawning_pyro.pyro.isReadyToRespawn()) {
+            current_spawning_pyro = spawning_pyro;
+            it.remove();
             state = EntranceState.SPAWN;
             state_time_left = TIME_TO_SPAWN;
-            if (spawn_queue.peek().is_center_object) {
+            if (spawning_pyro.is_center_object) {
               engine.setCenterObject(this);
             }
             playSound(engine, "effects/mtrl01.wav");
@@ -83,14 +87,13 @@ public class Entrance extends Scenery {
         if (state_time_left < 0.0) {
           state = EntranceState.COOLDOWN;
           state_time_left = COOLDOWN_TIME;
-          SpawningPyro spawning_pyro = spawn_queue.pop();
-          Pyro pyro = spawning_pyro.pyro;
+          Pyro pyro = current_spawning_pyro.pyro;
           if (pyro == null) {
             pyro = new Pyro(room, x_loc, y_loc, spawn_direction);
             engine.addCreatedPyro(pyro);
           }
           pyro.spawn(room, x_loc, y_loc, spawn_direction);
-          if (spawning_pyro.is_center_object) {
+          if (current_spawning_pyro.is_center_object) {
             engine.setCenterObject(pyro);
           }
           return pyro;
