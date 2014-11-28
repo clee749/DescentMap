@@ -23,6 +23,7 @@ enum BossRobotState {
 public abstract class BossRobot extends Robot {
   public static final double TELEPORT_CLOAK_TIME = 2.0;
   public static final double TELEPORT_COOLDOWN = 30.0;
+  public static final double GROWL_COOLDOWN = 1.0;
 
   protected final String cloaked_image_name;
   protected final LockedDoor exit_door;
@@ -45,6 +46,11 @@ public abstract class BossRobot extends Robot {
   }
 
   @Override
+  public void confirmGrowl() {
+    growl_cooldown_left = GROWL_COOLDOWN;
+  }
+
+  @Override
   public Image getImage(ImageHandler images) {
     if (state.equals(BossRobotState.NORMAL)) {
       return super.getImage(images);
@@ -59,9 +65,20 @@ public abstract class BossRobot extends Robot {
   }
 
   @Override
+  public void resetGrowl() {
+
+  }
+
+  @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     updateState(engine, s_elapsed);
     return super.doNextAction(engine, s_elapsed);
+  }
+
+  @Override
+  public void registerGrowler(MapEngine engine) {
+    playSound(engine, growl_sound_key);
+    confirmGrowl();
   }
 
   public void updateState(MapEngine engine, double s_elapsed) {
@@ -100,6 +117,7 @@ public abstract class BossRobot extends Robot {
   public MapObject doNextDeathSpinAction(MapEngine engine, double s_elapsed) {
     if (!death_spin_started) {
       state = BossRobotState.NORMAL;
+      playSound(engine, "enemies/boss02.wav");
     }
     return super.doNextDeathSpinAction(engine, s_elapsed);
   }

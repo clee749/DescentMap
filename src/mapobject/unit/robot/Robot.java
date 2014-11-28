@@ -96,7 +96,7 @@ public abstract class Robot extends Unit {
     keys.put(ObjectType.SecondaryLifter, "enemies/robot25.wav");
     keys.put(ObjectType.Spider, "enemies/robot14.wav");
     keys.put(ObjectType.BigGuy, "enemies/boss01.wav");
-    keys.put(ObjectType.FinalBoss, "enemies/boss02.wav");
+    keys.put(ObjectType.FinalBoss, "enemies/boss01.wav");
     return keys;
   }
 
@@ -132,10 +132,6 @@ public abstract class Robot extends Unit {
     return growl_sound_key;
   }
 
-  public boolean canGrowl() {
-    return can_growl;
-  }
-
   public void allowGrowl() {
     can_growl = true;
   }
@@ -165,7 +161,7 @@ public abstract class Robot extends Unit {
 
   @Override
   public void planNextAction(double s_elapsed) {
-    can_growl = false;
+    resetGrowl();
     inactive_time_left -= s_elapsed;
     if (inactive_time_left < 0.0) {
       super.planNextAction(s_elapsed);
@@ -175,10 +171,14 @@ public abstract class Robot extends Unit {
     }
   }
 
+  public void resetGrowl() {
+    can_growl = false;
+  }
+
   @Override
   public MapObject doNextAction(MapEngine engine, double s_elapsed) {
     if (can_growl && growl_cooldown_left < 0.0) {
-      engine.registerGrowler(this);
+      registerGrowler(engine);
     }
     MultipleObject created_objects = new MultipleObject();
     if (!is_exploded) {
@@ -197,6 +197,10 @@ public abstract class Robot extends Unit {
     }
     created_objects.addObject(super.doNextAction(engine, s_elapsed));
     return created_objects;
+  }
+
+  public void registerGrowler(MapEngine engine) {
+    engine.registerGrowler(this);
   }
 
   @Override
