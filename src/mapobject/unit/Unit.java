@@ -415,7 +415,9 @@ public abstract class Unit extends MovableObject {
 
   public void handleCooldowns(double s_elapsed) {
     reload_time_left -= s_elapsed;
-    visible_time_left -= s_elapsed;
+    if (shields >= 0) {
+      visible_time_left -= s_elapsed;
+    }
   }
 
   public void planToFireCannon() {

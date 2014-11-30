@@ -1,5 +1,6 @@
 package mapobject.unit;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -119,12 +120,15 @@ public class Pyro extends Unit {
   public static final int MIN_SHIELDS_FOR_PAINT = 10;
   public static final int SHIELD_COLORS_DIVISOR = 10;
   public static final double SHIELD_RADIUS = Unit.getRadius(ObjectType.Pyro) * 1.3;
-  public static final double SHIELD_DIAMETER = SHIELD_RADIUS * 2;
 
   // Cannon info painting
   public static final Color SELECTED_CANNON_COLOR = Color.green;
   public static final Color UNSELECTED_CANNON_COLOR = Color.gray;
   public static final Color AMMO_AMOUNT_COLOR = Color.red;
+
+  // cloak painting
+  public static final AlphaComposite CLOAK_COMPOSITE =
+          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);
 
   // energy
   public static final double MIN_STARTING_ENERGY = 100.0;
@@ -329,15 +333,18 @@ public class Pyro extends Unit {
   @Override
   public void paint(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
           int pixels_per_cell) {
-    if (!is_cloaked) {
-      Point center_pixel = MapUtils.coordsToPixel(x_loc, y_loc, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
-      Image image = getImage(images);
-      Point nw_corner_pixel =
-              new Point(center_pixel.x - image.getWidth(null) / 2, center_pixel.y - image.getHeight(null) / 2);
-      g.drawImage(image, nw_corner_pixel.x, nw_corner_pixel.y, null);
-      paintShield(g, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+    if (is_visible) {
+      if (is_cloaked) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setComposite(CLOAK_COMPOSITE);
+        paintShip(g2, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+        g2.dispose();
+      }
+      else {
+        paintShip(g, images, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+      }
     }
-    else {
+    if (is_cloaked) {
       g.setColor(Color.magenta);
       g.drawString(String.valueOf((int) cloak_time_left), 100, 20);
     }
@@ -348,16 +355,24 @@ public class Pyro extends Unit {
     g.drawRect(target_pixel.x, target_pixel.y, 0, 0);
   }
 
-  public void paintShield(Graphics2D g, Point ref_cell, Point ref_cell_nw_pixel, int pixels_per_cell) {
+  public void paintShip(Graphics2D g, ImageHandler images, Point ref_cell, Point ref_cell_nw_pixel,
+          int pixels_per_cell) {
+    Point center_pixel = MapUtils.coordsToPixel(x_loc, y_loc, ref_cell, ref_cell_nw_pixel, pixels_per_cell);
+    Image image = getImage(images);
+    Point nw_corner_pixel =
+            new Point(center_pixel.x - image.getWidth(null) / 2, center_pixel.y - image.getHeight(null) / 2);
+    g.drawImage(image, nw_corner_pixel.x, nw_corner_pixel.y, null);
+    paintShield(g, center_pixel, pixels_per_cell);
+  }
+
+  public void paintShield(Graphics2D g, Point center_pixel, int pixels_per_cell) {
     if (shields < MIN_SHIELDS_FOR_PAINT) {
       return;
     }
     g.setColor(SHIELD_COLORS[Math.min(shields / SHIELD_COLORS_DIVISOR, SHIELD_COLORS.length) - 1]);
-    Point nw_corner_pixel =
-            MapUtils.coordsToPixelRounded(x_loc - SHIELD_RADIUS, y_loc - SHIELD_RADIUS, ref_cell,
-                    ref_cell_nw_pixel, pixels_per_cell);
-    int shield_pixel_diameter = (int) (SHIELD_DIAMETER * pixels_per_cell);
-    g.fillOval(nw_corner_pixel.x, nw_corner_pixel.y, shield_pixel_diameter, shield_pixel_diameter);
+    int shield_pixel_radius = (int) (SHIELD_RADIUS * pixels_per_cell);
+    g.fillOval(center_pixel.x - shield_pixel_radius, center_pixel.y - shield_pixel_radius,
+            2 * shield_pixel_radius, 2 * shield_pixel_radius);
   }
 
   public void paintInfo(Graphics2D g) {

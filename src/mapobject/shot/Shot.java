@@ -31,7 +31,7 @@ public abstract class Shot extends MovableObject {
     damages.put(ObjectType.PlasmaShot, 7);
     damages.put(ObjectType.ConcussionMissile, 16);
     damages.put(ObjectType.HomingMissile, 16);
-    damages.put(ObjectType.SmartMissile, 16);
+    damages.put(ObjectType.SmartMissile, 5);
     damages.put(ObjectType.SmartPlasma, 35);
     damages.put(ObjectType.FusionShot, 60);
     damages.put(ObjectType.MegaMissile, 201);
@@ -64,6 +64,14 @@ public abstract class Shot extends MovableObject {
 
   public MapObject getSource() {
     return source;
+  }
+
+  public boolean isDetonated() {
+    return is_detonated;
+  }
+
+  public void detonate() {
+    is_detonated = true;
   }
 
   @Override
@@ -136,9 +144,5 @@ public abstract class Shot extends MovableObject {
   public MapObject handleWallCollision(MapEngine engine) {
     is_in_map = false;
     return null;
-  }
-
-  public void detonate() {
-    is_detonated = true;
   }
 }

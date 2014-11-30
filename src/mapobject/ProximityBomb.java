@@ -114,7 +114,8 @@ public class ProximityBomb extends MovableObject {
       }
     }
     for (Shot shot : room.getShots()) {
-      if ((is_outside_source || !shot.getSource().equals(source)) && MapUtils.objectsIntersect(this, shot)) {
+      if ((is_outside_source || !shot.getSource().equals(source)) && !shot.isDetonated() &&
+              MapUtils.objectsIntersect(this, shot)) {
         shot.detonate();
         return handleDetonation(engine, null);
       }
